@@ -45,31 +45,49 @@ except ImportError:
 CODIGO_ADMIN = "ADMIN2026"
 CODIGOS_ASESORES = ["ASE01", "ASE02", "ASE03", "VENTAS2026"] 
 
-# --- FUNCIONES ---
+# --- FUNCIONES GOOGLE SHEETS ---
+
+def get_gspread_client():
+    """Conecta con Google Sheets usando los secretos."""
+    try:
+        if "gcp_service_account" not in st.secrets:
+            return None
+        
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        creds_dict = dict(st.secrets["gcp_service_account"])
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        return gspread.authorize(creds)
+    except Exception as e:
+        print(f"Error conectando GSheets: {e}")
+        return None
 
 def guardar_en_sheets(datos_fila):
     """Guarda la cotización en Google Sheets."""
     try:
-        # Verificar si existen las credenciales en Secrets
-        if "gcp_service_account" not in st.secrets:
-            print("⚠️ [Google Sheets] No configurado. Se guardará solo en memoria.")
-            return
+        client = get_gspread_client()
+        if not client: return
 
-        # Configurar acceso
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds_dict = dict(st.secrets["gcp_service_account"]) # Leer credenciales del secreto
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        client = gspread.authorize(creds)
-
-        # Abrir hoja (Debe llamarse EXACTAMENTE así o cambiar el nombre aquí)
-        # Se asume que el usuario creará una hoja llamada "HISTORIAL_COTIZADOR_YQ"
-        sheet = client.open("HISTORIAL_COTIZADOR_YQ").sheet1 
-        
-        # Insertar fila
+        # Abrir hoja específica
+        sheet = client.open("historial_cotizador_salud").sheet1 
         sheet.append_row(datos_fila)
         
     except Exception as e:
         print(f"❌ Error guardando en Sheets: {e}")
+
+def descargar_historial_sheets():
+    """Descarga todo el historial desde Google Sheets."""
+    try:
+        client = get_gspread_client()
+        if not client: return None
+
+        sheet = client.open("historial_cotizador_salud").sheet1
+        data = sheet.get_all_records()
+        return pd.DataFrame(data)
+    except Exception as e:
+        st.error(f"Error descargando historial: {e}")
+        return None
+
+# --- FUNCIONES DE CORREO Y NOTIFICACIÓN ---
 
 def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, edad, clinicas, continuidad):
     """Envía un correo a administración usando Zoho Mail."""
@@ -90,9 +108,9 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     cuerpo = f"""
     Hola Chicos,
     
-    Un cliente ha generado una cotización en el sistema:
+    Un cliente ha generado una cotización de salud:
     
-    ¡¿Llama ahora!
+    ¡Llama ahora!
     
     DATOS DEL CLIENTE:
     ------------------------------------------------
@@ -133,6 +151,8 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     except Exception as e:
         print(f"Error enviando correo: {e}")
         return False
+
+# --- FUNCIONES DE SOPORTE ---
 
 def normalizar_clinica(nombre):
     if pd.isna(nombre): return ""
@@ -504,6 +524,31 @@ else:
                         val_default = campanas_activas.get(key, 0)
                         widget_key = f"dsct_{c}_{p}_{tipo_cliente_key}"
                         descuentos[(c,p)] = st.number_input(f"{c} - {p} %", 0, 50, val_default, key=widget_key)
+            
+            # --- PANEL DE ADMIN PARA HISTORIAL ---
+            st.divider()
+            st.write("### Base de Datos (Nube)")
+            if st.button("🔄 Cargar/Actualizar Historial desde Google Sheets"):
+                with st.spinner("Conectando con Google Sheets..."):
+                    df_historial = descargar_historial_sheets()
+                    if df_historial is not None and not df_historial.empty:
+                        st.session_state['df_historial'] = df_historial
+                        st.success("¡Datos cargados con éxito!")
+                    else:
+                        st.warning("No se encontraron datos o hubo un error de conexión.")
+            
+            if 'df_historial' in st.session_state:
+                st.dataframe(st.session_state['df_historial'].tail(5)) # Mostrar últimos 5
+                
+                # Botón de descarga
+                csv = st.session_state['df_historial'].to_csv(index=False).encode('utf-8-sig')
+                st.download_button(
+                    label="📥 Descargar Historial Completo (CSV)",
+                    data=csv,
+                    file_name=f"historial_cotizaciones_{datetime.now().strftime('%d%m%Y')}.csv",
+                    mime="text/csv"
+                )
+
         else:
             for c in df_full['Aseguradora'].unique():
                 for p in df_full[df_full['Aseguradora']==c]['Plan'].unique():
@@ -521,9 +566,16 @@ else:
             elif es_cliente and (not correo or not celular):
                 st.error("⚠️ Por favor ingrese su Correo y Celular para continuar.")
             else:
+                rol_actual = "Admin" if es_admin else ("Asesor" if es_asesor else "Cliente")
+                
+                # Guardar en nube
+                guardar_en_sheets([
+                    datetime.now().strftime('%Y-%m-%d %H:%M'),
+                    nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual
+                ])
+
                 if es_cliente:
                     enviar_notificacion(nom, correo, celular, cob, len(familia)-1, edad, clinicas, cont)
-                    guardar_en_sheets([datetime.now().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), "Cliente"])
                 
                 st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos)
                 cob_str = ", ".join(cob) if isinstance(cob, list) else str(cob)
@@ -587,8 +639,6 @@ else:
                     cls_list = [c.strip().split()[0] for c in st.session_state.get('clinicas_sel', [])]
                     cls_clean = "_".join(cls_list)
                     fecha_str = datetime.now().strftime("%d%m%y_%H%M")
-                    file_name = f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf"
-                    st.download_button("Descargar PDF", pdf_res, file_name, "application/pdf")
                     file_name = f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf"
                     st.download_button("Descargar PDF", pdf_res, file_name, "application/pdf")
 
