@@ -8,7 +8,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import gspread
-from google.oauth2.service_account import Credentials # <--- LIBRERÍA MODERNA
+from google.oauth2.service_account import Credentials
 
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="wide")
@@ -45,7 +45,7 @@ except ImportError:
 CODIGO_ADMIN = "ADMIN2026"
 CODIGOS_ASESORES = ["ASE01", "ASE02", "ASE03", "VENTAS2026"] 
 
-# --- FUNCIONES GOOGLE SHEETS (ROBUSTAS) ---
+# --- FUNCIONES GOOGLE SHEETS ---
 
 def get_gspread_client():
     """Conecta con Google Sheets usando librerías modernas."""
@@ -54,17 +54,13 @@ def get_gspread_client():
             st.warning("⚠️ Falta configuración de Google en Secrets.")
             return None
         
-        # Definir alcance
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive"
         ]
         
-        # Cargar credenciales
         creds_dict = dict(st.secrets["gcp_service_account"])
         credentials = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-        
-        # Autorizar
         client = gspread.authorize(credentials)
         return client
     except Exception as e:
@@ -77,12 +73,10 @@ def guardar_en_sheets(datos_fila):
         client = get_gspread_client()
         if not client: return
 
-        # Abrir hoja específica
         sheet = client.open("historial_cotizador_salud").sheet1 
         sheet.append_row(datos_fila)
         
     except Exception as e:
-        # Esto imprimirá el error en la web para que sepas qué pasa
         st.error(f"❌ Error al guardar en Sheets: {e}")
 
 def descargar_historial_sheets():
@@ -109,7 +103,6 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     if "EMAIL_PASSWORD" in st.secrets:
         SENDER_PASSWORD = st.secrets["EMAIL_PASSWORD"]
     else:
-        # Fallback para pruebas locales si no hay secrets
         SENDER_PASSWORD = "TU_CONTRASEÑA_AQUI" 
         
     RECEIVER_EMAIL = "administracion@yqcorredores.com"
@@ -120,7 +113,7 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     else:
         cobertura_txt = str(plan_interes_list)
 
-    asunto = f"NUEVO LEAD DE COTIZADOR SALUD: {cliente}"
+    asunto = f"NUEVO LEAD DE COTIZADOR: {cliente}"
     cuerpo = f"""
     Hola Chicos,
     
@@ -250,6 +243,7 @@ def cargar_campanas():
         except: pass
     return dict_campanas
 
+# --- BÚSQUEDA ---
 def calcular_precio(df, cia, plan, familia):
     total = 0
     for p in familia:
@@ -525,8 +519,7 @@ else:
         if es_cliente:
             st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
             correo = st.text_input("Correo Electrónico")
-            celular_num = st.number_input("Celular / WhatsApp (Solo números)", min_value=0, step=1, format="%d", value=0)
-            celular = str(celular_num) if celular_num > 0 else ""
+            celular = st.text_input("Celular / WhatsApp (Solo números)", max_chars=9)
         
         mes_actual = get_mes_actual()
         tipo_cliente_key = "Nuevo" if cont == "Nuevo" else "Continuidad"
@@ -541,25 +534,40 @@ else:
                         widget_key = f"dsct_{c}_{p}_{tipo_cliente_key}"
                         descuentos[(c,p)] = st.number_input(f"{c} - {p} %", 0, 50, val_default, key=widget_key)
             
-            # --- PANEL DE ADMIN (RE-INSERTADO) ---
+            # --- PANEL DE ADMIN PARA HISTORIAL ---
             st.divider()
             st.write("### Base de Datos (Nube)")
-            col1, col2 = st.columns(2)
-            with col1:
+            
+            col_admin_1, col_admin_2 = st.columns(2)
+            
+            with col_admin_1:
                 if st.button("🔄 Probar Conexión Sheets"):
-                    c = get_gspread_client()
-                    if c:
+                    client = get_gspread_client()
+                    if client:
                         try:
-                            s = c.open("historial_cotizador_salud")
-                            st.success(f"✅ Conectado a: {s.title}")
+                            sheet = client.open("historial_cotizador_salud")
+                            st.success(f"✅ Conectado a: {sheet.title}")
                         except Exception as e:
-                            st.error(f"❌ Error: {e}")
-            with col2:
-                if st.button("📥 Descargar Historial"):
-                    df = descargar_historial_sheets()
-                    if df is not None:
-                        csv = df.to_csv(index=False).encode('utf-8-sig')
-                        st.download_button("💾 Guardar CSV", csv, "historial.csv", "text/csv")
+                            st.error(f"❌ Falló al abrir hoja: {e}")
+                    else:
+                        st.error("❌ No hay cliente de Google.")
+
+            with col_admin_2:
+                if st.button("📥 Descargar Historial Completo"):
+                    with st.spinner("Descargando..."):
+                        df_historial = descargar_historial_sheets()
+                        if df_historial is not None and not df_historial.empty:
+                            csv = df_historial.to_csv(index=False).encode('utf-8-sig')
+                            st.download_button(
+                                label="💾 Guardar CSV",
+                                data=csv,
+                                file_name=f"historial_completo_{datetime.now().strftime('%d%m%Y')}.csv",
+                                mime="text/csv"
+                            )
+                            st.success(f"Registros encontrados: {len(df_historial)}")
+                        else:
+                            st.warning("No se encontraron datos o hubo un error.")
+
         else:
             for c in df_full['Aseguradora'].unique():
                 for p in df_full[df_full['Aseguradora']==c]['Plan'].unique():
@@ -570,23 +578,40 @@ else:
         requiere_clinica = not es_solo_internacional and es_cliente
 
         if st.button("Cotizar"):
+            # Validaciones
             if not cob:
                 st.error("⚠️ Por favor selecciona al menos un tipo de Cobertura.")
             elif requiere_clinica and not clinicas:
                 st.error("⚠️ Por favor selecciona al menos una Clínica de preferencia.")
-            elif es_cliente and (not correo or not celular):
-                st.error("⚠️ Por favor ingrese su Correo y Celular para continuar.")
+            elif es_cliente:
+                if not correo:
+                    st.error("⚠️ Por favor ingresa tu Correo Electrónico.")
+                # Validación Estricta de Celular: 9 dígitos, empieza con 9, solo números
+                elif not celular or len(celular) != 9 or not celular.startswith("9") or not celular.isdigit():
+                    st.error("⚠️ El número de celular debe tener 9 dígitos numéricos y comenzar con 9.")
+                else:
+                    # Todo OK para cliente
+                    rol_actual = "Cliente"
+                    # Guardar en nube
+                    guardar_en_sheets([
+                        datetime.now().strftime('%Y-%m-%d %H:%M'),
+                        nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual
+                    ])
+                    enviar_notificacion(nom, correo, celular, cob, len(familia)-1, edad, clinicas, cont)
+                    
+                    st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos)
+                    cob_str = ", ".join(cob) if isinstance(cob, list) else str(cob)
+                    st.session_state['perfil'] = {'Titular': f"{nom} ({edad} años)", 'Dependientes': txt_dependientes, 'Continuidad': cont, 'Cobertura': cob_str}
+                    st.session_state['nombre_cliente'] = nom
+                    st.session_state['clinicas_sel'] = clinicas
             else:
-                rol_actual = "Admin" if es_admin else ("Asesor" if es_asesor else "Cliente")
-                
-                # Guardar en nube
+                # Todo OK para Admin/Asesor
+                rol_actual = "Admin" if es_admin else "Asesor"
+                # Opcional: Guardar historial de asesores también
                 guardar_en_sheets([
                     datetime.now().strftime('%Y-%m-%d %H:%M'),
                     nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual
                 ])
-
-                if es_cliente:
-                    enviar_notificacion(nom, correo, celular, cob, len(familia)-1, edad, clinicas, cont)
                 
                 st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos)
                 cob_str = ", ".join(cob) if isinstance(cob, list) else str(cob)
@@ -652,5 +677,6 @@ else:
                     fecha_str = datetime.now().strftime("%d%m%y_%H%M")
                     file_name = f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf"
                     st.download_button("Descargar PDF", pdf_res, file_name, "application/pdf")
+
 
 
