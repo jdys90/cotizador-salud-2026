@@ -3,4 +3,4 @@ pandas
 openpyxl
 reportlab
 gspread
-oauth2client
+google-auth
