@@ -8,7 +8,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="wide")
@@ -45,20 +45,30 @@ except ImportError:
 CODIGO_ADMIN = "ADMIN2026"
 CODIGOS_ASESORES = ["ASE01", "ASE02", "ASE03", "VENTAS2026"] 
 
-# --- FUNCIONES GOOGLE SHEETS ---
+# --- FUNCIONES GOOGLE SHEETS (CORREGIDAS) ---
 
 def get_gspread_client():
-    """Conecta con Google Sheets usando los secretos."""
+    """Conecta con Google Sheets de forma robusta."""
     try:
         if "gcp_service_account" not in st.secrets:
+            st.warning("⚠️ No se encontraron las credenciales de Google en los Secretos.")
             return None
         
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        # Definir el alcance (scope) correcto
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive"
+        ]
+        
+        # Cargar credenciales desde secrets
         creds_dict = dict(st.secrets["gcp_service_account"])
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        return gspread.authorize(creds)
+        credentials = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        
+        # Autorizar cliente
+        client = gspread.authorize(credentials)
+        return client
     except Exception as e:
-        print(f"Error conectando GSheets: {e}")
+        st.error(f"❌ Error crítico conectando con Google: {e}")
         return None
 
 def guardar_en_sheets(datos_fila):
@@ -68,11 +78,13 @@ def guardar_en_sheets(datos_fila):
         if not client: return
 
         # Abrir hoja específica
+        # Asegúrate que el nombre sea EXACTO al de tu Google Sheet
         sheet = client.open("historial_cotizador_salud").sheet1 
         sheet.append_row(datos_fila)
         
     except Exception as e:
-        print(f"❌ Error guardando en Sheets: {e}")
+        # Mostramos el error en pantalla para depurar si falla
+        st.error(f"❌ Error al guardar en la hoja: {e}")
 
 def descargar_historial_sheets():
     """Descarga todo el historial desde Google Sheets."""
@@ -94,16 +106,23 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     SMTP_SERVER = "smtppro.zoho.com"
     SMTP_PORT = 587
     SENDER_EMAIL = "administracion@yqcorredores.com"
-    SENDER_PASSWORD = st.secrets["EMAIL_PASSWORD"]  
+    
+    # Manejo de contraseña seguro
+    if "EMAIL_PASSWORD" in st.secrets:
+        SENDER_PASSWORD = st.secrets["EMAIL_PASSWORD"]
+    else:
+        # Fallback local o error controlado
+        return False
+        
     RECEIVER_EMAIL = "administracion@yqcorredores.com"
 
-    # Formatear listas
     clinicas_txt = ", ".join(clinicas) if clinicas else "Sin preferencia específica"
-  # Manejo seguro si plan_interes es lista
-    if isinstance(plan_interes, list):
-        cobertura_txt = ", ".join(plan_interes)
+    
+    if isinstance(plan_interes_list, list):
+        cobertura_txt = ", ".join(plan_interes_list)
     else:
-        cobertura_txt = str(plan_interes)
+        cobertura_txt = str(plan_interes_list)
+
     asunto = f"NUEVO LEAD DE COTIZADOR: {cliente}"
     cuerpo = f"""
     Hola Chicos,
@@ -127,15 +146,12 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     Clínicas Preferidas: {clinicas_txt}
     Total Asegurados (Familia): {n_familia + 1}
     ------------------------------------------------
-    Fecha y hora de cotización: {datetime.now().strftime('%d/%m/%Y %H:%M')}
+    
+    Fecha: {datetime.now().strftime('%d/%m/%Y %H:%M')}
     Este correo fue generado automáticamente por el Cotizador YQ.
     """
 
     try:
-        if SENDER_PASSWORD == "TU_CONTRASEÑA_AQUI":
-            print("⚠️ [AVISO] No se envió el correo porque falta la contraseña en app.py")
-            return True
-
         msg = MIMEMultipart()
         msg['From'] = SENDER_EMAIL
         msg['To'] = RECEIVER_EMAIL
@@ -528,26 +544,36 @@ else:
             # --- PANEL DE ADMIN PARA HISTORIAL ---
             st.divider()
             st.write("### Base de Datos (Nube)")
-            if st.button("🔄 Cargar/Actualizar Historial desde Google Sheets"):
-                with st.spinner("Conectando con Google Sheets..."):
-                    df_historial = descargar_historial_sheets()
-                    if df_historial is not None and not df_historial.empty:
-                        st.session_state['df_historial'] = df_historial
-                        st.success("¡Datos cargados con éxito!")
-                    else:
-                        st.warning("No se encontraron datos o hubo un error de conexión.")
             
-            if 'df_historial' in st.session_state:
-                st.dataframe(st.session_state['df_historial'].tail(5)) # Mostrar últimos 5
-                
-                # Botón de descarga
-                csv = st.session_state['df_historial'].to_csv(index=False).encode('utf-8-sig')
-                st.download_button(
-                    label="📥 Descargar Historial Completo (CSV)",
-                    data=csv,
-                    file_name=f"historial_cotizaciones_{datetime.now().strftime('%d%m%Y')}.csv",
-                    mime="text/csv"
-                )
+            col_admin_1, col_admin_2 = st.columns(2)
+            
+            with col_admin_1:
+                if st.button("🔄 Probar Conexión Sheets"):
+                    client = get_gspread_client()
+                    if client:
+                        try:
+                            sheet = client.open("historial_cotizador_salud")
+                            st.success(f"✅ Conectado a: {sheet.title}")
+                        except Exception as e:
+                            st.error(f"❌ Falló al abrir hoja: {e}")
+                    else:
+                        st.error("❌ No hay cliente de Google.")
+
+            with col_admin_2:
+                if st.button("📥 Descargar Historial Completo"):
+                    with st.spinner("Descargando..."):
+                        df_historial = descargar_historial_sheets()
+                        if df_historial is not None and not df_historial.empty:
+                            csv = df_historial.to_csv(index=False).encode('utf-8-sig')
+                            st.download_button(
+                                label="💾 Guardar CSV",
+                                data=csv,
+                                file_name=f"historial_completo_{datetime.now().strftime('%d%m%Y')}.csv",
+                                mime="text/csv"
+                            )
+                            st.success(f"Registros encontrados: {len(df_historial)}")
+                        else:
+                            st.warning("No se encontraron datos o hubo un error.")
 
         else:
             for c in df_full['Aseguradora'].unique():
