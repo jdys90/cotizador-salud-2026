@@ -7,6 +7,8 @@ import calendar
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="wide")
@@ -44,6 +46,31 @@ CODIGO_ADMIN = "ADMIN2026"
 CODIGOS_ASESORES = ["ASE01", "ASE02", "ASE03", "VENTAS2026"] 
 
 # --- FUNCIONES ---
+
+def guardar_en_sheets(datos_fila):
+    """Guarda la cotización en Google Sheets."""
+    try:
+        # Verificar si existen las credenciales en Secrets
+        if "gcp_service_account" not in st.secrets:
+            print("⚠️ [Google Sheets] No configurado. Se guardará solo en memoria.")
+            return
+
+        # Configurar acceso
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        creds_dict = dict(st.secrets["gcp_service_account"]) # Leer credenciales del secreto
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        client = gspread.authorize(creds)
+
+        # Abrir hoja (Debe llamarse EXACTAMENTE así o cambiar el nombre aquí)
+        # Se asume que el usuario creará una hoja llamada "HISTORIAL_COTIZADOR_YQ"
+        sheet = client.open("HISTORIAL_COTIZADOR_YQ").sheet1 
+        
+        # Insertar fila
+        sheet.append_row(datos_fila)
+        
+    except Exception as e:
+        print(f"❌ Error guardando en Sheets: {e}")
+
 def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, edad, clinicas, continuidad):
     """Envía un correo a administración usando Zoho Mail."""
     SMTP_SERVER = "smtppro.zoho.com"
@@ -54,8 +81,11 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
 
     # Formatear listas
     clinicas_txt = ", ".join(clinicas) if clinicas else "Sin preferencia específica"
-    cobertura_txt = ", ".join(plan_interes_list) if isinstance(plan_interes_list, list) else str(plan_interes_list)
-
+  # Manejo seguro si plan_interes es lista
+    if isinstance(plan_interes, list):
+        cobertura_txt = ", ".join(plan_interes)
+    else:
+        cobertura_txt = str(plan_interes)
     asunto = f"NUEVO LEAD DE COTIZADOR: {cliente}"
     cuerpo = f"""
     Hola Chicos,
@@ -79,9 +109,8 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     Clínicas Preferidas: {clinicas_txt}
     Total Asegurados (Familia): {n_familia + 1}
     ------------------------------------------------
-    
-    Este correo fue generado automáticamente por el Cotizador YQ.
     Fecha y hora de cotización: {datetime.now().strftime('%d/%m/%Y %H:%M')}
+    Este correo fue generado automáticamente por el Cotizador YQ.
     """
 
     try:
@@ -104,33 +133,6 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     except Exception as e:
         print(f"Error enviando correo: {e}")
         return False
-
-def guardar_historial(cliente, correo, celular, edad, salud, cobertura_list, continuidad, clinicas, n_familia, usuario_rol):
-    """Guarda cada cotización en un archivo CSV local."""
-    archivo_historial = 'historial_leads.csv'
-    
-    cobertura_str = ", ".join(cobertura_list) if isinstance(cobertura_list, list) else str(cobertura_list)
-    
-    nuevo_registro = {
-        'Fecha': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
-        'Cliente': cliente,
-        'Correo': correo,
-        'Celular': celular,
-        'Edad_Titular': edad,
-        'Salud': salud,
-        'Cobertura_Interes': cobertura_str,
-        'Condicion': continuidad,
-        'Clinicas_Preferidas': ", ".join(clinicas),
-        'Total_Asegurados': n_familia + 1,
-        'Rol_Cotizador': usuario_rol
-    }
-    
-    df_new = pd.DataFrame([nuevo_registro])
-    
-    if not os.path.exists(archivo_historial):
-        df_new.to_csv(archivo_historial, index=False, encoding='utf-8-sig')
-    else:
-        df_new.to_csv(archivo_historial, mode='a', header=False, index=False, encoding='utf-8-sig')
 
 def normalizar_clinica(nombre):
     if pd.isna(nombre): return ""
@@ -229,47 +231,38 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
     candidatos = []
     set_user = set(clinicas_user)
     
-    # Definición de Categorías
     PLANES_BASICA = ['Esencial', 'Esencial Plus', 'Multisalud Base', 'Medisalud Lite', 'Medisalud Base']
     PLANES_INTEGRAL = ['Red Preferente', 'Red Médica', 'Multisalud', 'Medisalud', 'Medisalud Plus', 'Viva Salud', 'Trébol Salud', 'Medisalud Senior +', 'Oro - Plan preferente', 'Oro - Plan Red', 'Oro - Plan Completo']
     PLANES_REEMBOLSO = ['Full Salud', 'Medicvida Nacional', 'Medisalud Premium']
     PLANES_INTERNACIONAL = ['Salud Preferencial', 'Medicvida Internacional']
 
-    # Lógica de Lista Blanca (Unión de conjuntos)
     planes_permitidos = set()
     if "Básica" in coberturas_list: planes_permitidos.update(PLANES_BASICA)
     if "Integral" in coberturas_list: planes_permitidos.update(PLANES_INTEGRAL)
     if "Integral + Reembolso" in coberturas_list: planes_permitidos.update(PLANES_REEMBOLSO)
     if "Integral + Cobertura Internacional" in coberturas_list: planes_permitidos.update(PLANES_INTERNACIONAL)
 
-    # Regla específica de Mapfre (Continuidad)
     es_continuidad = (continuidad == "Vengo con continuidad")
     if es_continuidad:
         if 'Viva Salud' in planes_permitidos: planes_permitidos.remove('Viva Salud')
         if 'Trébol Salud' in planes_permitidos: planes_permitidos.remove('Trébol Salud')
 
     for (cia, plan), grupo in df_redes.groupby(['Aseguradora', 'Plan']):
-        # Filtro de Mapfre Global
         if es_continuidad and "mapfre" in str(cia).lower(): continue
 
         plan_check = str(plan).strip()
-        
-        # Filtro principal: ¿Está el plan en las categorías seleccionadas?
         if plan_check not in planes_permitidos: continue
 
-        # Filtro de Clínicas
         clinicas_plan = set()
         for _, row in grupo.iterrows():
             clinicas_plan.update([c.strip() for c in str(row['Clinicas_Busqueda']).split(',')])
         
-        # Si el usuario seleccionó clínicas, verificamos que el plan las cubra
         if clinicas_user and not set_user.issubset(clinicas_plan): continue
 
         list_clin_red = []
         list_cob_amb = []
         list_cob_hosp = []
         
-        # Si no hay clínicas seleccionadas (ej. solo internacional), mostramos la red general
         if not clinicas_user:
             row = grupo.iloc[0]
             list_clin_red.append(f"• <b>Red:</b> {row['Nombre_Red']}")
@@ -458,7 +451,6 @@ else:
     if 'resultados' not in st.session_state: st.session_state['resultados'] = None
     
     with st.sidebar:
-        # --- LOGO ---
         if os.path.exists("logo.png"):
             st.sidebar.image("logo.png", use_container_width=True)
         
@@ -482,15 +474,9 @@ else:
 
         st.header("Filtros")
         cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"])
-        
-        # --- CAMBIO 1: MULTISELECT ---
-        cob = st.multiselect("Cobertura", 
-                             ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"],
-                             default=["Integral"])
-        
+        cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral"])
         clinicas = st.multiselect("Clínicas de preferencia", clinicas_unicas, placeholder="Puedes elegir más de una")
         
-        # --- DESCUENTO ---
         st.header("Descuento")
         codigo_acceso = st.text_input("Código opcional de descuento", type="password")
         
@@ -524,9 +510,6 @@ else:
                     key = (str(c).strip(), str(p).strip(), tipo_cliente_key, mes_actual)
                     descuentos[(c,p)] = campanas_activas.get(key, 0)
 
-        # --- CAMBIO 3: VALIDACIÓN INTELIGENTE ---
-        # Si selecciona SOLO "Integral + Cobertura Internacional" -> No requiere clínica
-        # Si selecciona CUALQUIER OTRA -> Requiere clínica
         es_solo_internacional = (len(cob) == 1 and "Integral + Cobertura Internacional" in cob)
         requiere_clinica = not es_solo_internacional and es_cliente
 
@@ -534,18 +517,15 @@ else:
             if not cob:
                 st.error("⚠️ Por favor selecciona al menos un tipo de Cobertura.")
             elif requiere_clinica and not clinicas:
-                st.error("⚠️ Por favor selecciona al menos una Clínica de preferencia (necesaria para planes locales).")
+                st.error("⚠️ Por favor selecciona al menos una Clínica de preferencia.")
             elif es_cliente and (not correo or not celular):
                 st.error("⚠️ Por favor ingrese su Correo y Celular para continuar.")
             else:
                 if es_cliente:
                     enviar_notificacion(nom, correo, celular, cob, len(familia)-1, edad, clinicas, cont)
-                    guardar_historial(nom, correo, celular, edad, salud, cob, cont, clinicas, len(familia)-1, "Cliente")
+                    guardar_en_sheets([datetime.now().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), "Cliente"])
                 
-                # --- CAMBIO 2: PASAR LISTA 'cob' A BUSCAR ---
                 st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos)
-                
-                # Formato string para el PDF
                 cob_str = ", ".join(cob) if isinstance(cob, list) else str(cob)
                 st.session_state['perfil'] = {'Titular': f"{nom} ({edad} años)", 'Dependientes': txt_dependientes, 'Continuidad': cont, 'Cobertura': cob_str}
                 st.session_state['nombre_cliente'] = nom
@@ -554,33 +534,29 @@ else:
     if st.session_state['resultados'] is not None:
         res = st.session_state['resultados']
         if res.empty:
-            st.error(f"⚠️ No se encontraron planes para la combinación seleccionada. Intenta cambiar las clínicas o el tipo de cobertura.")
+            st.error(f"⚠️ No se encontraron planes. Intenta cambiar los filtros.")
         else:
             st.success(f"¡Hemos encontrado {len(res)} opciones compatibles!")
             
             if not es_cliente:
                 cols = ['Aseguradora','Plan']
-                # Si hay internacional en la mezcla, mostramos las columnas internacionales
                 if "Integral + Cobertura Internacional" in cob:
                     cols += ['Int_Amb_Full', 'Int_Hosp_Full']
                 
-                # Si hay locales, mostramos las columnas locales
                 mostrar_locales = any(c != "Integral + Cobertura Internacional" for c in cob)
                 if mostrar_locales:
                     cols += ['Txt_Cob_Amb', 'Txt_Cob_Hosp']
 
-                # Limpieza visual de la tabla
                 df_view = res.copy()
                 for c in df_view.columns:
                     if df_view[c].dtype == object:
                         df_view[c] = df_view[c].str.replace('<b>','').str.replace('</b>','').str.replace('<br/>','\n').str.replace('• ','')
                 
-                # Asegurar que las columnas existan antes de mostrar
                 cols_final = [c for c in cols if c in df_view.columns]
                 st.subheader("Tabla Comparativa (Vista Asesor/Admin)")
                 st.dataframe(df_view[cols_final + ['Precio_Lista', 'Pct_Dscto', 'Precio_Final']], hide_index=True)
             else:
-                st.info("👇 Descarga el PDF para ver el comparativo detallado de precios y coberturas.")
+                st.info("👇 Descarga el PDF para ver el comparativo detallado.")
 
             if cont == "Vengo con continuidad":
                 st.info("ℹ️ Para gozar del beneficio de continuidad debe haber estado asegurado dentro de los últimos 90 días.")
@@ -613,3 +589,6 @@ else:
                     fecha_str = datetime.now().strftime("%d%m%y_%H%M")
                     file_name = f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf"
                     st.download_button("Descargar PDF", pdf_res, file_name, "application/pdf")
+                    file_name = f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf"
+                    st.download_button("Descargar PDF", pdf_res, file_name, "application/pdf")
+
