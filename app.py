@@ -120,7 +120,7 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     else:
         cobertura_txt = str(plan_interes_list)
 
-    asunto = f"NUEVO LEAD DE COTIZADOR: {cliente}"
+    asunto = f"NUEVO LEAD DE COTIZADOR SALUD: {cliente}"
     cuerpo = f"""
     Hola Chicos,
     
@@ -652,4 +652,5 @@ else:
                     fecha_str = datetime.now().strftime("%d%m%y_%H%M")
                     file_name = f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf"
                     st.download_button("Descargar PDF", pdf_res, file_name, "application/pdf")
+
 
