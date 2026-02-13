@@ -45,6 +45,11 @@ except ImportError:
 CODIGO_ADMIN = "ADMIN2026"
 CODIGOS_ASESORES = ["ASE01", "ASE02", "ASE03", "VENTAS2026"] 
 
+# --- FUNCIÓN DE HORA PERÚ (NUEVA) ---
+def obtener_hora_peru():
+    """Obtiene la hora actual ajustada a Perú (UTC-5)."""
+    return datetime.utcnow() - timedelta(hours=5)
+
 # --- FUNCIONES GOOGLE SHEETS ---
 
 def get_gspread_client():
@@ -113,7 +118,10 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     else:
         cobertura_txt = str(plan_interes_list)
 
-    asunto = f"NUEVO LEAD DE COTIZADOR: {cliente}"
+    # Usamos la hora de Perú para el correo
+    fecha_hora_peru = obtener_hora_peru().strftime('%d/%m/%Y %H:%M')
+
+    asunto = f"NUEVO LEAD DE COTIZADOR SALUD: {cliente}"
     cuerpo = f"""
     Hola Chicos,
     
@@ -137,13 +145,12 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     Total Asegurados (Familia): {n_familia + 1}
     ------------------------------------------------
     
-    Fecha: {datetime.now().strftime('%d/%m/%Y %H:%M')}
+    Fecha: {fecha_hora_peru} (Hora Perú)
     Este correo fue generado automáticamente por el Cotizador YQ.
     """
 
     try:
         if SENDER_PASSWORD == "TU_CONTRASEÑA_AQUI":
-            print("⚠️ Falta contraseña de correo.")
             return True
 
         msg = MIMEMultipart()
@@ -181,9 +188,11 @@ def incrementar_folio():
     return fol
 
 def get_mes_actual():
+    # Usamos la hora de Perú para saber en qué mes estamos realmente
+    mes_num = obtener_hora_peru().month
     meses = {1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril", 5: "Mayo", 6: "Junio",
              7: "Julio", 8: "Agosto", 9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"}
-    return meses[datetime.now().month]
+    return meses[mes_num]
 
 # --- CARGA DE DATOS ---
 @st.cache_data
@@ -368,7 +377,11 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
         img = ImageRL("logo.png", width=4.5*cm, height=1.6*cm, kind='proportional') if os.path.exists("logo.png") else Paragraph("", st_norm)
         txt_header = """<b>YQ CORREDORES DE SEGUROS</b><br/>Propuesta de seguro de salud"""
         p_header = Paragraph(txt_header, st_tit)
-        txt_folio = f"<b>Folio:</b> {folio}<br/><b>Fecha:</b> {datetime.now().strftime('%d/%m/%Y')}"
+        
+        # FECHA PDF (PERU)
+        fecha_peru = obtener_hora_peru().strftime('%d/%m/%Y')
+        txt_folio = f"<b>Folio:</b> {folio}<br/><b>Fecha:</b> {fecha_peru}"
+        
         p_folio = Paragraph(txt_folio, ParagraphStyle('F', parent=st_norm, alignment=2))
         t_head = Table([[img, p_header, p_folio]], colWidths=[5*cm, 9*cm, 4*cm])
         t_head.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'MIDDLE')]))
@@ -519,7 +532,8 @@ else:
         if es_cliente:
             st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
             correo = st.text_input("Correo Electrónico")
-            celular = st.text_input("Celular / WhatsApp (Solo números)", max_chars=9)
+            celular_num = st.number_input("Celular / WhatsApp (Solo números)", min_value=0, step=1, format="%d", value=0)
+            celular = str(celular_num) if celular_num > 0 else ""
         
         mes_actual = get_mes_actual()
         tipo_cliente_key = "Nuevo" if cont == "Nuevo" else "Continuidad"
@@ -561,7 +575,7 @@ else:
                             st.download_button(
                                 label="💾 Guardar CSV",
                                 data=csv,
-                                file_name=f"historial_completo_{datetime.now().strftime('%d%m%Y')}.csv",
+                                file_name=f"historial_completo_{obtener_hora_peru().strftime('%d%m%Y')}.csv",
                                 mime="text/csv"
                             )
                             st.success(f"Registros encontrados: {len(df_historial)}")
@@ -586,15 +600,13 @@ else:
             elif es_cliente:
                 if not correo:
                     st.error("⚠️ Por favor ingresa tu Correo Electrónico.")
-                # Validación Estricta de Celular: 9 dígitos, empieza con 9, solo números
                 elif not celular or len(celular) != 9 or not celular.startswith("9") or not celular.isdigit():
                     st.error("⚠️ El número de celular debe tener 9 dígitos numéricos y comenzar con 9.")
                 else:
-                    # Todo OK para cliente
                     rol_actual = "Cliente"
-                    # Guardar en nube
+                    # Guardar con hora PERÚ
                     guardar_en_sheets([
-                        datetime.now().strftime('%Y-%m-%d %H:%M'),
+                        obtener_hora_peru().strftime('%Y-%m-%d %H:%M'),
                         nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual
                     ])
                     enviar_notificacion(nom, correo, celular, cob, len(familia)-1, edad, clinicas, cont)
@@ -607,9 +619,9 @@ else:
             else:
                 # Todo OK para Admin/Asesor
                 rol_actual = "Admin" if es_admin else "Asesor"
-                # Opcional: Guardar historial de asesores también
+                # Guardar con hora PERÚ
                 guardar_en_sheets([
-                    datetime.now().strftime('%Y-%m-%d %H:%M'),
+                    obtener_hora_peru().strftime('%Y-%m-%d %H:%M'),
                     nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual
                 ])
                 
@@ -674,9 +686,11 @@ else:
                     nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
                     cls_list = [c.strip().split()[0] for c in st.session_state.get('clinicas_sel', [])]
                     cls_clean = "_".join(cls_list)
-                    fecha_str = datetime.now().strftime("%d%m%y_%H%M")
+                    # Hora Perú para nombre de archivo
+                    fecha_str = obtener_hora_peru().strftime("%d%m%y_%H%M")
                     file_name = f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf"
                     st.download_button("Descargar PDF", pdf_res, file_name, "application/pdf")
+
 
 
 
