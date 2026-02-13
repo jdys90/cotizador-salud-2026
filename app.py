@@ -533,6 +533,7 @@ else:
             st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
             correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com")
             celular_num = st.text_input("Celular / Whatsapp", max_chars=9, placeholder="Ej: 999123456")
+            if celular_num > 0 else ""
            
         
         mes_actual = get_mes_actual()
@@ -690,6 +691,7 @@ else:
                     fecha_str = obtener_hora_peru().strftime("%d%m%y_%H%M")
                     file_name = f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf"
                     st.download_button("Descargar PDF", pdf_res, file_name, "application/pdf")
+
 
 
 
