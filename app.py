@@ -471,7 +471,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
         elements.append(Paragraph("¿Listo para estar protegido?", st_sub))
         elements.append(Spacer(1, 5))
         st_btn = ParagraphStyle('Btn', parent=st_norm, textColor=colors.white, alignment=1, fontName='Helvetica-Bold', fontSize=10)
-        t_btns = Table([[Paragraph('<a href="https://wa.link/czc7jg">Tengo Dudas ¡QUIERO MI ASESORÍA GRATUITA!</a>', st_btn), "", Paragraph('<a href="https://wa.link/zwdc6r">¡QUIERO CONTRATAR AHORA!</a>', st_btn)]], colWidths=[7*cm, 1*cm, 7*cm], rowHeights=[1.2*cm])
+        t_btns = Table([[Paragraph('<a href="https://wa.link/czc7jg">TENGO DUDAS: QUIERO MI ASESORÍA GRATUITA</a>', st_btn), "", Paragraph('<a href="https://wa.link/zwdc6r">¡QUIERO CONTRATAR AHORA!</a>', st_btn)]], colWidths=[7*cm, 1*cm, 7*cm], rowHeights=[1.2*cm])
         t_btns.setStyle(TableStyle([('BACKGROUND', (0,0), (0,0), AZUL), ('BACKGROUND', (2,0), (2,0), VERDE), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('ROUNDED', (0,0), (-1,-1), 8)]))
         elements.append(t_btns)
         elements.append(Spacer(1, 30))
@@ -691,6 +691,7 @@ else:
                     fecha_str = obtener_hora_peru().strftime("%d%m%y_%H%M")
                     file_name = f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf"
                     st.download_button("Descargar PDF", pdf_res, file_name, "application/pdf")
+
 
 
 
