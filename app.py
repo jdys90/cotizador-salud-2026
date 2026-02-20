@@ -1,4 +1,5 @@
 import streamlit as st
+import urllib.parse # Pon esto hasta arriba, junto a import streamlit as st
 import pandas as pd
 import os
 from io import BytesIO
@@ -9,6 +10,18 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import gspread
 from google.oauth2.service_account import Credentials
+
+
+# --- 1. EL SALUDO PERSONALIZADO (El Paso 1 que acabamos de armar) ---
+if "nombre" in st.query_params:
+    nombre_cliente = st.query_params["nombre"]
+    st.title(f"¡Hola {nombre_cliente}! 👋")
+    st.subheader("Vamos a evaluar qué seguro de salud es el adecuado para ti.")
+else:
+    st.title("¡Hola! 👋")
+    st.subheader("Vamos a evaluar qué seguro de salud es el adecuado para ti.")
+
+st.divider() # Pone una línea separadora visual muy elegante
 
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="wide")
@@ -353,6 +366,30 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
 
     if not candidatos: return pd.DataFrame()
     return pd.DataFrame(candidatos).sort_values('Precio_Final')
+    
+# 3. EL CIERRE HUMANO (Siguiendo tu Brandbook)
+st.subheader("¿Tienes dudas o quieres evaluar estas opciones?")
+st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.")
+
+# Configura el número de tu asesora (sin el símbolo +)
+numero_whatsapp = "51948289614" # ¡Reemplaza esto con el número real!
+
+# Armamos el mensaje base
+mensaje_base = "Hola. Acabo de usar el cotizador de salud y me gustaría que me acompañen a evaluar mis opciones."
+
+# Si el cliente entró desde el correo y tenemos su nombre, lo agregamos al mensaje
+if "nombre" in st.query_params:
+    nombre_cliente = st.query_params["nombre"]
+    mensaje_base += f" Mi nombre es {nombre_cliente}."
+
+# Codificamos el texto para que los espacios y tildes funcionen en el enlace web
+mensaje_codificado = urllib.parse.quote(mensaje_base)
+
+# Creamos la URL final de WhatsApp
+url_whatsapp = f"https://wa.me/{numero_whatsapp}?text={mensaje_codificado}"
+
+# Mostramos el botón nativo de Streamlit
+st.link_button("💬 Escribir por WhatsApp a un asesor humano", url_whatsapp)
 
 # --- PDF ---
 def generar_pdf(perfil, df, id_sel, razon, folio):
@@ -691,6 +728,7 @@ else:
                     fecha_str = obtener_hora_peru().strftime("%d%m%y_%H%M")
                     file_name = f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf"
                     st.download_button("Descargar PDF", pdf_res, file_name, "application/pdf")
+
 
 
 
