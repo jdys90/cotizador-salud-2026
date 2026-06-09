@@ -512,7 +512,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
         t_btns.setStyle(TableStyle([('BACKGROUND', (0,0), (0,0), AZUL), ('BACKGROUND', (2,0), (2,0), VERDE), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('ROUNDED', (0,0), (-1,-1), 8)]))
         elements.append(t_btns)
         elements.append(Spacer(1, 30))
-        elements.append(Paragraph("Nota: Precios referenciales sujetos a evaluación médica. Incluyen IGV.", ParagraphStyle('D', parent=st_norm, fontSize=7)))
+        elements.append(Paragraph("Nota: Precios referenciales sujetos a evaluación médica. Incluyen IGV. Esta cotización dura sólo por 7 días.", ParagraphStyle('D', parent=st_norm, fontSize=7)))
 
         doc.build(elements)
         buffer.seek(0)
