@@ -10,7 +10,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import gspread
 from google.oauth2.service_account import Credentials
-
+import unicodedata
 
 # --- 1. EL SALUDO PERSONALIZADO (El Paso 1 que acabamos de armar) ---
 if "nombre" in st.query_params:
