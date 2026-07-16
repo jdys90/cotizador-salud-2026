@@ -510,7 +510,7 @@ else:
             
         st.header("Datos del Cliente")
         nom = st.text_input("Nombres completos")
-        edad = st.number_input("Edad", 0, 99, 30)
+        edad = st.number_input("Edad", 0, 99)
         salud = st.radio("Estado de salud", ["Sano", "Crónico"], horizontal=True)
         
         st.header("Familia")
