@@ -290,7 +290,7 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
         plan_clean = quitar_tildes(plan)
         
         if "Vengo con continuidad" == continuidad and "MAPFRE" in cia_clean: continue
-        if "RIMAC" in cia_clean and familia[0]['edad'] >= 65 and "ORO" not in plan_clean: continue
+        if continuidad == "Sí (Continuidad)" and "mapfre" in str(cia).lower(): continue
         if plan_clean not in [quitar_tildes(p) for p in planes_permitidos]: continue
 
         clinicas_plan = set()
