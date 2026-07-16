@@ -1,10 +1,9 @@
 import streamlit as st
-import urllib.parse # Pon esto hasta arriba, junto a import streamlit as st
+import urllib.parse
 import pandas as pd
 import os
 from io import BytesIO
 from datetime import datetime, timedelta
-import calendar
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -12,7 +11,10 @@ import gspread
 from google.oauth2.service_account import Credentials
 import unicodedata
 
-# --- 1. EL SALUDO PERSONALIZADO (El Paso 1 que acabamos de armar) ---
+# --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
+st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="wide")
+
+# --- 1. EL SALUDO PERSONALIZADO ---
 if "nombre" in st.query_params:
     nombre_cliente = st.query_params["nombre"]
     st.title(f"¡Hola {nombre_cliente}! 👋")
@@ -21,12 +23,8 @@ else:
     st.title("¡Hola! 👋")
     st.subheader("Vamos a evaluar qué seguro de salud es el adecuado para ti.")
 
-st.divider() # Pone una línea separadora visual muy elegante
+st.divider()
 
-# --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
-st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="wide")
-
-# Estilos CSS personalizados
 st.markdown("""
     <style>
     .stButton>button {
@@ -58,25 +56,28 @@ except ImportError:
 CODIGO_ADMIN = "ADMIN2026"
 CODIGOS_ASESORES = ["ASE01", "ASE02", "ASE03", "VENTAS2026"] 
 
-# --- FUNCIÓN DE HORA PERÚ (NUEVA) ---
+# --- FUNCIONES DE SOPORTE Y LIMPIEZA ---
 def obtener_hora_peru():
-    """Obtiene la hora actual ajustada a Perú (UTC-5)."""
     return datetime.utcnow() - timedelta(hours=5)
 
-# --- FUNCIONES GOOGLE SHEETS ---
+def get_mes_actual():
+    mes_num = obtener_hora_peru().month
+    meses = {1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril", 5: "Mayo", 6: "Junio",
+             7: "Julio", 8: "Agosto", 9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"}
+    return meses[mes_num]
 
+def quitar_tildes(texto):
+    if pd.isna(texto): return ""
+    texto = str(texto).strip()
+    return "".join(c for c in unicodedata.normalize('NFKD', texto) if not unicodedata.combining(c)).upper()
+
+# --- FUNCIONES GOOGLE SHEETS ---
 def get_gspread_client():
-    """Conecta con Google Sheets usando librerías modernas."""
     try:
         if "gcp_service_account" not in st.secrets:
             st.warning("⚠️ Falta configuración de Google en Secrets.")
             return None
-        
-        scopes = [
-            "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive"
-        ]
-        
+        scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
         creds_dict = dict(st.secrets["gcp_service_account"])
         credentials = Credentials.from_service_account_info(creds_dict, scopes=scopes)
         client = gspread.authorize(credentials)
@@ -90,19 +91,18 @@ def guardar_en_sheets(datos_fila):
     try:
         client = get_gspread_client()
         if not client: return
-
         sheet = client.open("historial_cotizador_salud").sheet1 
         sheet.append_row(datos_fila)
-        
+
     except Exception as e:
         st.error(f"❌ Error al guardar en Sheets: {e}")
 
+
 def descargar_historial_sheets():
-    """Descarga todo el historial desde Google Sheets."""
+    
     try:
         client = get_gspread_client()
         if not client: return None
-
         sheet = client.open("historial_cotizador_salud").sheet1
         data = sheet.get_all_records()
         return pd.DataFrame(data)
@@ -111,13 +111,10 @@ def descargar_historial_sheets():
         return None
 
 # --- FUNCIONES DE CORREO ---
-
-def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, edad, clinicas, continuidad):
-    """Envía un correo a administración usando Zoho Mail."""
+def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, edad, clinicas, continuidad, score_rimac, cliente_rimac):
     SMTP_SERVER = "smtppro.zoho.com"
     SMTP_PORT = 587
     SENDER_EMAIL = "administracion@yqcorredores.com"
-    
     if "EMAIL_PASSWORD" in st.secrets:
         SENDER_PASSWORD = st.secrets["EMAIL_PASSWORD"]
     else:
@@ -126,68 +123,27 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
     RECEIVER_EMAIL = "administracion@yqcorredores.com"
 
     clinicas_txt = ", ".join(clinicas) if clinicas else "Sin preferencia específica"
-    if isinstance(plan_interes_list, list):
-        cobertura_txt = ", ".join(plan_interes_list)
-    else:
-        cobertura_txt = str(plan_interes_list)
-
-    # Usamos la hora de Perú para el correo
+    cobertura_txt = ", ".join(plan_interes_list) if isinstance(plan_interes_list, list) else str(plan_interes_list)
     fecha_hora_peru = obtener_hora_peru().strftime('%d/%m/%Y %H:%M')
 
     asunto = f"NUEVO LEAD DE COTIZADOR SALUD: {cliente}"
-    cuerpo = f"""
-    Hola Chicos,
-    
-    Un cliente ha generado una cotización de salud:
-    
-    ¡Llama ahora!
-    
-    DATOS DEL CLIENTE:
-    ------------------------------------------------
-    Nombre: {cliente}
-    Correo: {correo}
-    WhatsApp: {celular}
-    ------------------------------------------------
-    
-    DATOS DE LA COTIZACIÓN:
-    ------------------------------------------------
-    Edad Titular: {edad} años
-    Interés (Coberturas): {cobertura_txt}
-    Condición: {continuidad}
-    Clínicas Preferidas: {clinicas_txt}
-    Total Asegurados (Familia): {n_familia + 1}
-    ------------------------------------------------
-    
-    Fecha: {fecha_hora_peru} (Hora Perú)
-    Este correo fue generado automáticamente por el Cotizador YQ.
-    """
+    cuerpo = f"""Hola Chicos,\n\nUn cliente ha generado una cotización de salud:\n\nDATOS DEL CLIENTE:\nNombre: {cliente}\nCorreo: {correo}\nWhatsApp: {celular}\n\nDATOS DE LA COTIZACIÓN:\nEdad Titular: {edad} años\nInterés: {cobertura_txt}\nCondición: {continuidad}\nScoring Rímac: {score_rimac}\nCliente Rímac: {cliente_rimac}\nClínicas Preferidas: {clinicas_txt}\nTotal Asegurados: {n_familia + 1}\n\nFecha: {fecha_hora_peru}"""
 
     try:
-        if SENDER_PASSWORD == "TU_CONTRASEÑA_AQUI":
-            return True
-
+        if SENDER_PASSWORD == "TU_CONTRASEÑA_AQUI": return True
         msg = MIMEMultipart()
-        msg['From'] = SENDER_EMAIL
-        msg['To'] = RECEIVER_EMAIL
-        msg['Subject'] = asunto
+        msg['From'], msg['To'], msg['Subject'] = SENDER_EMAIL, RECEIVER_EMAIL, asunto
         msg.attach(MIMEText(cuerpo, 'plain'))
-
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
         server.starttls()
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
         server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
         server.quit()
         return True
-    except Exception as e:
-        print(f"Error enviando correo: {e}")
+    except:
         return False
 
 # --- SOPORTE ---
-
-def normalizar_clinica(nombre):
-    if pd.isna(nombre): return ""
-    return str(nombre).strip().title()
-
 def obtener_nuevo_folio():
     try:
         with open('folio.txt', 'r') as f: return int(f.read().strip()) + 1
@@ -200,19 +156,11 @@ def incrementar_folio():
     except: pass
     return fol
 
-def get_mes_actual():
-    # Usamos la hora de Perú para saber en qué mes estamos realmente
-    mes_num = obtener_hora_peru().month
-    meses = {1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril", 5: "Mayo", 6: "Junio",
-             7: "Julio", 8: "Agosto", 9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"}
-    return meses[mes_num]
-
 # --- CARGA DE DATOS ---
 @st.cache_data
 def cargar_datos_base():
     if not os.path.exists('precios_2026.csv') or not os.path.exists('base_clinicas.xlsx'):
         return None
-
     try:
         try: df_precios = pd.read_csv('precios_2026.csv', sep=',')
         except: df_precios = pd.read_csv('precios_2026.csv', sep=';')
@@ -221,20 +169,15 @@ def cargar_datos_base():
         df_precios['Aseguradora'] = df_precios['Aseguradora'].astype(str).str.strip()
         df_precios['Plan'] = df_precios['Plan'].astype(str).str.strip()
 
+        # Cargar info_adicional.csv si existe para los links
         if os.path.exists('info_adicional.csv'):
             try: df_int = pd.read_csv('info_adicional.csv')
             except: df_int = pd.read_csv('info_adicional.csv', sep=';')
-            
             df_int['Aseguradora'] = df_int['Aseguradora'].astype(str).str.strip()
             df_int['Plan'] = df_int['Plan'].astype(str).str.strip()
             cols_drop = [c for c in df_int.columns if c in df_precios.columns and c not in ['Aseguradora','Plan']]
             df_precios = df_precios.drop(columns=cols_drop, errors='ignore')
             df_precios = pd.merge(df_precios, df_int, on=['Aseguradora','Plan'], how='left')
-        
-        cols_seguras = ['Cob_Int_Amb', 'Cob_Int_Hosp', 'Link_Carencia', 'Link_Cartilla', 'Int_Ded_Amb_Pre', 'Int_Reem_Amb_Sin', 'Int_Ded_Hosp_Pre', 'Int_Reem_Hosp_Sin', 'Tiene_Int']
-        for col in cols_seguras:
-            if col not in df_precios.columns: df_precios[col] = "-"
-            df_precios[col] = df_precios[col].fillna("-")
 
         xls = pd.ExcelFile('base_clinicas.xlsx', engine='openpyxl')
         df_redes = pd.read_excel(xls, sheet_name='REDES')
@@ -253,17 +196,65 @@ def cargar_datos_base():
         return None
 
 def cargar_campanas():
-    dict_campanas = {}
+    lista_campanas = [] 
     if os.path.exists('campana_descuentos.csv'):
         try:
             try: df_camp = pd.read_csv('campana_descuentos.csv', sep=',')
             except: df_camp = pd.read_csv('campana_descuentos.csv', sep=';')
+            
+            if len(df_camp.columns) <= 1:
+                df_camp = pd.read_csv('campana_descuentos.csv', sep=';')
+
+            df_camp.columns = df_camp.columns.str.strip()
+
+            def safe_int(val, default):
+                try: return int(float(val))
+                except: return default
+
             for _, row in df_camp.iterrows():
-                key = (str(row['Aseguradora']).strip(), str(row['Plan']).strip(), str(row['Tipo_Cliente']).strip(), str(row['Mes']).strip())
-                try: dict_campanas[key] = int(row['Porcentaje_Descuento'])
-                except: dict_campanas[key] = 0
-        except: pass
-    return dict_campanas
+                lista_campanas.append({
+                    'Aseguradora': quitar_tildes(row.get('Aseguradora', '')),
+                    'Plan': quitar_tildes(row.get('Plan', '')),
+                    'Continuidad': quitar_tildes(row.get('Continuidad', '')),
+                    'Edad_Min': safe_int(row.get('Edad_Min', 0), 0),
+                    'Edad_Max': safe_int(row.get('Edad_Max', 999), 999),
+                    'Asegurados_Min': safe_int(row.get('Asegurados_Min', 1), 1),
+                    'Forma_Pago': quitar_tildes(row.get('Forma_Pago', '')),
+                    'Score_Rimac': quitar_tildes(row.get('Score_Rimac', '')),
+                    'Cliente_Rimac': quitar_tildes(row.get('Cliente_Rimac', '')),
+                    'Salud': quitar_tildes(row.get('Salud', '')),
+                    'Mes': quitar_tildes(row.get('Mes', '')),
+                    'Porcentaje_Descuento': safe_int(row.get('Porcentaje_Descuento', 0), 0)
+                })
+        except Exception as e: 
+            st.error(f"Error procesando campañas: {e}")
+    return lista_campanas
+
+# --- MOTOR DE REGLAS DINÁMICO ---
+def obtener_descuento_matriz(campanas, cia, plan, continuidad, edad, n_asegurados, forma_pago, score_rimac, cliente_rimac, salud, mes):
+    cia_norm = quitar_tildes(cia)
+    plan_norm = quitar_tildes(plan)
+    mes_norm = quitar_tildes(mes)
+    cont_norm = "CONTINUIDAD" if "continuidad" in continuidad.lower() else "NUEVO"
+    pago_norm = quitar_tildes(forma_pago)
+    score_norm = quitar_tildes(score_rimac)
+    cliente_norm = "SI" if quitar_tildes(cliente_rimac) in ["SI", "S", "YES"] else "NO"
+    salud_norm = quitar_tildes(salud)
+   
+    for c in campanas:
+        if not (cia_norm in c['Aseguradora'] or c['Aseguradora'] in cia_norm): continue
+        if c['Plan'] != plan_norm: continue
+        if c['Mes'] != 'TODOS' and c['Mes'] != mes_norm: continue
+        if c['Continuidad'] != 'TODOS' and c['Continuidad'] != cont_norm: continue
+        if not (c['Edad_Min'] <= edad <= c['Edad_Max']): continue
+        if n_asegurados < c['Asegurados_Min']: continue
+        if c['Forma_Pago'] != 'TODOS' and c['Forma_Pago'] != pago_norm: continue
+        if c['Score_Rimac'] != 'TODOS' and c['Score_Rimac'] != score_norm: continue
+        if c['Cliente_Rimac'] != 'TODOS' and c['Cliente_Rimac'] != cliente_norm: continue
+        if c['Salud'] != 'TODOS' and c['Salud'] != salud_norm: continue
+        
+        return c['Porcentaje_Descuento']
+    return 0
 
 # --- BÚSQUEDA ---
 def calcular_precio(df, cia, plan, familia):
@@ -279,9 +270,9 @@ def calcular_precio(df, cia, plan, familia):
         total += precio
     return total
 
-def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas_list, descuentos):
+def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas_list, desc_men_dict, desc_anu_dict):
     candidatos = []
-    set_user = set(clinicas_user)
+    set_user = set(quitar_tildes(c) for c in clinicas_user)
     
     PLANES_BASICA = ['Esencial', 'Esencial Plus', 'Multisalud Base', 'Medisalud Lite', 'Medisalud Base']
     PLANES_INTEGRAL = ['Red Preferente', 'Red Médica', 'Multisalud', 'Medisalud', 'Medisalud Plus', 'Viva Salud', 'Trébol Salud', 'Medisalud Senior +', 'Oro - Plan preferente', 'Oro - Plan Red', 'Oro - Plan Completo']
@@ -294,26 +285,20 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
     if "Integral + Reembolso" in coberturas_list: planes_permitidos.update(PLANES_REEMBOLSO)
     if "Integral + Cobertura Internacional" in coberturas_list: planes_permitidos.update(PLANES_INTERNACIONAL)
 
-    es_continuidad = (continuidad == "Vengo con continuidad")
-    if es_continuidad:
-        if 'Viva Salud' in planes_permitidos: planes_permitidos.remove('Viva Salud')
-        if 'Trébol Salud' in planes_permitidos: planes_permitidos.remove('Trébol Salud')
-
     for (cia, plan), grupo in df_redes.groupby(['Aseguradora', 'Plan']):
-        if es_continuidad and "mapfre" in str(cia).lower(): continue
-
-        plan_check = str(plan).strip()
-        if plan_check not in planes_permitidos: continue
+        cia_clean = quitar_tildes(cia)
+        plan_clean = quitar_tildes(plan)
+        
+        if "Vengo con continuidad" == continuidad and "MAPFRE" in cia_clean: continue
+        if "RIMAC" in cia_clean and familia[0]['edad'] >= 65 and "ORO" not in plan_clean: continue
+        if plan_clean not in [quitar_tildes(p) for p in planes_permitidos]: continue
 
         clinicas_plan = set()
         for _, row in grupo.iterrows():
-            clinicas_plan.update([c.strip() for c in str(row['Clinicas_Busqueda']).split(',')])
-        
+            clinicas_plan.update([quitar_tildes(c) for c in str(row['Clinicas_Busqueda']).split(',')])
         if clinicas_user and not set_user.issubset(clinicas_plan): continue
-
-        list_clin_red = []
-        list_cob_amb = []
-        list_cob_hosp = []
+        
+        list_clin_red, list_cob_amb, list_cob_hosp = [], [], []
         
         if not clinicas_user:
             row = grupo.iloc[0]
@@ -323,73 +308,46 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
         else:
             for cli in clinicas_user:
                 for _, row in grupo.iterrows():
-                    if cli in [c.strip() for c in str(row['Clinicas_Busqueda']).split(',')]:
+                    if quitar_tildes(cli) in [quitar_tildes(c.strip()) for c in str(row['Clinicas_Busqueda']).split(',')]:
                         list_clin_red.append(f"• <b>{cli}</b>: {row['Nombre_Red']}")
                         list_cob_amb.append(f"• <b>{cli}</b>: {row['Cobertura_Amb']}")
                         list_cob_hosp.append(f"• <b>{cli}</b>: {row['Cobertura_Hosp']}")
                         break
-        
-        match = df_precios[(df_precios['Aseguradora']==cia) & (df_precios['Plan']==plan)]
-        if match.empty: continue
-        data = match.iloc[0]
-        
+
         base = calcular_precio(df_precios, cia, plan, familia)
         if base is None: continue
         
-        dsc = descuentos.get((cia, plan), 0)
-        final = base * (1 - dsc/100)
-        ahorro = base - final
+        # OBTENCIÓN DE DESCUENTOS USANDO LOS DICCIONARIOS (Permite la edición manual)
+        dsc_men = 0
+        dsc_anu = 0
+        for (d_cia, d_plan), v in desc_men_dict.items():
+            if quitar_tildes(d_cia) == cia_clean and quitar_tildes(d_plan) == plan_clean:
+                dsc_men = v
+                break
+        for (d_cia, d_plan), v in desc_anu_dict.items():
+            if quitar_tildes(d_cia) == cia_clean and quitar_tildes(d_plan) == plan_clean:
+                dsc_anu = v
+                break
+        
+        precio_anual_final = base * (1 - dsc_anu/100)
+        precio_mensual_final = (base / 12) * (1 - dsc_men/100)
 
-        amb_pre = str(data.get('Int_Ded_Amb_Pre', '-'))
-        amb_sin = str(data.get('Int_Reem_Amb_Sin', '-'))
-        hosp_pre = str(data.get('Int_Ded_Hosp_Pre', '-'))
-        hosp_sin = str(data.get('Int_Reem_Hosp_Sin', '-'))
-        txt_int_amb = f"<b>Ded:</b> {amb_pre}<br/><b>Reemb:</b> {amb_sin}"
-        txt_int_hosp = f"<b>Ded:</b> {hosp_pre}<br/><b>Reemb:</b> {hosp_sin}"
+        match = df_precios[(df_precios['Aseguradora']==cia) & (df_precios['Plan']==plan)]
+        data = match.iloc[0] if not match.empty else {}
 
         candidatos.append({
-            'Aseguradora': cia, 'Plan': plan,
-            'Txt_Clin_Red': "<br/>".join(list_clin_red),
-            'Txt_Cob_Amb': "<br/>".join(list_cob_amb),
-            'Txt_Cob_Hosp': "<br/>".join(list_cob_hosp),
-            'Int_Amb_Full': txt_int_amb,
-            'Int_Hosp_Full': txt_int_hosp,
-            'Precio_Final': final,
-            'Precio_Lista': base,
-            'Ahorro_Soles': ahorro,
-            'Pct_Dscto': dsc,
-            'Precio_Mensual': final/12,
-            'Link_Cartilla': data.get('Link_Cartilla', ''),
-            'Link_Carencia': data.get('Link_Carencia', ''),
-            'ID': f"{cia}-{plan}"
+            'Aseguradora': cia, 'Plan': plan, 'Txt_Clin_Red': "<br/>".join(list_clin_red),
+            'Txt_Cob_Amb': "<br/>".join(list_cob_amb), 'Txt_Cob_Hosp': "<br/>".join(list_cob_hosp),
+            'Int_Amb_Full': f"<b>Ded:</b> {data.get('Int_Ded_Amb_Pre','-')}<br/><b>Reemb:</b> {data.get('Int_Reem_Amb_Sin','-')}",
+            'Int_Hosp_Full': f"<b>Ded:</b> {data.get('Int_Ded_Hosp_Pre','-')}<br/><b>Reemb:</b> {data.get('Int_Reem_Hosp_Sin','-')}",
+            'Precio_Mensual_Base': base/12, 'Pct_Dscto_Mensual': f"{dsc_men}%", 'Precio_Mensual_Final': precio_mensual_final,
+            'Precio_Anual_Base': base, 'Pct_Dscto_Anual': f"{dsc_anu}%", 'Precio_Anual_Final': precio_anual_final,
+            'Dsc_Num_Mensual': dsc_men, 'Dsc_Num_Anual': dsc_anu,
+            'Precio_Final': precio_anual_final,
+            'Link_Cartilla': data.get('Link_Cartilla', ''), 'Link_Carencia': data.get('Link_Carencia', ''), 'ID': f"{cia}-{plan}"
         })
 
-    if not candidatos: return pd.DataFrame()
-    return pd.DataFrame(candidatos).sort_values('Precio_Final')
-    
-# 3. EL CIERRE HUMANO (Siguiendo tu Brandbook)
-st.subheader("¿Tienes dudas o quieres evaluar estas opciones?")
-st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.")
-
-# Configura el número de tu asesora (sin el símbolo +)
-numero_whatsapp = "51948289614" # ¡Reemplaza esto con el número real!
-
-# Armamos el mensaje base
-mensaje_base = "Hola. Acabo de usar el cotizador de salud y me gustaría que me acompañen a evaluar mis opciones."
-
-# Si el cliente entró desde el correo y tenemos su nombre, lo agregamos al mensaje
-if "nombre" in st.query_params:
-    nombre_cliente = st.query_params["nombre"]
-    mensaje_base += f" Mi nombre es {nombre_cliente}."
-
-# Codificamos el texto para que los espacios y tildes funcionen en el enlace web
-mensaje_codificado = urllib.parse.quote(mensaje_base)
-
-# Creamos la URL final de WhatsApp
-url_whatsapp = f"https://wa.me/{numero_whatsapp}?text={mensaje_codificado}"
-
-# Mostramos el botón nativo de Streamlit
-st.link_button("💬 Escribir por WhatsApp a un asesor humano", url_whatsapp)
+    return pd.DataFrame(candidatos).sort_values('Precio_Final') if candidatos else pd.DataFrame()
 
 # --- PDF ---
 def generar_pdf(perfil, df, id_sel, razon, folio):
@@ -411,21 +369,21 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
         st_td_b = ParagraphStyle('TDB', parent=st_td, fontName='Helvetica-Bold', textColor=AZUL)
 
         elements = []
-        img = ImageRL("logo.png", width=4.5*cm, height=1.6*cm, kind='proportional') if os.path.exists("logo.png") else Paragraph("", st_norm)
+        # LOGO MÁS GRANDE (Se aumentó el width a 6.0cm y height a 2.2cm proporcionalmente)
+        img = ImageRL("logo.png", width=4.0*cm, height=2.2*cm, kind='proportional') if os.path.exists("logo.png") else Paragraph("", st_norm)
         txt_header = """<b>YQ CORREDORES DE SEGUROS</b><br/>Propuesta de seguro de salud"""
         p_header = Paragraph(txt_header, st_tit)
         
-        # FECHA PDF (PERU)
         fecha_peru = obtener_hora_peru().strftime('%d/%m/%Y')
         txt_folio = f"<b>Folio:</b> {folio}<br/><b>Fecha:</b> {fecha_peru}"
         
         p_folio = Paragraph(txt_folio, ParagraphStyle('F', parent=st_norm, alignment=2))
-        t_head = Table([[img, p_header, p_folio]], colWidths=[5*cm, 9*cm, 4*cm])
+        t_head = Table([[img, p_header, p_folio]], colWidths=[4.0*cm, 8.5*cm, 3.5*cm])
         t_head.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'MIDDLE')]))
         elements.append(t_head)
         elements.append(Spacer(1, 15))
 
-        elements.append(Paragraph("En YQ Corredores de Seguros, entendemos la importancia de proteger tu salud. Te presentamos esta cotización personalizada con precios de campaña exclusivos.", st_norm))
+        elements.append(Paragraph("En YQ Corredores de Seguros, entendemos la importancia de proteger tu salud. Te presentamos esta cotización personalizada con precios exclusivos.", st_norm))
         elements.append(Spacer(1, 10))
 
         elements.append(Paragraph("TU PERFIL", st_sub))
@@ -436,18 +394,18 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
             [Paragraph("<b>Dependientes:</b>", st_bold), Paragraph(perfil['Dependientes'], st_norm),
              Paragraph("<b>Condición:</b>", st_bold), Paragraph(perfil['Continuidad'], st_norm)]
         ]
-        t_perf = Table(data_perfil, colWidths=[2.5*cm, 6.5*cm, 2.5*cm, 6.5*cm])
+        t_perf = Table(data_perfil, colWidths=[3.0*cm, 7.5*cm, 2.5*cm, 5.0*cm])
         t_perf.setStyle(TableStyle([('LINEBELOW', (0,0), (-1,-1), 0.5, colors.lightgrey), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('PADDING', (0,0), (-1,-1), 5)]))
         elements.append(t_perf)
         elements.append(Spacer(1, 20))
 
         es_int = "Internacional" in perfil['Cobertura']
         if es_int:
-            headers = ['Plan', 'Clínicas / Redes', 'Int. Amb', 'Int. Hosp', 'Mensual', 'Anual']
-            anchos = [3.0*cm, 4.2*cm, 3.7*cm, 3.5*cm, 1.4*cm, 2.2*cm]
+            headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
+            anchos = [3.1*cm, 3.2*cm, 3.6*cm, 3.8*cm, 2.1*cm, 2.2*cm]
         else:
-            headers = ['Plan', 'Clínicas / Redes', 'Cob. Ambulatoria', 'Cob. Hospitalaria', 'Mensual', 'Anual']
-            anchos = [3.0*cm, 4.2*cm, 4.2*cm, 3.0*cm, 1.4*cm, 2.2*cm]
+            headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
+            anchos = [3.1*cm, 3.2*cm, 3.6*cm, 3.8*cm, 2.1*cm, 2.2*cm]
 
         data = [[Paragraph(h, st_th) for h in headers]]
         
@@ -457,22 +415,37 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
             if rec: txt_p = "⭐ RECOMENDADO ⭐<br/>" + txt_p
             
             links = []
-            if row['Link_Cartilla'] and str(row['Link_Cartilla']).startswith('http'):
-                links.append(f"<a href='{row['Link_Cartilla']}' color='blue'><u>Cartilla</u></a>")
-            if perfil['Continuidad'] == "Nuevo" and row['Link_Carencia'] and str(row['Link_Carencia']).startswith('http'):
-                links.append(f"<a href='{row['Link_Carencia']}' color='red'><u>Carencias</u></a>")
+            # LOGICA DE ENLACES A PRUEBA DE FALLOS
+            cartilla = str(row.get('Link_Cartilla', '')).strip()
+            if cartilla and cartilla != '-' and cartilla.lower() != 'nan':
+                href = cartilla if cartilla.startswith('http') else 'https://' + cartilla
+                links.append(f"<a href='{href}' color='blue'><u>Cartilla</u></a>")
+                
+            carencia = str(row.get('Link_Carencia', '')).strip()
+            if carencia and carencia != '-' and carencia.lower() != 'nan':
+                href_c = carencia if carencia.startswith('http') else 'https://' + carencia
+                links.append(f"<a href='{href_c}' color='green'><u>Carencia</u></a>")
             
             if links: txt_p += "<br/>" + " | ".join(links)
 
-            precio_anual = f"S/ {row['Precio_Final']:,.2f}"
-            if row['Pct_Dscto'] > 0:
-                precio_anual = f"<strike color='grey'>S/ {row['Precio_Lista']:,.0f}</strike><br/><b>{precio_anual}</b><br/><font color='red' size='7'>Ahorras S/ {row['Ahorro_Soles']:,.0f}</font>"
-            precio_mensual = f"S/ {row['Precio_Mensual']:,.0f}"
+            dsc_men = row['Dsc_Num_Mensual']
+            dsc_anu = row['Dsc_Num_Anual']
+            
+            precio_anual_str = f"S/ {row['Precio_Anual_Final']:,.2f}"
+            precio_mensual_str = f"S/ {row['Precio_Mensual_Final']:,.0f}"
+
+            if dsc_anu > 0:
+                ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
+                precio_anual_str = f"<strike color='grey'>S/ {row['Precio_Anual_Base']:,.0f}</strike><br/><b>{precio_anual_str}</b><br/><font color='red' size='7'>Ahorras S/ {ahorro_anual:,.0f}</font>"
+            
+            if dsc_men > 0:
+                ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
+                precio_mensual_str = f"<strike color='grey'>S/ {row['Precio_Mensual_Base']:,.0f}</strike><br/><b>{precio_mensual_str}</b><br/><font color='red' size='7'>Ahorras S/ {ahorro_mensual:,.0f}</font>"
 
             if es_int:
-                fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Int_Amb_Full'], st_td), Paragraph(row['Int_Hosp_Full'], st_td), Paragraph(precio_mensual, st_td_b), Paragraph(precio_anual, st_td_b)]
+                fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Int_Amb_Full'], st_td), Paragraph(row['Int_Hosp_Full'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
             else:
-                fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Txt_Cob_Amb'], st_td), Paragraph(row['Txt_Cob_Hosp'], st_td), Paragraph(precio_mensual, st_td_b), Paragraph(precio_anual, st_td_b)]
+                fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Txt_Cob_Amb'], st_td), Paragraph(row['Txt_Cob_Hosp'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
             data.append(fila)
 
         t = Table(data, colWidths=anchos, repeatRows=1)
@@ -486,7 +459,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
         
         elements.append(Spacer(1, 10))
         if perfil['Continuidad'] == "Nuevo":
-            aviso = "<b>IMPORTANTE:</b> Al ser un seguro nuevo, aplican periodos de carencia (30 días) y espera (para preexistencias). Por favor revise el enlace de carencias en la tabla superior."
+            aviso = "<b>IMPORTANTE:</b> Al ser un seguro nuevo, aplican periodos de carencia (30 días) y espera (para preexistencias). Por favor revise el enlace de 'carencia' en la tabla superior."
             t_warn = Table([[Paragraph(aviso, ParagraphStyle('W', parent=st_norm, textColor=AZUL))]], colWidths=[18*cm])
             t_warn.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), AZUL_CLARO), ('BOX', (0,0), (-1,-1), 0.5, AZUL), ('PADDING', (0,0), (-1,-1), 8)]))
             elements.append(t_warn)
@@ -512,7 +485,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
         t_btns.setStyle(TableStyle([('BACKGROUND', (0,0), (0,0), AZUL), ('BACKGROUND', (2,0), (2,0), VERDE), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('ROUNDED', (0,0), (-1,-1), 8)]))
         elements.append(t_btns)
         elements.append(Spacer(1, 30))
-        elements.append(Paragraph("Nota: Precios referenciales sujetos a evaluación médica. Incluyen IGV. Esta cotización dura sólo por 7 días.", ParagraphStyle('D', parent=st_norm, fontSize=7)))
+        elements.append(Paragraph("Nota: Precios referenciales sujetos a evaluación médica. Incluyen IGV. Esta cotización dura sólo por 7 días.", ParagraphStyle('D', parent=st_norm, fontSize=9)))
 
         doc.build(elements)
         buffer.seek(0)
@@ -523,17 +496,18 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
 # --- INTERFAZ ---
 base_data = cargar_datos_base()
 if base_data is None:
-    st.error("Ejecuta 'actualizar_db.py'")
+    st.error("Error en base_data. Verifica precios_2026.csv y base_clinicas.xlsx")
 else:
     df_precios, df_redes, clinicas_unicas, df_full = base_data
-    campanas_activas = cargar_campanas() 
-    
+    campanas_maestras = cargar_campanas() 
+    mes_actual = get_mes_actual()
+
     if 'resultados' not in st.session_state: st.session_state['resultados'] = None
     
     with st.sidebar:
         if os.path.exists("logo.png"):
             st.sidebar.image("logo.png", use_container_width=True)
-        
+            
         st.header("Datos del Cliente")
         nom = st.text_input("Nombres completos")
         edad = st.number_input("Edad", 0, 99, 30)
@@ -552,120 +526,86 @@ else:
         
         txt_dependientes = ", ".join(txt_fam) if txt_fam else "Ninguno"
 
-        st.header("Filtros")
+        st.header("Filtros Comerciales")
         cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"])
+        score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"])
+        cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], horizontal=True)
+        
+        st.header("Filtros Técnicos")
         cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral"])
         clinicas = st.multiselect("Clínicas de preferencia", clinicas_unicas, placeholder="Puedes elegir más de una")
         
-        st.header("Descuento")
+        st.header("Seguridad")
         codigo_acceso = st.text_input("Código opcional de descuento", type="password")
         
         es_admin = (codigo_acceso == CODIGO_ADMIN)
         es_asesor = (codigo_acceso in CODIGOS_ASESORES)
         es_cliente = (not es_admin and not es_asesor)
 
-        correo = ""
-        celular = ""
+        correo, celular = "", ""
         if es_cliente:
             st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
             correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com")
             celular = st.text_input("Celular / Whatsapp", max_chars=9, placeholder="Ej: 999123456")
-            
-           
-        
-        mes_actual = get_mes_actual()
-        tipo_cliente_key = "Nuevo" if cont == "Nuevo" else "Continuidad"
-        
-        descuentos = {}
+
+        # GENERACIÓN DE DICCIONARIOS EN MEMORIA
+        descuentos_mensual = {}
+        descuentos_anual = {}
+        for c in df_full['Aseguradora'].unique():
+            for p in df_full[df_full['Aseguradora']==c]['Plan'].unique():
+                val_men = obtener_descuento_matriz(campanas_maestras, c, p, cont, edad, len(familia), "Mensual", score_rimac, cliente_rimac, salud, mes_actual)
+                val_anu = obtener_descuento_matriz(campanas_maestras, c, p, cont, edad, len(familia), "Contado", score_rimac, cliente_rimac, salud, mes_actual)
+                descuentos_mensual[(c,p)] = int(val_men)
+                descuentos_anual[(c,p)] = int(val_anu)
+
         if es_admin:
             with st.expander(f"Campañas {mes_actual} (Modo Admin)"):
+                st.write("Verifica o modifica los descuentos a mano:")
                 for c in df_full['Aseguradora'].unique():
                     for p in df_full[df_full['Aseguradora']==c]['Plan'].unique():
-                        key = (str(c).strip(), str(p).strip(), tipo_cliente_key, mes_actual)
-                        val_default = campanas_activas.get(key, 0)
-                        widget_key = f"dsct_{c}_{p}_{tipo_cliente_key}"
-                        descuentos[(c,p)] = st.number_input(f"{c} - {p} %", 0, 50, val_default, key=widget_key)
+                        st.markdown(f"**{c} - {p}**")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            # ESTA ES LA CLAVE: El diccionario ahora lee y guarda el input manual
+                            descuentos_mensual[(c,p)] = st.number_input(f"Mensual %", 0, 100, descuentos_mensual[(c,p)], key=f"dm_{c}_{p}")
+                        with col2:
+                            descuentos_anual[(c,p)] = st.number_input(f"Anual %", 0, 100, descuentos_anual[(c,p)], key=f"da_{c}_{p}")
+                        st.write("---")
             
-            # --- PANEL DE ADMIN PARA HISTORIAL ---
             st.divider()
             st.write("### Base de Datos (Nube)")
-            
             col_admin_1, col_admin_2 = st.columns(2)
-            
             with col_admin_1:
                 if st.button("🔄 Probar Conexión Sheets"):
                     client = get_gspread_client()
-                    if client:
-                        try:
-                            sheet = client.open("historial_cotizador_salud")
-                            st.success(f"✅ Conectado a: {sheet.title}")
-                        except Exception as e:
-                            st.error(f"❌ Falló al abrir hoja: {e}")
-                    else:
-                        st.error("❌ No hay cliente de Google.")
-
+                    if client: st.success("✅ Conectado a Sheets")
+                    else: st.error("❌ No hay cliente configurado.")
             with col_admin_2:
                 if st.button("📥 Descargar Historial Completo"):
-                    with st.spinner("Descargando..."):
-                        df_historial = descargar_historial_sheets()
-                        if df_historial is not None and not df_historial.empty:
-                            csv = df_historial.to_csv(index=False).encode('utf-8-sig')
-                            st.download_button(
-                                label="💾 Guardar CSV",
-                                data=csv,
-                                file_name=f"historial_completo_{obtener_hora_peru().strftime('%d%m%Y')}.csv",
-                                mime="text/csv"
-                            )
-                            st.success(f"Registros encontrados: {len(df_historial)}")
-                        else:
-                            st.warning("No se encontraron datos o hubo un error.")
-
-        else:
-            for c in df_full['Aseguradora'].unique():
-                for p in df_full[df_full['Aseguradora']==c]['Plan'].unique():
-                    key = (str(c).strip(), str(p).strip(), tipo_cliente_key, mes_actual)
-                    descuentos[(c,p)] = campanas_activas.get(key, 0)
+                    df_historial = descargar_historial_sheets()
+                    if df_historial is not None and not df_historial.empty:
+                        csv = df_historial.to_csv(index=False).encode('utf-8-sig')
+                        st.download_button(label="💾 Guardar CSV", data=csv, file_name=f"historial_{obtener_hora_peru().strftime('%d%m%Y')}.csv", mime="text/csv")
+                        st.success(f"Registros encontrados: {len(df_historial)}")
 
         es_solo_internacional = (len(cob) == 1 and "Integral + Cobertura Internacional" in cob)
         requiere_clinica = not es_solo_internacional and es_cliente
 
         if st.button("Cotizar"):
-            # Validaciones
             if not cob:
                 st.error("⚠️ Por favor selecciona al menos un tipo de Cobertura.")
             elif requiere_clinica and not clinicas:
                 st.error("⚠️ Por favor selecciona al menos una Clínica de preferencia.")
-            elif es_cliente:
-                if not correo:
-                    st.error("⚠️ Por favor ingresa tu Correo Electrónico.")
-                elif not celular or len(celular) != 9 or not celular.startswith("9") or not celular.isdigit():
-                    st.error("⚠️ El número de celular debe tener 9 dígitos numéricos y comenzar con 9.")
-                else:
-                    rol_actual = "Cliente"
-                    # Guardar con hora PERÚ
-                    guardar_en_sheets([
-                        obtener_hora_peru().strftime('%Y-%m-%d %H:%M'),
-                        nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual
-                    ])
-                    enviar_notificacion(nom, correo, celular, cob, len(familia)-1, edad, clinicas, cont)
-                    
-                    st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos)
-                    cob_str = ", ".join(cob) if isinstance(cob, list) else str(cob)
-                    st.session_state['perfil'] = {'Titular': f"{nom} ({edad} años)", 'Dependientes': txt_dependientes, 'Continuidad': cont, 'Cobertura': cob_str}
-                    st.session_state['nombre_cliente'] = nom
-                    st.session_state['clinicas_sel'] = clinicas
+            elif es_cliente and (not correo or not celular or len(celular) != 9):
+                st.error("⚠️ Datos de contacto inválidos.")
             else:
-                # Todo OK para Admin/Asesor
-                rol_actual = "Admin" if es_admin else "Asesor"
-                # Guardar con hora PERÚ
-                guardar_en_sheets([
-                    obtener_hora_peru().strftime('%Y-%m-%d %H:%M'),
-                    nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual
-                ])
+                rol_actual = "Cliente" if es_cliente else "Admin/Asesor"
+                guardar_en_sheets([obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual])
+                if es_cliente: enviar_notificacion(nom, correo, celular, cob, len(familia)-1, edad, clinicas, cont, score_rimac, cliente_rimac)
                 
-                st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos)
-                cob_str = ", ".join(cob) if isinstance(cob, list) else str(cob)
-                st.session_state['perfil'] = {'Titular': f"{nom} ({edad} años)", 'Dependientes': txt_dependientes, 'Continuidad': cont, 'Cobertura': cob_str}
+                # ENVIAMOS LOS DICCIONARIOS YA VALIDADOS
+                st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos_mensual, descuentos_anual)
+                st.session_state['perfil'] = {'Titular': f"{nom} ({edad} años)", 'Dependientes': txt_dependientes, 'Continuidad': cont, 'Cobertura': ", ".join(cob)}
                 st.session_state['nombre_cliente'] = nom
                 st.session_state['clinicas_sel'] = clinicas
 
@@ -678,12 +618,8 @@ else:
             
             if not es_cliente:
                 cols = ['Aseguradora','Plan']
-                if "Integral + Cobertura Internacional" in cob:
-                    cols += ['Int_Amb_Full', 'Int_Hosp_Full']
-                
-                mostrar_locales = any(c != "Integral + Cobertura Internacional" for c in cob)
-                if mostrar_locales:
-                    cols += ['Txt_Cob_Amb', 'Txt_Cob_Hosp']
+                if "Integral + Cobertura Internacional" in cob: cols += ['Int_Amb_Full', 'Int_Hosp_Full']
+                if any(c != "Integral + Cobertura Internacional" for c in cob): cols += ['Txt_Cob_Amb', 'Txt_Cob_Hosp']
 
                 df_view = res.copy()
                 for c in df_view.columns:
@@ -691,52 +627,59 @@ else:
                         df_view[c] = df_view[c].str.replace('<b>','').str.replace('</b>','').str.replace('<br/>','\n').str.replace('• ','')
                 
                 cols_final = [c for c in cols if c in df_view.columns]
-                st.subheader("Tabla Comparativa (Vista Asesor/Admin)")
-                st.dataframe(df_view[cols_final + ['Precio_Lista', 'Pct_Dscto', 'Precio_Final']], hide_index=True)
+                columnas_precios = ['Precio_Mensual_Base', 'Pct_Dscto_Mensual', 'Precio_Mensual_Final', 'Precio_Anual_Base', 'Pct_Dscto_Anual', 'Precio_Anual_Final']
+                st.dataframe(df_view[cols_final + columnas_precios], hide_index=True)
             else:
                 st.info("👇 Descarga el PDF para ver el comparativo detallado.")
 
-            if cont == "Vengo con continuidad":
-                st.info("ℹ️ Para gozar del beneficio de continuidad debe haber estado asegurado dentro de los últimos 90 días.")
-
             st.divider()
+            
+            # --- NUEVA FUNCIONALIDAD: SELECCIÓN DE PLANES ---
+            st.subheader("Configuración del PDF")
+            st.write("Desmarca los planes que **NO** deseas incluir en el documento final:")
             
             op = {f"{r['Aseguradora']} {r['Plan']}": r['ID'] for _,r in res.iterrows()}
             op_keys = list(op.keys())
             
-            clin_txt = ", ".join(st.session_state.get('clinicas_sel', []))
-            if not clin_txt: clin_txt = "su red de afiliados"
+            planes_seleccionados = []
             
-            txt_motivo = f"Este plan es el que tiene mejor precio considerando las clínicas que prefiere ({clin_txt}) y sus beneficios."
-            if cont == "Nuevo": txt_motivo += " Recuerde revisar los periodos de carencia."
-
-            if es_cliente:
-                sel = op_keys[0] 
-                razon = txt_motivo 
+            # Usamos checkboxes en lista vertical para que JAMÁS se corte el texto
+            for i, opcion in enumerate(op_keys):
+                # value=True hace que vengan marcados por defecto
+                if st.checkbox(opcion, value=True, key=f"pdf_chk_{i}"):
+                    planes_seleccionados.append(opcion)
+            
+            if not planes_seleccionados:
+                st.warning("⚠️ Debes dejar marcado al menos un plan para generar el PDF.")
             else:
-                sel = st.radio("Recomendar", op_keys) 
-                razon = st.text_area("Motivo (Análisis del Experto):", value=txt_motivo)
-            
-            if st.button("Generar PDF"):
-                pdf_res = generar_pdf(st.session_state['perfil'], res, op[sel], razon, incrementar_folio())
-                if isinstance(pdf_res, str): st.error(pdf_res)
-                else:
-                    nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
-                    cls_list = [c.strip().split()[0] for c in st.session_state.get('clinicas_sel', [])]
-                    cls_clean = "_".join(cls_list)
-                    # Hora Perú para nombre de archivo
-                    fecha_str = obtener_hora_peru().strftime("%d%m%y_%H%M")
-                    file_name = f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf"
-                    st.download_button("Descargar PDF", pdf_res, file_name, "application/pdf")
+                # Filtramos los resultados según lo que el usuario dejó marcado
+                res_filtrado = res[res.apply(lambda r: f"{r['Aseguradora']} {r['Plan']}" in planes_seleccionados, axis=1)]
+                
+                clin_txt = ", ".join(st.session_state.get('clinicas_sel', [])) or "su red de afiliados"
+                txt_motivo = f"Este plan es el que tiene mejor precio considerando las clínicas que prefiere ({clin_txt}) y sus beneficios."
+                if cont == "Nuevo": txt_motivo += " Recuerde revisar los periodos de carencia."
 
+                st.divider()
+                st.write("### Recomendación Principal")
+                # La recomendación ahora solo muestra las opciones que dejaste marcadas
+                sel = planes_seleccionados[0] if es_cliente else st.radio("¿Qué plan deseas recomendar y resaltar con la estrella (⭐) en el PDF?", planes_seleccionados)
+                razon = txt_motivo if es_cliente else st.text_area("Motivo (Análisis del Experto):", value=txt_motivo)
+                
+                if st.button("Generar PDF"):
+                    # Generamos el PDF con res_filtrado en lugar de res
+                    pdf_res = generar_pdf(st.session_state['perfil'], res_filtrado, op[sel], razon, incrementar_folio())
+                    if isinstance(pdf_res, str): st.error(pdf_res)
+                    else:
+                        nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
+                        cls_clean = "_".join([c.strip().split()[0] for c in st.session_state.get('clinicas_sel', [])])
+                        fecha_str = obtener_hora_peru().strftime("%d%m%y_%H%M")
+                        st.download_button("Descargar PDF", pdf_res, f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf", "application/pdf")
 
-
-
-
-
-
-
-
-
-
-
+            # --- CIERRE HUMANO ---
+            st.divider()
+            st.subheader("¿Tienes dudas o quieres evaluar estas opciones?")
+            st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.")
+            numero_whatsapp = "51948289614"
+            mensaje_base = "Hola. Acabo de usar el cotizador de salud y me gustaría que me acompañen a evaluar mis opciones."
+            if "nombre" in st.query_params: mensaje_base += f" Mi nombre es {st.query_params['nombre']}."
+            st.link_button("💬 Escribir por WhatsApp a un asesor humano", f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_base)}")
