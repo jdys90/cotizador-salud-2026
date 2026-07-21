@@ -610,7 +610,7 @@ else:
                 st.error("⚠️ Datos de contacto inválidos.")
             else:
                 rol_actual = "Cliente" if es_cliente else "Admin/Asesor"
-                guardar_en_sheets([obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual])
+                
                 if es_cliente: enviar_notificacion(nom, correo, celular, cob, len(familia)-1, edad, clinicas, cont, score_rimac, cliente_rimac)
                 
                 # ENVIAMOS LOS DICCIONARIOS YA VALIDADOS
@@ -680,6 +680,10 @@ else:
                     pdf_res = generar_pdf(st.session_state['perfil'], res_filtrado, op[sel], razon, incrementar_folio())
                     if isinstance(pdf_res, str): st.error(pdf_res)
                     else:
+
+                        # SE AGREGÓ EL GUARDADO EN SHEETS AQUÍ
+                        rol_actual = "Cliente" if es_cliente else "Admin/Asesor"
+                        guardar_en_sheets([obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual])
                         nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
                         cls_clean = "_".join([c.strip().split()[0] for c in st.session_state.get('clinicas_sel', [])])
                         fecha_str = obtener_hora_peru().strftime("%d%m%y_%H%M")
