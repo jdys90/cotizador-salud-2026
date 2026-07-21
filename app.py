@@ -569,11 +569,15 @@ else:
                     for p in df_full[df_full['Aseguradora']==c]['Plan'].unique():
                         st.markdown(f"**{c} - {p}**")
                         col1, col2 = st.columns(2)
+                        
+                        # SOLUCIÓN: Creamos una llave dinámica. Si cambias la edad o continuidad, 
+                        # la llave cambia, Streamlit reinicia la cajita y acepta el nuevo descuento.
+                        llave_dinamica = f"{c}_{p}_{edad}_{cont}_{score_rimac}_{cliente_rimac}"
+                        
                         with col1:
-                            # ESTA ES LA CLAVE: El diccionario ahora lee y guarda el input manual
-                            descuentos_mensual[(c,p)] = st.number_input(f"Mensual %", 0, 100, descuentos_mensual[(c,p)], key=f"dm_{c}_{p}")
+                            descuentos_mensual[(c,p)] = st.number_input(f"Mensual %", 0, 100, descuentos_mensual[(c,p)], key=f"dm_{llave_dinamica}")
                         with col2:
-                            descuentos_anual[(c,p)] = st.number_input(f"Anual %", 0, 100, descuentos_anual[(c,p)], key=f"da_{c}_{p}")
+                            descuentos_anual[(c,p)] = st.number_input(f"Anual %", 0, 100, descuentos_anual[(c,p)], key=f"da_{llave_dinamica}")
                         st.write("---")
             
             st.divider()
