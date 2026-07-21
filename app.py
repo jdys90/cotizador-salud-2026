@@ -508,7 +508,7 @@ else:
         if os.path.exists("logo.png"):
             st.sidebar.image("logo.png", use_container_width=True)
             
-       st.header("Datos del Cliente")
+        st.header("Datos del Cliente")
         nom = st.text_input("Nombres completos")
         
         # value=None deja la caja vacía. edad_calculo evita que el programa colapse antes de cotizar.
