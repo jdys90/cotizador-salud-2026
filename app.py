@@ -508,14 +508,18 @@ else:
         if os.path.exists("logo.png"):
             st.sidebar.image("logo.png", use_container_width=True)
             
-        st.header("Datos del Cliente")
+       st.header("Datos del Cliente")
         nom = st.text_input("Nombres completos")
-        edad = st.number_input("Edad", 0, 99)
+        
+        # value=None deja la caja vacía. edad_calculo evita que el programa colapse antes de cotizar.
+        edad = st.number_input("Edad", min_value=0, max_value=99, value=None, placeholder="Obligatorio")
+        edad_calculo = edad if edad is not None else 0 
+        
         salud = st.radio("Estado de salud", ["Sano", "Crónico"], horizontal=True)
         
         st.header("Familia")
         n_dep = st.number_input("Número de dependientes", 0, 10, 0)
-        familia = [{'edad': edad, 'salud': salud, 'rol': 'Titular'}]
+        familia = [{'edad': edad_calculo, 'salud': salud, 'rol': 'Titular'}]
         txt_fam = []
         if n_dep > 0:
             for i in range(n_dep):
@@ -553,8 +557,8 @@ else:
         descuentos_anual = {}
         for c in df_full['Aseguradora'].unique():
             for p in df_full[df_full['Aseguradora']==c]['Plan'].unique():
-                val_men = obtener_descuento_matriz(campanas_maestras, c, p, cont, edad, len(familia), "Mensual", score_rimac, cliente_rimac, salud, mes_actual)
-                val_anu = obtener_descuento_matriz(campanas_maestras, c, p, cont, edad, len(familia), "Contado", score_rimac, cliente_rimac, salud, mes_actual)
+                val_men = obtener_descuento_matriz(campanas_maestras, c, p, cont, edad_calculo, len(familia), "Mensual", score_rimac, cliente_rimac, salud, mes_actual)
+                val_anu = obtener_descuento_matriz(campanas_maestras, c, p, cont, edad_calculo, len(familia), "Contado", score_rimac, cliente_rimac, salud, mes_actual)
                 descuentos_mensual[(c,p)] = int(val_men)
                 descuentos_anual[(c,p)] = int(val_anu)
 
@@ -591,8 +595,10 @@ else:
         es_solo_internacional = (len(cob) == 1 and "Integral + Cobertura Internacional" in cob)
         requiere_clinica = not es_solo_internacional and es_cliente
 
-        if st.button("Cotizar"):
-            if not cob:
+      if st.button("Cotizar"):
+            if edad is None:
+                st.error("⚠️ ALERTA: Has olvidado ingresar la EDAD del titular. Es obligatorio para calcular los descuentos correctos.")
+            elif not cob:
                 st.error("⚠️ Por favor selecciona al menos un tipo de Cobertura.")
             elif requiere_clinica and not clinicas:
                 st.error("⚠️ Por favor selecciona al menos una Clínica de preferencia.")
