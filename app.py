@@ -595,7 +595,7 @@ else:
         es_solo_internacional = (len(cob) == 1 and "Integral + Cobertura Internacional" in cob)
         requiere_clinica = not es_solo_internacional and es_cliente
 
-      if st.button("Cotizar"):
+        if st.button("Cotizar"):
             if edad is None:
                 st.error("⚠️ ALERTA: Has olvidado ingresar la EDAD del titular. Es obligatorio para calcular los descuentos correctos.")
             elif not cob:
