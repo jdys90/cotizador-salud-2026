@@ -10,6 +10,10 @@ from email.mime.multipart import MIMEMultipart
 import gspread
 from google.oauth2.service_account import Credentials
 import unicodedata
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import requests
 
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="wide")
@@ -112,37 +116,94 @@ def descargar_historial_sheets():
 
 # --- FUNCIONES DE CORREO ---
 def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, edad, clinicas, continuidad, score_rimac, cliente_rimac):
-    SMTP_SERVER = "smtppro.zoho.com"
-    SMTP_PORT = 587
-    SENDER_EMAIL = "administracion@yqcorredores.com"
-    if "EMAIL_PASSWORD" in st.secrets:
-        SENDER_PASSWORD = st.secrets["EMAIL_PASSWORD"]
-    else:
-        SENDER_PASSWORD = "TU_CONTRASEÑA_AQUI" 
-        
-    RECEIVER_EMAIL = "administracion@yqcorredores.com"
-
+    """
+    Intenta inyectar el Lead de Salud en Zoho CRM. Si falla, activa el protocolo
+    de emergencia enviando el correo clásico a administración.
+    """
+    # Formateo previo de las variables
     clinicas_txt = ", ".join(clinicas) if clinicas else "Sin preferencia específica"
     cobertura_txt = ", ".join(plan_interes_list) if isinstance(plan_interes_list, list) else str(plan_interes_list)
-    fecha_hora_peru = obtener_hora_peru().strftime('%d/%m/%Y %H:%M')
-
-    asunto = f"NUEVO LEAD DE COTIZADOR SALUD: {cliente}"
-    cuerpo = f"""Hola Chicos,\n\nUn cliente ha generado una cotización de salud:\n\nDATOS DEL CLIENTE:\nNombre: {cliente}\nCorreo: {correo}\nWhatsApp: {celular}\n\nDATOS DE LA COTIZACIÓN:\nEdad Titular: {edad} años\nInterés: {cobertura_txt}\nCondición: {continuidad}\nScoring Rímac: {score_rimac}\nCliente Rímac: {cliente_rimac}\nClínicas Preferidas: {clinicas_txt}\nTotal Asegurados: {n_familia + 1}\n\nFecha: {fecha_hora_peru}"""
-
+    
+    # Manejo seguro de la fecha
     try:
-        if SENDER_PASSWORD == "TU_CONTRASEÑA_AQUI": return True
-        msg = MIMEMultipart()
-        msg['From'], msg['To'], msg['Subject'] = SENDER_EMAIL, RECEIVER_EMAIL, asunto
-        msg.attach(MIMEText(cuerpo, 'plain'))
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        server.starttls()
-        server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
-        server.quit()
-        return True
+        fecha_hora_peru = obtener_hora_peru().strftime('%d/%m/%Y %H:%M')
     except:
-        return False
+        fecha_hora_peru = "Fecha no disponible"
+        
+    descripcion_crm = f"Edad Titular: {edad} | Interés: {cobertura_txt} | Condición: {continuidad} | Scoring Rímac: {score_rimac} | Cliente Rímac: {cliente_rimac} | Clínicas: {clinicas_txt} | Total Asegurados: {n_familia + 1} | Fecha: {fecha_hora_peru}"
 
+    # 1. Intentar inyectar en Zoho CRM
+    try:
+        url_auth = "https://accounts.zoho.com/oauth/v2/token"
+        datos_auth = {
+            "refresh_token": st.secrets["ZOHO_REFRESH_TOKEN"],
+            "client_id": st.secrets["ZOHO_CLIENT_ID"],
+            "client_secret": st.secrets["ZOHO_CLIENT_SECRET"],
+            "grant_type": "refresh_token"
+        }
+        res_auth = requests.post(url_auth, data=datos_auth)
+        access_token = res_auth.json().get("access_token")
+        
+        if not access_token:
+            raise Exception("No se pudo obtener el Access Token de Zoho")
+
+        # Inyectar el Lead
+        url_crm = "https://www.zohoapis.com/crm/v2/Leads"
+        headers = {"Authorization": f"Zoho-oauthtoken {access_token}"}
+        
+        payload = {
+            "data": [
+                {
+                    "Last_Name": cliente,
+                    "Email": correo,
+                    "Mobile": str(celular),
+                    "Lead_Source": "Cotizador Salud Web",
+                    "Description": descripcion_crm
+                }
+            ]
+        }
+        
+        res_crm = requests.post(url_crm, headers=headers, json=payload)
+        
+        if res_crm.status_code in [200, 201]:
+            # Éxito en CRM
+            return True, "¡Cotización generada y enviada a un asesor exitosamente!"
+        else:
+            raise Exception(f"Fallo en API Zoho CRM: {res_crm.text}")
+
+    # 2. Sistema de Respaldo (Si Zoho falla, se envía tu correo clásico)
+    except Exception as e:
+        print(f"⚠️ Error CRM (Salud): {e}. Activando envío de correo de respaldo...")
+        
+        try:
+            if "EMAIL_PASSWORD" in st.secrets:
+                SENDER_PASSWORD = st.secrets["EMAIL_PASSWORD"]
+            else:
+                return False, "Hubo un problema temporal en el servidor. Por favor, contáctanos por WhatsApp."
+                
+            SMTP_SERVER = "smtppro.zoho.com"
+            SMTP_PORT = 587
+            SENDER_EMAIL = "administracion@yqcorredores.com"
+            RECEIVER_EMAIL = "administracion@yqcorredores.com"
+            
+            asunto = f"NUEVO LEAD DE COTIZADOR SALUD: {cliente} [RESPALDO]"
+            cuerpo = f"Hola Chicos,\n\nUn cliente ha generado una cotización de salud:\n\nDATOS DEL CLIENTE:\nNombre: {cliente}\nCorreo: {correo}\nWhatsApp: {celular}\n\nDATOS DE LA COTIZACIÓN:\nEdad Titular: {edad} años\nInterés: {cobertura_txt}\nCondición: {continuidad}\nScoring Rímac: {score_rimac}\nCliente Rímac: {cliente_rimac}\nClínicas Preferidas: {clinicas_txt}\nTotal Asegurados: {n_familia + 1}\n\nFecha: {fecha_hora_peru}"
+
+            msg = MIMEMultipart()
+            msg['From'], msg['To'], msg['Subject'] = SENDER_EMAIL, RECEIVER_EMAIL, asunto
+            msg.attach(MIMEText(cuerpo, 'plain'))
+            
+            server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+            server.starttls()
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
+            server.quit()
+            
+            return True, "Hemos procesado tu cotización, un asesor te contactará en breve."
+            
+        except Exception as email_error:
+            print(f"❌ Fallo crítico en CRM y Correo (Salud): {email_error}")
+            return False, "Experimentamos intermitencias. Por favor, intenta de nuevo en unos minutos."
 # --- SOPORTE ---
 def obtener_nuevo_folio():
     try:
