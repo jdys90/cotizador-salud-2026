@@ -585,7 +585,7 @@ else:
 
     if 'resultados' not in st.session_state: st.session_state['resultados'] = None
     
-   with st.sidebar:
+    with st.sidebar:
         if os.path.exists("logo.png"):
             st.sidebar.image("logo.png", use_container_width=True)
             
