@@ -43,7 +43,7 @@ col_texto, col_boton = st.columns([2, 1])
 with col_texto:
     st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona una EPS/Continuidad?**")
 with col_boton:
-    numero_whatsapp = "51948289614" 
+    numero_whatsapp = "51906462225" 
     mensaje = urllib.parse.quote("Hola, estoy en el cotizador web de salud y necesito ayuda para elegir mi plan.")
     st.link_button("💬 Chatear con un experto", f"https://wa.me/{numero_whatsapp}?text={mensaje}")
 
