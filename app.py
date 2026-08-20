@@ -569,6 +569,15 @@ else:
         if os.path.exists("logo.png"):
             st.sidebar.image("logo.png", use_container_width=True)
             
+        # --- 1. SEGURIDAD (Se movió al inicio para definir es_cliente) ---
+        st.header("Seguridad")
+        codigo_acceso = st.text_input("Código opcional de descuento", type="password")
+        
+        es_admin = (codigo_acceso == CODIGO_ADMIN)
+        es_asesor = (codigo_acceso in CODIGOS_ASESORES)
+        es_cliente = (not es_admin and not es_asesor)
+
+        # --- 2. DATOS DEL CLIENTE ---
         st.header("Datos del Cliente")
         nom = st.text_input("Nombres completos")
         
@@ -578,6 +587,7 @@ else:
         
         salud = st.radio("Estado de salud", ["Sano", "Crónico"], horizontal=True)
         
+        # --- 3. FAMILIA ---
         st.header("Familia")
         n_dep = st.number_input("Número de dependientes", 0, 10, 0)
         familia = [{'edad': edad_calculo, 'salud': salud, 'rol': 'Titular'}]
@@ -591,33 +601,22 @@ else:
         
         txt_dependientes = ", ".join(txt_fam) if txt_fam else "Ninguno"
 
+        # --- 4. FILTROS COMERCIALES (Blindaje activo) ---
         st.header("Filtros Comerciales")
         cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"])
         
-        # --- BLINDAJE COMERCIAL ---
-        # Si es un cliente final, fijamos los valores más conservadores para evitar descuentos no autorizados.
-        # Si es Administrador o Asesor, les permitimos seleccionarlo manualmente.
         if es_cliente:
             score_rimac = "ROJO"
             cliente_rimac = "No"
-            
-            # Opcional: Un mensaje sutil o informativo interno si lo deseas, 
-            # pero lo ideal es que sea transparente para el usuario final.
         else:
-            score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"], index=2) # Por defecto ROJO (índice 2)
-            cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], index=1, horizontal=True) # Por defecto "No" (índice 1)
+            score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"], index=2)
+            cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], index=1, horizontal=True)
         
+        # --- 5. FILTROS TÉCNICOS ---
         st.header("Filtros Técnicos")
         cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral"])
         clinicas = st.multiselect("Clínicas de preferencia", clinicas_unicas, placeholder="Puedes elegir más de una")
         
-        st.header("Seguridad")
-        codigo_acceso = st.text_input("Código opcional de descuento", type="password")
-        
-        es_admin = (codigo_acceso == CODIGO_ADMIN)
-        es_asesor = (codigo_acceso in CODIGOS_ASESORES)
-        es_cliente = (not es_admin and not es_asesor)
-
         correo, celular = "", ""
         if es_cliente:
             st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
