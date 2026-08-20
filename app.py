@@ -593,8 +593,19 @@ else:
 
         st.header("Filtros Comerciales")
         cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"])
-        score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"])
-        cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], horizontal=True)
+        
+        # --- BLINDAJE COMERCIAL ---
+        # Si es un cliente final, fijamos los valores más conservadores para evitar descuentos no autorizados.
+        # Si es Administrador o Asesor, les permitimos seleccionarlo manualmente.
+        if es_cliente:
+            score_rimac = "ROJO"
+            cliente_rimac = "No"
+            
+            # Opcional: Un mensaje sutil o informativo interno si lo deseas, 
+            # pero lo ideal es que sea transparente para el usuario final.
+        else:
+            score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"], index=2) # Por defecto ROJO (índice 2)
+            cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], index=1, horizontal=True) # Por defecto "No" (índice 1)
         
         st.header("Filtros Técnicos")
         cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral"])
