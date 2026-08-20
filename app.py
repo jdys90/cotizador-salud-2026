@@ -565,23 +565,21 @@ else:
 
     if 'resultados' not in st.session_state: st.session_state['resultados'] = None
     
-    with st.sidebar:
+   with st.sidebar:
         if os.path.exists("logo.png"):
             st.sidebar.image("logo.png", use_container_width=True)
             
-        # --- 1. SEGURIDAD (Se movió al inicio para definir es_cliente) ---
-        st.header("Seguridad")
-        codigo_acceso = st.text_input("Código opcional de descuento", type="password")
-        
-        es_admin = (codigo_acceso == CODIGO_ADMIN)
-        es_asesor = (codigo_acceso in CODIGOS_ASESORES)
+        # 1. EVALUACIÓN DE SEGURIDAD INVISIBLE
+        # Leemos lo que se escriba en la caja de abajo antes de dibujar el resto
+        codigo_actual = st.session_state.get('codigo_secreto', '')
+        es_admin = (codigo_actual == CODIGO_ADMIN)
+        es_asesor = (codigo_actual in CODIGOS_ASESORES)
         es_cliente = (not es_admin and not es_asesor)
 
         # --- 2. DATOS DEL CLIENTE ---
         st.header("Datos del Cliente")
         nom = st.text_input("Nombres completos")
         
-        # value=None deja la caja vacía. edad_calculo evita que el programa colapse antes de cotizar.
         edad = st.number_input("Edad", min_value=0, max_value=99, value=None, placeholder="Obligatorio")
         edad_calculo = edad if edad is not None else 0 
         
@@ -612,16 +610,21 @@ else:
             score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"], index=2)
             cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], index=1, horizontal=True)
         
-        # --- 5. FILTROS TÉCNICOS ---
+        # --- 5. FILTROS TÉCNICOS Y CAMPO SECRETO ---
         st.header("Filtros Técnicos")
         cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral"])
         clinicas = st.multiselect("Clínicas de preferencia", clinicas_unicas, placeholder="Puedes elegir más de una")
+        
+        # LA CAJA SECRETA (Sin título y conectada a la memoria)
+        st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="· · ·")
         
         correo, celular = "", ""
         if es_cliente:
             st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
             correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com")
             celular = st.text_input("Celular / Whatsapp", max_chars=9, placeholder="Ej: 999123456")
+
+        # --- GENERACIÓN DE DICCIONARIOS EN MEMORIA (Tu código continúa normal aquí) ---
 
         # GENERACIÓN DE DICCIONARIOS EN MEMORIA
         descuentos_mensual = {}
