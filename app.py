@@ -18,14 +18,34 @@ import requests
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="wide")
 
-# --- 1. EL SALUDO PERSONALIZADO ---
+# --- 1. EL SALUDO Y GUÍA DE CONVERSIÓN ---
 if "nombre" in st.query_params:
     nombre_cliente = st.query_params["nombre"]
     st.title(f"¡Hola {nombre_cliente}! 👋")
-    st.subheader("Vamos a evaluar qué seguro de salud es el adecuado para ti.")
 else:
     st.title("¡Hola! 👋")
-    st.subheader("Vamos a evaluar qué seguro de salud es el adecuado para ti.")
+
+st.subheader("Descubre el seguro de salud ideal para ti en 3 simples pasos.")
+
+# Guía visual rápida
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.info("**1. Tu Perfil**\n\nCompleta tus datos básicos y los de tu familia en el panel izquierdo.")
+with col2:
+    st.info("**2. Tus Preferencias**\n\nElige el tipo de cobertura y tus clínicas favoritas.")
+with col3:
+    st.success("**3. Tu Cotización**\n\nObtén un comparativo y descarga tu PDF al instante.")
+
+st.divider()
+
+# Salvavidas de WhatsApp para evitar abandonos
+col_texto, col_boton = st.columns([2, 1])
+with col_texto:
+    st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona una EPS/Continuidad?**")
+with col_boton:
+    numero_whatsapp = "51948289614" 
+    mensaje = urllib.parse.quote("Hola, estoy en el cotizador web de salud y necesito ayuda para elegir mi plan.")
+    st.link_button("💬 Chatear con un experto", f"https://wa.me/{numero_whatsapp}?text={mensaje}")
 
 st.divider()
 
