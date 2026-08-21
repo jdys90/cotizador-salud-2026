@@ -576,11 +576,11 @@ else:
     # Guía visual amigable
     col_g1, col_g2, col_g3 = st.columns(3)
     with col_g1:
-        st.info("**1. Tu Perfil**\n\nDatos básicos y familiares.")
+        st.info("**1. Tu Perfil**\n\nCompleta tus datos básicos y familiares.")
     with col_g2:
-        st.info("**2. Preferencias**\n\nCobertura y clínicas.")
+        st.info("**2. Preferencias**\n\nElije el tipo de cobertura y tus clínicas favoritas.")
     with col_g3:
-        st.success("**3. Cotización**\n\nComparativo y PDF.")
+        st.success("**3. Cotización**\n\nObtén un comparativo y descarga tu PDF al instante.")
 
     st.divider()
 
