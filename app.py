@@ -561,7 +561,7 @@ else:
     es_cliente = (not es_admin and not es_asesor)
 
     # LOGO EN PANTALLA PRINCIPAL
-    if os.path.exists("logo_web.jpg"):
+    if os.path.exists("logo_web.png"):
         col1, col2, col3 = st.columns([1, 2, 1]) # Crea 3 columnas (la del medio es el doble de ancha)
         with col2:
             st.image("logo_web.jpg", use_container_width=True) # Se centra perfectamente
