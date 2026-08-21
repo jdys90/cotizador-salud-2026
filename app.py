@@ -585,134 +585,155 @@ else:
 
     if 'resultados' not in st.session_state: st.session_state['resultados'] = None
     
-    with st.sidebar:
-        if os.path.exists("logo.png"):
-            st.sidebar.image("logo.png", use_container_width=True)
-            
-        # 1. EVALUACIÓN DE SEGURIDAD INVISIBLE
-        # Leemos lo que se escriba en la caja de abajo antes de dibujar el resto
-        codigo_actual = st.session_state.get('codigo_secreto', '')
-        es_admin = (codigo_actual == CODIGO_ADMIN)
-        es_asesor = (codigo_actual in CODIGOS_ASESORES)
-        es_cliente = (not es_admin and not es_asesor)
+    # 1. EVALUACIÓN DE SEGURIDAD INVISIBLE (Se lee de la memoria al instante)
+    codigo_actual = st.session_state.get('codigo_secreto', '')
+    es_admin = (codigo_actual == CODIGO_ADMIN)
+    es_asesor = (codigo_actual in CODIGOS_ASESORES)
+    es_cliente = (not es_admin and not es_asesor)
 
-        # --- 2. DATOS DEL CLIENTE ---
-        st.header("Datos del Cliente")
-        nom = st.text_input("Nombres completos")
-        
+    # LOGO EN PANTALLA PRINCIPAL
+    if os.path.exists("logo.png"):
+        st.image("logo.png", width=180)
+
+    # --- 2. EL SALUDO Y GUÍA DE CONVERSIÓN ---
+    if "nombre" in st.query_params:
+        nombre_cliente = st.query_params["nombre"]
+        st.title(f"¡Hola {nombre_cliente}! 👋")
+    else:
+        st.title("¡Hola! 👋")
+
+    st.subheader("Descubre el seguro de salud ideal para ti en 3 simples pasos.")
+
+    # Guía visual amigable
+    col_g1, col_g2, col_g3 = st.columns(3)
+    with col_g1:
+        st.info("**1. Tu Perfil**\n\nDatos básicos y familiares.")
+    with col_g2:
+        st.info("**2. Preferencias**\n\nCobertura y clínicas.")
+    with col_g3:
+        st.success("**3. Cotización**\n\nComparativo y PDF.")
+
+    st.divider()
+
+    # --- 3. FORMULARIO PRINCIPAL (Optimizado para móvil) ---
+    st.write("### 👤 1. Datos del Cliente")
+    nom = st.text_input("Nombres completos")
+    
+    col_edad, col_salud = st.columns(2)
+    with col_edad:
         edad = st.number_input("Edad", min_value=0, max_value=99, value=None, placeholder="Obligatorio")
         edad_calculo = edad if edad is not None else 0 
-        
+    with col_salud:
         salud = st.radio("Estado de salud", ["Sano", "Crónico"], horizontal=True)
         
-        # --- 3. FAMILIA ---
-        st.header("Familia")
-        n_dep = st.number_input("Número de dependientes", 0, 10, 0)
-        familia = [{'edad': edad_calculo, 'salud': salud, 'rol': 'Titular'}]
-        txt_fam = []
-        if n_dep > 0:
-            for i in range(n_dep):
+    st.write("### 👨‍👩‍👧‍👦 2. Familia")
+    n_dep = st.number_input("Número de dependientes", 0, 10, 0)
+    familia = [{'edad': edad_calculo, 'salud': salud, 'rol': 'Titular'}]
+    txt_fam = []
+    if n_dep > 0:
+        for i in range(n_dep):
+            col_edep, col_sdep = st.columns(2)
+            with col_edep:
                 e = st.number_input(f"Edad Dep {i+1}", 0, 99, 10, key=f"edad_dep_{i}")
+            with col_sdep:
                 s = st.radio(f"Salud Dep {i+1}", ["Sano", "Crónico"], horizontal=True, key=f"salud_dep_{i}")
-                familia.append({'edad': e, 'salud': s, 'rol': 'Dependiente'})
-                txt_fam.append(f"Dep ({e}a)")
-        
-        txt_dependientes = ", ".join(txt_fam) if txt_fam else "Ninguno"
+            familia.append({'edad': e, 'salud': s, 'rol': 'Dependiente'})
+            txt_fam.append(f"Dep ({e}a)")
+    
+    txt_dependientes = ", ".join(txt_fam) if txt_fam else "Ninguno"
 
-        # --- 4. FILTROS COMERCIALES (Blindaje activo) ---
-        st.header("Filtros Comerciales")
-        cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"])
-        
-        if es_cliente:
-            score_rimac = "ROJO"
-            cliente_rimac = "No"
-        else:
+    st.write("### ⚙️ 3. Filtros y Preferencias")
+    cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"])
+    
+    if es_cliente:
+        score_rimac = "ROJO"
+        cliente_rimac = "No"
+    else:
+        col_sc, col_cr = st.columns(2)
+        with col_sc:
             score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"], index=2)
+        with col_cr:
             cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], index=1, horizontal=True)
-        
-        # --- 5. FILTROS TÉCNICOS Y CAMPO SECRETO ---
-        st.header("Filtros Técnicos")
-        cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral"])
-        clinicas = st.multiselect("Clínicas de preferencia", clinicas_unicas, placeholder="Puedes elegir más de una")
-        
-        # LA CAJA SECRETA (Sin título y conectada a la memoria)
-        st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="· · ·")
-        
-        correo, celular = "", ""
-        if es_cliente:
-            st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
+
+    cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral"])
+    clinicas = st.multiselect("Clínicas de preferencia", clinicas_unicas, placeholder="Puedes elegir más de una")
+    
+    # LA CAJA SECRETA: Ubicada exactamente debajo de clínicas, sin título visible
+    st.text_input("Código secreto", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="· · ·")
+    
+    correo, celular = "", ""
+    if es_cliente:
+        st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
+        col_mail, col_cel = st.columns(2)
+        with col_mail:
             correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com")
+        with col_cel:
             celular = st.text_input("Celular / Whatsapp", max_chars=9, placeholder="Ej: 999123456")
 
-        # --- GENERACIÓN DE DICCIONARIOS EN MEMORIA (Tu código continúa normal aquí) ---
+    # --- GENERACIÓN DE DICCIONARIOS EN MEMORIA ---
+    descuentos_mensual = {}
+    descuentos_anual = {}
+    for c in df_full['Aseguradora'].unique():
+        for p in df_full[df_full['Aseguradora']==c]['Plan'].unique():
+            val_men = obtener_descuento_matriz(campanas_maestras, c, p, cont, edad_calculo, len(familia), "Mensual", score_rimac, cliente_rimac, salud, mes_actual)
+            val_anu = obtener_descuento_matriz(campanas_maestras, c, p, cont, edad_calculo, len(familia), "Contado", score_rimac, cliente_rimac, salud, mes_actual)
+            descuentos_mensual[(c,p)] = int(val_men)
+            descuentos_anual[(c,p)] = int(val_anu)
 
-        # GENERACIÓN DE DICCIONARIOS EN MEMORIA
-        descuentos_mensual = {}
-        descuentos_anual = {}
-        for c in df_full['Aseguradora'].unique():
-            for p in df_full[df_full['Aseguradora']==c]['Plan'].unique():
-                val_men = obtener_descuento_matriz(campanas_maestras, c, p, cont, edad_calculo, len(familia), "Mensual", score_rimac, cliente_rimac, salud, mes_actual)
-                val_anu = obtener_descuento_matriz(campanas_maestras, c, p, cont, edad_calculo, len(familia), "Contado", score_rimac, cliente_rimac, salud, mes_actual)
-                descuentos_mensual[(c,p)] = int(val_men)
-                descuentos_anual[(c,p)] = int(val_anu)
+    if es_admin:
+        with st.expander(f"Campañas {mes_actual} (Modo Admin)"):
+            st.write("Verifica o modifica los descuentos a mano:")
+            for c in df_full['Aseguradora'].unique():
+                for p in df_full[df_full['Aseguradora']==c]['Plan'].unique():
+                    st.markdown(f"**{c} - {p}**")
+                    col_da1, col_da2 = st.columns(2)
+                    llave_dinamica = f"{c}_{p}_{edad}_{cont}_{score_rimac}_{cliente_rimac}"
+                    with col_da1:
+                        descuentos_mensual[(c,p)] = st.number_input(f"Mensual %", 0, 100, descuentos_mensual[(c,p)], key=f"dm_{llave_dinamica}")
+                    with col_da2:
+                        descuentos_anual[(c,p)] = st.number_input(f"Anual %", 0, 100, descuentos_anual[(c,p)], key=f"da_{llave_dinamica}")
+                    st.write("---")
+        
+        st.divider()
+        st.write("### Base de Datos (Nube)")
+        col_admin_1, col_admin_2 = st.columns(2)
+        with col_admin_1:
+            if st.button("🔄 Probar Conexión Sheets"):
+                client = get_gspread_client()
+                if client: st.success("✅ Conectado a Sheets")
+                else: st.error("❌ No hay cliente configurado.")
+        with col_admin_2:
+            if st.button("📥 Descargar Historial Completo"):
+                df_historial = descargar_historial_sheets()
+                if df_historial is not None and not df_historial.empty:
+                    csv = df_historial.to_csv(index=False).encode('utf-8-sig')
+                    st.download_button(label="💾 Guardar CSV", data=csv, file_name=f"historial_{obtener_hora_peru().strftime('%d%m%Y')}.csv", mime="text/csv")
+                    st.success(f"Registros encontrados: {len(df_historial)}")
 
-        if es_admin:
-            with st.expander(f"Campañas {mes_actual} (Modo Admin)"):
-                st.write("Verifica o modifica los descuentos a mano:")
-                for c in df_full['Aseguradora'].unique():
-                    for p in df_full[df_full['Aseguradora']==c]['Plan'].unique():
-                        st.markdown(f"**{c} - {p}**")
-                        col1, col2 = st.columns(2)
-                        
-                        # SOLUCIÓN: Creamos una llave dinámica. Si cambias la edad o continuidad, 
-                        # la llave cambia, Streamlit reinicia la cajita y acepta el nuevo descuento.
-                        llave_dinamica = f"{c}_{p}_{edad}_{cont}_{score_rimac}_{cliente_rimac}"
-                        
-                        with col1:
-                            descuentos_mensual[(c,p)] = st.number_input(f"Mensual %", 0, 100, descuentos_mensual[(c,p)], key=f"dm_{llave_dinamica}")
-                        with col2:
-                            descuentos_anual[(c,p)] = st.number_input(f"Anual %", 0, 100, descuentos_anual[(c,p)], key=f"da_{llave_dinamica}")
-                        st.write("---")
+    es_solo_internacional = (len(cob) == 1 and "Integral + Cobertura Internacional" in cob)
+    requiere_clinica = not es_solo_internacional and es_cliente
+
+    st.divider()
+    if st.button("Cotizar", type="primary", use_container_width=True):
+        if edad is None:
+            st.error("⚠️ ALERTA: Has olvidado ingresar la EDAD del titular. Es obligatorio para calcular los descuentos correctos.")
+        elif not cob:
+            st.error("⚠️ Por favor selecciona al menos un tipo de Cobertura.")
+        elif requiere_clinica and not clinicas:
+            st.error("⚠️ Por favor selecciona al menos una Clínica de preferencia.")
+        elif es_cliente and (not correo or not celular or len(celular) != 9):
+            st.error("⚠️ Datos de contacto inválidos.")
+        else:
+            rol_actual = "Cliente" if es_cliente else "Admin/Asesor"
             
-            st.divider()
-            st.write("### Base de Datos (Nube)")
-            col_admin_1, col_admin_2 = st.columns(2)
-            with col_admin_1:
-                if st.button("🔄 Probar Conexión Sheets"):
-                    client = get_gspread_client()
-                    if client: st.success("✅ Conectado a Sheets")
-                    else: st.error("❌ No hay cliente configurado.")
-            with col_admin_2:
-                if st.button("📥 Descargar Historial Completo"):
-                    df_historial = descargar_historial_sheets()
-                    if df_historial is not None and not df_historial.empty:
-                        csv = df_historial.to_csv(index=False).encode('utf-8-sig')
-                        st.download_button(label="💾 Guardar CSV", data=csv, file_name=f"historial_{obtener_hora_peru().strftime('%d%m%Y')}.csv", mime="text/csv")
-                        st.success(f"Registros encontrados: {len(df_historial)}")
+            if es_cliente: enviar_notificacion(nom, correo, celular, cob, len(familia)-1, edad, clinicas, cont, score_rimac, cliente_rimac)
+            
+            st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos_mensual, descuentos_anual)
+            st.session_state['perfil'] = {'Titular': f"{nom} ({edad} años)", 'Dependientes': txt_dependientes, 'Continuidad': cont, 'Cobertura': ", ".join(cob)}
+            st.session_state['nombre_cliente'] = nom
+            st.session_state['clinicas_sel'] = clinicas
 
-        es_solo_internacional = (len(cob) == 1 and "Integral + Cobertura Internacional" in cob)
-        requiere_clinica = not es_solo_internacional and es_cliente
-
-        if st.button("Cotizar"):
-            if edad is None:
-                st.error("⚠️ ALERTA: Has olvidado ingresar la EDAD del titular. Es obligatorio para calcular los descuentos correctos.")
-            elif not cob:
-                st.error("⚠️ Por favor selecciona al menos un tipo de Cobertura.")
-            elif requiere_clinica and not clinicas:
-                st.error("⚠️ Por favor selecciona al menos una Clínica de preferencia.")
-            elif es_cliente and (not correo or not celular or len(celular) != 9):
-                st.error("⚠️ Datos de contacto inválidos.")
-            else:
-                rol_actual = "Cliente" if es_cliente else "Admin/Asesor"
-                
-                if es_cliente: enviar_notificacion(nom, correo, celular, cob, len(familia)-1, edad, clinicas, cont, score_rimac, cliente_rimac)
-                
-                # ENVIAMOS LOS DICCIONARIOS YA VALIDADOS
-                st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos_mensual, descuentos_anual)
-                st.session_state['perfil'] = {'Titular': f"{nom} ({edad} años)", 'Dependientes': txt_dependientes, 'Continuidad': cont, 'Cobertura': ", ".join(cob)}
-                st.session_state['nombre_cliente'] = nom
-                st.session_state['clinicas_sel'] = clinicas
-
+    # --- RESULTADOS ---
     if st.session_state['resultados'] is not None:
         res = st.session_state['resultados']
         if res.empty:
@@ -738,7 +759,7 @@ else:
 
             st.divider()
             
-            # --- NUEVA FUNCIONALIDAD: SELECCIÓN DE PLANES ---
+            # SELECCIÓN DE PLANES PDF
             st.subheader("Configuración del PDF")
             st.write("Desmarca los planes que **NO** deseas incluir en el documento final:")
             
@@ -747,16 +768,13 @@ else:
             
             planes_seleccionados = []
             
-            # Usamos checkboxes en lista vertical para que JAMÁS se corte el texto
             for i, opcion in enumerate(op_keys):
-                # value=True hace que vengan marcados por defecto
                 if st.checkbox(opcion, value=True, key=f"pdf_chk_{i}"):
                     planes_seleccionados.append(opcion)
             
             if not planes_seleccionados:
                 st.warning("⚠️ Debes dejar marcado al menos un plan para generar el PDF.")
             else:
-                # Filtramos los resultados según lo que el usuario dejó marcado
                 res_filtrado = res[res.apply(lambda r: f"{r['Aseguradora']} {r['Plan']}" in planes_seleccionados, axis=1)]
                 
                 clin_txt = ", ".join(st.session_state.get('clinicas_sel', [])) or "su red de afiliados"
@@ -765,29 +783,28 @@ else:
 
                 st.divider()
                 st.write("### Recomendación Principal")
-                # La recomendación ahora solo muestra las opciones que dejaste marcadas
                 sel = planes_seleccionados[0] if es_cliente else st.radio("¿Qué plan deseas recomendar y resaltar con la estrella (⭐) en el PDF?", planes_seleccionados)
                 razon = txt_motivo if es_cliente else st.text_area("Motivo (Análisis del Experto):", value=txt_motivo)
                 
-                if st.button("Generar PDF"):
-                    # Generamos el PDF con res_filtrado en lugar de res
+                if st.button("Generar PDF", type="secondary"):
                     pdf_res = generar_pdf(st.session_state['perfil'], res_filtrado, op[sel], razon, incrementar_folio())
                     if isinstance(pdf_res, str): st.error(pdf_res)
                     else:
-
-                        # SE AGREGÓ EL GUARDADO EN SHEETS AQUÍ
                         rol_actual = "Cliente" if es_cliente else "Admin/Asesor"
                         guardar_en_sheets([obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual])
                         nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
                         cls_clean = "_".join([c.strip().split()[0] for c in st.session_state.get('clinicas_sel', [])])
                         fecha_str = obtener_hora_peru().strftime("%d%m%y_%H%M")
-                        st.download_button("Descargar PDF", pdf_res, f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf", "application/pdf")
+                        st.download_button("📥 Descargar PDF", pdf_res, f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf", "application/pdf")
 
-            # --- CIERRE HUMANO ---
-            st.divider()
-            st.subheader("¿Tienes dudas o quieres evaluar estas opciones?")
-            st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.")
-            numero_whatsapp = "51948289614"
-            mensaje_base = "Hola. Acabo de usar el cotizador de salud y me gustaría que me acompañen a evaluar mis opciones."
-            if "nombre" in st.query_params: mensaje_base += f" Mi nombre es {st.query_params['nombre']}."
-            st.link_button("💬 Escribir por WhatsApp a un asesor humano", f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_base)}")
+    # --- CIERRE HUMANO (Salvavidas UX) ---
+    st.divider()
+    col_sos_1, col_sos_2 = st.columns([2, 1])
+    with col_sos_1:
+        st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona una EPS/Continuidad?**")
+        st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.")
+    with col_sos_2:
+        numero_whatsapp = "51948289614"
+        mensaje_base = "Hola. Acabo de usar el cotizador web de salud y necesito ayuda para elegir mi plan."
+        if "nombre" in st.query_params: mensaje_base += f" Mi nombre es {st.query_params['nombre']}."
+        st.link_button("💬 Chatear con un experto", f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_base)}")
