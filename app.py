@@ -16,7 +16,7 @@ from email.mime.text import MIMEText
 import requests
 
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
-st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="wide")
+st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="centered")
 
 st.markdown("""
     <style>
