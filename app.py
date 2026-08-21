@@ -18,19 +18,6 @@ import requests
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="wide")
 
-# --- 1. EL SALUDO Y GUÍA DE CONVERSIÓN ---
-
-# Salvavidas de WhatsApp para evitar abandonos
-col_texto, col_boton = st.columns([2, 1])
-with col_texto:
-    st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona una EPS/Continuidad?**")
-with col_boton:
-    numero_whatsapp = "51906462225" 
-    mensaje = urllib.parse.quote("Hola, estoy en el cotizador web de salud y necesito ayuda para elegir mi plan.")
-    st.link_button("💬 Chatear con un experto", f"https://wa.me/{numero_whatsapp}?text={mensaje}")
-
-st.divider()
-
 st.markdown("""
     <style>
     .stButton>button {
