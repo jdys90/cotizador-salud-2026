@@ -561,8 +561,10 @@ else:
     es_cliente = (not es_admin and not es_asesor)
 
     # LOGO EN PANTALLA PRINCIPAL
-    if os.path.exists("logo.png"):
-        st.image("logo.png", width=180)
+    if os.path.exists("logo_web.jpg"):
+        col1, col2, col3 = st.columns([1, 2, 1]) # Crea 3 columnas (la del medio es el doble de ancha)
+        with col2:
+            st.image("logo_web.jpg", use_container_width=True) # Se centra perfectamente
 
     # --- 2. EL SALUDO Y GUÍA DE CONVERSIÓN ---
     if "nombre" in st.query_params:
@@ -768,12 +770,9 @@ else:
 
     # --- CIERRE HUMANO (Salvavidas UX) ---
     st.divider()
-    col_sos_1, col_sos_2 = st.columns([2, 1])
-    with col_sos_1:
-        st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona una EPS/Continuidad?**")
-        st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.")
-    with col_sos_2:
-        numero_whatsapp = "51906462225"
-        mensaje_base = "Hola. Acabo de usar el cotizador web de salud y necesito ayuda para elegir mi plan."
-        if "nombre" in st.query_params: mensaje_base += f" Mi nombre es {st.query_params['nombre']}."
-        st.link_button("💬 Chatear con un experto", f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_base)}")
+    st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona una EPS/Continuidad?**")
+    st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.")
+    numero_whatsapp = "51906462225"
+    mensaje_base = "Hola. Acabo de usar el cotizador web de salud y necesito ayuda para elegir mi plan."
+    if "nombre" in st.query_params: mensaje_base += f" Mi nombre es {st.query_params['nombre']}."
+    st.link_button("💬 Chatear con un experto", f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_base)}"), use_container_width=True)
