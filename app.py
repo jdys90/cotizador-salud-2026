@@ -18,8 +18,6 @@ import requests
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="centered")
 
-st.divider()
-
 st.markdown("""
     <style>
     /* 1. Botón Principal: Cotizar (Azul sólido corporativo, elimina bordes rojos) */
@@ -802,4 +800,12 @@ else:
     numero_whatsapp = "51906462225"
     mensaje_base = "Hola. Acabo de usar el cotizador web de salud y necesito ayuda para elegir mi plan."
     if "nombre" in st.query_params: mensaje_base += f" Mi nombre es {st.query_params['nombre']}."
-    st.link_button("💬 Chatear con un experto", f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_base)}", use_container_width=True)
+        
+    enlace_wa = f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_base)}"
+    
+    # Botón HTML 100% Verde WhatsApp
+    st.markdown(f"""
+        <a href="{enlace_wa}" target="_blank" style="display: block; width: 100%; text-align: center; background-color: #25D366; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: sans-serif; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);">
+            💬 Chatear con un experto
+        </a>
+    """, unsafe_allow_html=True)
