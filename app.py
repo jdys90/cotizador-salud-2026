@@ -775,4 +775,4 @@ else:
     numero_whatsapp = "51906462225"
     mensaje_base = "Hola. Acabo de usar el cotizador web de salud y necesito ayuda para elegir mi plan."
     if "nombre" in st.query_params: mensaje_base += f" Mi nombre es {st.query_params['nombre']}."
-    st.link_button("💬 Chatear con un experto", f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_base)}"), use_container_width=True)
+    st.link_button("💬 Chatear con un experto", f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_base)}", use_container_width=True)
