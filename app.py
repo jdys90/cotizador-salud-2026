@@ -656,7 +656,7 @@ else:
     
     # LA CAJA SECRETA: Oculta en un desplegable discreto
     with st.expander("🔒 Acceso Interno YQ"):
-        st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="Ingresa tu claver de acceso...")
+        st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="Ingresa tu clave de acceso...")
     
     correo, celular = "", ""
     if es_cliente:
