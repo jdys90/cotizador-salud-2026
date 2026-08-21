@@ -18,9 +18,11 @@ import requests
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="centered")
 
+st.divider()
+
 st.markdown("""
     <style>
-    /* 1. Botón Principal: Cotizar (Azul sólido sin bordes rojos) */
+    /* 1. Botón Principal: Cotizar (Azul sólido corporativo, elimina bordes rojos) */
     div.stButton > button {
         background-color: #2456A6 !important;
         color: white !important;
@@ -29,24 +31,33 @@ st.markdown("""
         font-weight: 600 !important;
         font-size: 16px !important;
     }
-    div.stButton > button:hover {
+    div.stButton > button:hover, div.stButton > button:active, div.stButton > button:focus {
         background-color: #1a428a !important;
         border-color: #1a428a !important;
         color: white !important;
+        box-shadow: none !important;
     }
 
-    /* 2. Botón Salvavidas: WhatsApp (Verde oficial y llamativo) */
+    /* 2. Botón Salvavidas: WhatsApp (Verde oficial, llamativo y centrado) */
     a[data-testid="stLinkButton"] {
         background-color: #25D366 !important;
         color: white !important;
         border: none !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
+        text-decoration: none !important;
         box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2) !important;
+        display: flex !important;
+        justify-content: center !important;
     }
     a[data-testid="stLinkButton"]:hover {
         background-color: #1ebc59 !important;
         color: white !important;
+    }
+    
+    /* Limpieza visual extra */
+    div[data-testid="stSidebarHeader"] {
+        padding-bottom: 0px;
     }
     </style>
 """, unsafe_allow_html=True)
