@@ -612,12 +612,27 @@ else:
     st.divider()
 
     # --- 3. FORMULARIO PRINCIPAL (Optimizado para móvil) ---
+   # --- 3. FORMULARIO PRINCIPAL (Optimizado para móvil) ---
     st.write("### 👤 1. Datos del Cliente")
-    nom = st.text_input("Nombres completos")
+    
+    # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
+    nombre_url = st.query_params.get("nombre", "")
+    edad_url = st.query_params.get("edad", "")
+    cont_url = st.query_params.get("continuidad", "")
+
+    # Convertimos la edad a número (por seguridad)
+    try:
+        edad_default = int(edad_url) if edad_url else None
+    except:
+        edad_default = None
+
+    # Autocompletado del nombre
+    nom = st.text_input("Nombres completos", value=nombre_url)
     
     col_edad, col_salud = st.columns(2)
     with col_edad:
-        edad = st.number_input("Edad", min_value=0, max_value=99, value=None, placeholder="Obligatorio")
+        # Autocompletado de la edad
+        edad = st.number_input("Edad", min_value=0, max_value=99, value=edad_default, placeholder="Obligatorio")
         edad_calculo = edad if edad is not None else 0 
     with col_salud:
         salud = st.radio("Estado de salud", ["Sano", "Crónico"], horizontal=True)
@@ -639,8 +654,10 @@ else:
     txt_dependientes = ", ".join(txt_fam) if txt_fam else "Ninguno"
 
     st.write("### ⚙️ 3. Filtros y Preferencias")
-    cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"])
     
+    # Autocompletado de Continuidad (Si el link dice 'continuidad', marca la opción 2, sino la opción 1)
+    index_continuidad = 1 if "continuidad" in cont_url.lower() else 0
+    cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"], index=index_continuidad)
     if es_cliente:
         score_rimac = "ROJO"
         cliente_rimac = "No"
