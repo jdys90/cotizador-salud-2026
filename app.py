@@ -692,7 +692,7 @@ else:
             cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], index=1, horizontal=True)
 
     cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral"])
-    clinicas = st.multiselect("Clínicas de preferencia", clinicas_unicas, placeholder="Puedes elegir más de una")
+    
     
     # LA CAJA SECRETA: Oculta en un desplegable discreto
     with st.expander("🔒 Acceso Interno YQ"):
