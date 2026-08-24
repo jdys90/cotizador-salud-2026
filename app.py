@@ -620,21 +620,28 @@ else:
    # --- 3. FORMULARIO PRINCIPAL (Optimizado para móvil) ---
     st.write("### 👤 1. Datos del Cliente")
     
-    # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
+   # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
     nombre_url = st.query_params.get("nombre", "")
     edad_url = st.query_params.get("edad", "")
     cont_url = st.query_params.get("continuidad", "")
     salud_url = st.query_params.get("salud", "")
-    clinicas_url = st.query_params.get("clinicas", "")
+    dep_url = st.query_params.get("dependientes", "0") # Nueva variable
 
-    # Convertimos la edad a número (por seguridad)
+    # Convertimos la edad a número
     try:
         edad_default = int(edad_url) if edad_url else None
     except:
         edad_default = None
-        
-    # Índice para estado de salud (Sano=0, Crónico=1)
-    index_salud = 1 if "crónico" in salud_url.lower() else 0
+
+    # Extractor inteligente de dependientes (Saca el número aunque el texto diga "0 (Solo para mí)")
+    try:
+        num_dep = int(''.join(filter(str.isdigit, dep_url))) if any(c.isdigit() for c in dep_url) else 0
+    except:
+        num_dep = 0
+
+    # Índice para estado de salud (A prueba de tildes y mayúsculas)
+    salud_lower = salud_url.lower()
+    index_salud = 1 if "cronic" in salud_lower or "crónic" in salud_lower else 0
 
     # Autocompletado del nombre
     nom = st.text_input("Nombres completos", value=nombre_url)
@@ -647,7 +654,10 @@ else:
         salud = st.radio("Estado de salud", ["Sano", "Crónico"], index=index_salud, horizontal=True)
         
     st.write("### 👨‍👩‍👧‍👦 2. Familia")
-    n_dep = st.number_input("Número de dependientes", 0, 10, 0)
+    
+    # El formulario ahora arranca con el número de dependientes que puso en WhatsApp
+    n_dep = st.number_input("Número de dependientes", 0, 10, value=num_dep)
+    
     familia = [{'edad': edad_calculo, 'salud': salud, 'rol': 'Titular'}]
     txt_fam = []
     if n_dep > 0:
