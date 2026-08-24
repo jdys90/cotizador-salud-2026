@@ -690,9 +690,6 @@ else:
             score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"], index=2)
         with col_cr:
             cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], index=1, horizontal=True)
-
-    cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral"])
-    
     
     # LA CAJA SECRETA: Oculta en un desplegable discreto
     with st.expander("🔒 Acceso Interno YQ"):
