@@ -621,11 +621,13 @@ else:
     st.write("### 👤 1. Datos del Cliente")
     
    # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
+   # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
     nombre_url = st.query_params.get("nombre", "")
     edad_url = st.query_params.get("edad", "")
     cont_url = st.query_params.get("continuidad", "")
     salud_url = st.query_params.get("salud", "")
-    dep_url = st.query_params.get("dependientes", "0") # Nueva variable
+    dep_url = st.query_params.get("dependientes", "0") 
+    clinicas_url = st.query_params.get("clinicas", "") # <--- ¡Agregamos esta línea de regreso!
 
     # Convertimos la edad a número
     try:
