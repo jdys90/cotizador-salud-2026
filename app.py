@@ -624,23 +624,27 @@ else:
     nombre_url = st.query_params.get("nombre", "")
     edad_url = st.query_params.get("edad", "")
     cont_url = st.query_params.get("continuidad", "")
+    salud_url = st.query_params.get("salud", "")
+    clinicas_url = st.query_params.get("clinicas", "")
 
     # Convertimos la edad a número (por seguridad)
     try:
         edad_default = int(edad_url) if edad_url else None
     except:
         edad_default = None
+        
+    # Índice para estado de salud (Sano=0, Crónico=1)
+    index_salud = 1 if "crónico" in salud_url.lower() else 0
 
     # Autocompletado del nombre
     nom = st.text_input("Nombres completos", value=nombre_url)
     
     col_edad, col_salud = st.columns(2)
     with col_edad:
-        # Autocompletado de la edad
         edad = st.number_input("Edad", min_value=0, max_value=99, value=edad_default, placeholder="Obligatorio")
         edad_calculo = edad if edad is not None else 0 
     with col_salud:
-        salud = st.radio("Estado de salud", ["Sano", "Crónico"], horizontal=True)
+        salud = st.radio("Estado de salud", ["Sano", "Crónico"], index=index_salud, horizontal=True)
         
     st.write("### 👨‍👩‍👧‍👦 2. Familia")
     n_dep = st.number_input("Número de dependientes", 0, 10, 0)
@@ -660,9 +664,23 @@ else:
 
     st.write("### ⚙️ 3. Filtros y Preferencias")
     
-    # Autocompletado de Continuidad (Si el link dice 'continuidad', marca la opción 2, sino la opción 1)
+    # Autocompletado de Continuidad
     index_continuidad = 1 if "continuidad" in cont_url.lower() else 0
     cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"], index=index_continuidad)
+
+    # Cobertura por defecto: Integral y Básica
+    cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral", "Básica"])
+    
+    # Autocompletado Inteligente de Clínicas
+    clinicas_default = []
+    if clinicas_url:
+        for clinica in clinicas_unicas:
+            # Busca si alguna clínica de tu base de datos está mencionada en la URL
+            if clinica.lower() in clinicas_url.lower():
+                clinicas_default.append(clinica)
+
+    clinicas = st.multiselect("Clínicas de preferencia", clinicas_unicas, default=clinicas_default, placeholder="Puedes elegir más de una")
+    
     if es_cliente:
         score_rimac = "ROJO"
         cliente_rimac = "No"
