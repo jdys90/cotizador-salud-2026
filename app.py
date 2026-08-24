@@ -592,22 +592,27 @@ else:
             st.image("logo_web.png", use_container_width=True) # Se centra perfectamente
 
     # --- 2. EL SALUDO Y GUÍA DE CONVERSIÓN ---
-    if "nombre" in st.query_params:
-        nombre_cliente = st.query_params["nombre"]
-        st.title(f"¡Hola {nombre_cliente}! 👋")
+    # --- 2. EL SALUDO Y GUÍA DE CONVERSIÓN (Dinámico) ---
+    nombre_url = st.query_params.get("nombre", "")
+
+    if nombre_url:
+        # 🟢 VISTA PARA USUARIOS DE WHATSAPP (Acelera el cierre)
+        st.title(f"¡Hola {nombre_url}! 👋")
+        st.subheader("Hemos guardado tus respuestas del chat. 🚀")
+        st.info("Ya tienes la mitad del camino hecho. Solo elige tus **clínicas favoritas**, ingresa tus **datos de contacto** y haz clic en Cotizar.")
     else:
+        # 🔵 VISTA PARA USUARIOS ORGÁNICOS (Guía paso a paso)
         st.title("¡Hola! 👋")
-
-    st.subheader("Descubre el seguro de salud ideal para ti en 3 simples pasos.")
-
-    # Guía visual amigable
-    col_g1, col_g2, col_g3 = st.columns(3)
-    with col_g1:
-        st.info("**1. Tu Perfil**\n\nCompleta tus datos básicos y familiares.")
-    with col_g2:
-        st.info("**2. Preferencias**\n\nElije el tipo de cobertura y tus clínicas favoritas.")
-    with col_g3:
-        st.success("**3. Cotización**\n\nObtén un comparativo y descarga tu PDF al instante.")
+        st.subheader("Descubre el seguro de salud ideal para ti en 3 simples pasos.")
+        
+        # Guía visual amigable (solo se muestra si entran de cero)
+        col_g1, col_g2, col_g3 = st.columns(3)
+        with col_g1:
+            st.info("**1. Tu Perfil**\n\nDatos básicos y familiares.")
+        with col_g2:
+            st.info("**2. Preferencias**\n\nCobertura y clínicas.")
+        with col_g3:
+            st.success("**3. Cotización**\n\nComparativo y PDF.")
 
     st.divider()
 
