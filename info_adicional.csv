@@ -1,4 +1,5 @@
 ﻿Aseguradora,Plan,Link_Cartilla,Link_Carencia,Int_Ded_Amb_Pre,Int_Reem_Amb_Sin,Int_Ded_Hosp_Pre,Int_Reem_Hosp_Sin,Tiene_Int
+Rímac Seguros,Plan Vital,https://acrobat.adobe.com/id/urn:aaid:sc:US:221090eb-4320-4b17-8f76-fe7beee78b8d,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:01efcab3-6681-49ab-83a9-76cfa2c06d2c,,,,,False
 Rímac Seguros,Red Preferente,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:77742e6e-a8ad-45e4-9ad3-8aed81b38c1b,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:01efcab3-6681-49ab-83a9-76cfa2c06d2c,,,,,False
 Rímac Seguros,Red Médica,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:c8d26264-ec71-49dc-9288-5ec07da73c2b,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:01efcab3-6681-49ab-83a9-76cfa2c06d2c,,,,,False
 Rímac Seguros,Full Salud,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:5014b6b3-9eb4-4c41-8f95-4b84aceb9831,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:01efcab3-6681-49ab-83a9-76cfa2c06d2c,,,,,False
@@ -21,3 +22,4 @@ La Positiva Seguros,Medisalud Plus,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C
 La Positiva Seguros,Medisalud Premium,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:3fe82287-25d4-4846-b9ef-f8ec1e3535bf,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:507edec3-3b59-4e12-92f9-f57383845ec5,,,,,False
 Mapfre Seguros,Viva Salud,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:c5d612b8-b6e6-4d5d-8344-9cd8acc4b015,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:e9b585b9-104b-4ec1-b748-d07351bccf0b,,,,,False
 Mapfre Seguros,Trébol Salud,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:1180cf6c-39ad-41b6-9a3b-d45f8276f234,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:e9b585b9-104b-4ec1-b748-d07351bccf0b,,,,,False
+Mapfre Seguros,Salud Total,https://acrobat.adobe.com/id/urn:aaid:sc:US:cd44642c-03f0-4c72-81a3-7bae9b3dbf3a,https://acrobat.adobe.com/id/urn:aaid:sc:VA6C2:e9b585b9-104b-4ec1-b748-d07351bccf0b,,,,,False
