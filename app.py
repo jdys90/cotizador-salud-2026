@@ -349,7 +349,7 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
     candidatos = []
     set_user = set(quitar_tildes(c) for c in clinicas_user)
     
-    PLANES_BASICA = ['Esencial', 'Esencial Plus', 'Multisalud Base', 'Medisalud Lite', 'Medisalud Base']
+    PLANES_BASICA = ['Esencial', 'Esencial Plus', 'Multisalud Base', 'Medisalud Lite', 'Medisalud Base','Plan Vital','Salud Total']
     PLANES_INTEGRAL = ['Red Preferente', 'Red Médica', 'Multisalud', 'Medisalud', 'Medisalud Plus', 'Viva Salud', 'Trébol Salud', 'Medisalud Senior +', 'Oro - Plan preferente', 'Oro - Plan Red', 'Oro - Plan Completo']
     PLANES_REEMBOLSO = ['Full Salud', 'Medicvida Nacional', 'Medisalud Premium']
     PLANES_INTERNACIONAL = ['Salud Preferencial', 'Medicvida Internacional']
@@ -363,7 +363,9 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
     for (cia, plan), grupo in df_redes.groupby(['Aseguradora', 'Plan']):
         cia_clean = quitar_tildes(cia)
         plan_clean = quitar_tildes(plan)
-        
+        # 1. NUEVA REGLA RÍMAC: "Plan Vital" es SOLO para NUEVOS. Si tiene continuidad, lo ocultamos.
+        if continuidad == "Vengo con continuidad" and "RIMAC" in cia_clean and plan_clean == "PLAN VITAL": 
+            continue
         if "Vengo con continuidad" == continuidad and "MAPFRE" in cia_clean: continue
         if continuidad == "Sí (Continuidad)" and "mapfre" in str(cia).lower(): continue
         if plan_clean not in [quitar_tildes(p) for p in planes_permitidos]: continue
