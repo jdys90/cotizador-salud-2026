@@ -778,7 +778,7 @@ else:
         elif requiere_clinica and not clinicas:
             st.error("⚠️ Por favor selecciona al menos una Clínica de preferencia.")
         elif es_cliente and (not correo or not celular or len(celular) != 9):
-            st.error("⚠️ Datos de contacto inválidos.")
+            st.error("⚠️ Correo y/o celular no completados correctamente.")
         else:
             rol_actual = "Cliente" if es_cliente else "Admin/Asesor"
             
