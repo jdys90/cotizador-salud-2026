@@ -549,9 +549,9 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
         tiene_salud_total = any("SALUD TOTAL" in str(p).upper() for p in df['Plan'].values)
         if tiene_salud_total:
             elements.append(Spacer(1, 10))
-            aviso_st = "<b>NOTA (PLAN SALUD TOTAL):</b> Tener en cuenta que con respecto al plan Salud Total: La atención en la clínica Ricardo Palma y la hospitalización, será previa evaluación y autorización por parte de Mapfre."
-            t_st = Table([[Paragraph(aviso_st, ParagraphStyle('W', parent=st_norm, textColor=ROJO))]], colWidths=[18*cm])
-            t_st.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FFEBEE")), ('BOX', (0,0), (-1,-1), 0.5, ROJO), ('PADDING', (0,0), (-1,-1), 8)]))
+            aviso_st = "<b>PLAN SALUD TOTAL:</b> La atención en la clínica Ricardo Palma y la hospitalización, será previa evaluación y autorización por parte de Mapfre."
+            t_st = Table([[Paragraph(aviso_st, ParagraphStyle('W', parent=st_norm, textColor=VERDE))]], colWidths=[18*cm])
+            t_st.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#E8F5E9")), ('BOX', (0,0), (-1,-1), 0.5, ROJO), ('PADDING', (0,0), (-1,-1), 8)]))
             elements.append(t_st)
             
         elements.append(Spacer(1, 20))
