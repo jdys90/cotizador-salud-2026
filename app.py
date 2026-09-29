@@ -908,5 +908,16 @@ else:
     # --- CIERRE HUMANO (Salvavidas UX) ---
     st.divider()
     st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona un seguro de salud/Continuidad?**")
-    st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas. Ingresa tus datos y escríbenos al whatsapp")
-   
+    st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas. Escríbenos y nosotros te asesoramos completamente gratis")
+    numero_whatsapp = "51906462225"
+    mensaje_base = "Hola. Acabo de usar el cotizador web de salud y necesito ayuda para elegir mi plan."
+    if "nombre" in st.query_params: mensaje_base += f" Mi nombre es {st.query_params['nombre']}."
+
+    enlace_wa = f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_base)}"
+
+    # Botón HTML 100% Verde WhatsApp
+    st.markdown(f"""
+        <a href="{enlace_wa}" target="_blank" style="display: block; width: 100%; text-align: center; background-color: #25D366; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: sans-serif; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);">
+            💬 Chatear con un experto
+        </a>
+    """, unsafe_allow_html=True)
