@@ -502,9 +502,9 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
 
         # 2. LUEGO COLOCAMOS EL INSTRUCTIVO DEL PDF
         texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
-        • <b>Cartilla:</b> Haz clic en la palabra <font color='blue'><u>Cartilla</u></font> para abrir la red oficial y ver el 100% de clínicas afiliadas.<br/>
-        • <b>Carencia:</b> Haz clic en <font color='green'><u>Carencia</u></font> para revisar los tiempos de espera oficiales antes de usar ciertos servicios.<br/>
-        • <b>Int. Amb / Hosp:</b> Aquí verás el deducible (S/) o porcentaje (%) que pagarás en tus clínicas preferidas al atenderte."""
+        • <b>Cartilla / Carencia:</b> Haz clic en <font color='blue'><u>Cartilla</u></font> para ver todas las clínicas afiliadas, o en <font color='green'><u>Carencia</u></font> para ver los tiempos de carencia y espera.<br/>
+        • <b>Int. Amb / Hosp:</b> Es el deducible (S/) o porcentaje (%) que pagarás al atenderte.<br/>
+        • <b>Precios y Descuentos:</b> El precio <strike color='grey'>tachado en gris</strike> es la tarifa regular de la aseguradora. El precio en <b>negrita</b> es tu costo final exclusivo por contratar con nosotros. El monto en <font color='#28A745'><b>verde</b></font> es el dinero que te ahorras hoy."""
         
         t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
         t_guia.setStyle(TableStyle([
@@ -545,12 +545,12 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
 
             if dsc_anu > 0:
                 ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
-                precio_anual_str = f"<strike color='grey'>S/ {row['Precio_Anual_Base']:,.0f}</strike><br/><b>{precio_anual_str}</b><br/><font color='red' size='7'>Ahorras S/ {ahorro_anual:,.0f}</font>"
+                precio_anual_str = f"<strike color='grey'>S/ {row['Precio_Anual_Base']:,.0f}</strike><br/><b>{precio_anual_str}</b><br/><font color='#28A745' size='7'><b>Ahorras S/ {ahorro_anual:,.0f}</b></font>"
             
             if dsc_men > 0:
                 ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
-                precio_mensual_str = f"<strike color='grey'>S/ {row['Precio_Mensual_Base']:,.0f}</strike><br/><b>{precio_mensual_str}</b><br/><font color='red' size='7'>Ahorras S/ {ahorro_mensual:,.0f}</font>"
-
+                precio_mensual_str = f"<strike color='grey'>S/ {row['Precio_Mensual_Base']:,.0f}</strike><br/><b>{precio_mensual_str}</b><br/><font color='#28A745' size='7'><b>Ahorras S/ {ahorro_mensual:,.0f}</b></font>"
+                
             if es_int:
                 fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Int_Amb_Full'], st_td), Paragraph(row['Int_Hosp_Full'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
             else:
@@ -840,7 +840,9 @@ else:
                 enlace_wa = f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_wa)}"
                             
                 # REQUERIMIENTO 6: Botones en la misma línea
-                col_btn_pdf, col_btn_wa = st.columns(2)
+                with col_btn_wa:
+                    # Usamos el botón nativo de enlace de Streamlit para una alineación 100% perfecta
+                    st.link_button("📲 Contratar vía WhatsApp", enlace_wa, use_container_width=True)
                 
                 planes_seleccionados = mejores_planes.apply(lambda r: f"{r['Aseguradora']} {r['Plan']}", axis=1).tolist()
                 sel = planes_seleccionados[0] # Se marca como favorito el más barato
