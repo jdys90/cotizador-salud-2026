@@ -482,9 +482,9 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             anchos = [3.1*cm, 3.2*cm, 3.6*cm, 3.8*cm, 2.1*cm, 2.2*cm]
 
         texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
-        • <b>Cartilla / Carencia:</b> Haz clic en <font color='blue'><u>Cartilla</u></font> para ver todas las clínicas afiliadas, o en <font color='green'><u>Carencia</u></font> para ver los tiempos de carencia y espera.<br/>
+        • <b>Cartilla / Carencia:</b> Haz clic en <font color='blue'><u>Cartilla</u></font> para ver todas las clínicas afiliadas,\n\no en <font color='green'><u>Carencia</u></font> para ver los tiempos de carencia y espera.<br/>
         • <b>Int. Amb / Hosp:</b> Es el deducible (S/) o porcentaje (%) que pagarás al atenderte.<br/>
-        • <b>Precios y Descuentos:</b> El precio <strike color='grey'>tachado en gris</strike> es la tarifa regular de la aseguradora. El precio en <b>negrita</b> es tu costo final exclusivo por contratar con nosotros. El monto en <font color='#28A745'><b>verde</b></font> es el dinero que te ahorras hoy."""
+        • <b>Precios y Descuentos:</b> El precio <strike color='grey'>tachado en gris</strike> es la tarifa regular de la aseguradora.\n\nEl precio en <b>negrita</b> es tu costo final exclusivo por contratar con nosotros.\n\nEl monto en <font color='#28A745'><b>verde</b></font> es el dinero que te ahorras hoy."""
         
         t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
         t_guia.setStyle(TableStyle([
