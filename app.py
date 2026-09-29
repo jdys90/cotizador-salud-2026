@@ -626,36 +626,27 @@ else:
 
     st.divider()
 
-    # --- 3. FORMULARIO PRINCIPAL (Optimizado para móvil) ---
-   # --- 3. FORMULARIO PRINCIPAL (Optimizado para móvil) ---
-    st.write("### 👤 1. Datos del Cliente")
-    
-   # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
-   # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
+  # LA CAJA SECRETA: Mover al menú lateral (Sidebar) - REQUERIMIENTO 1
+    with st.sidebar.expander("🔒 Acceso Interno YQ"):
+        st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="Ingresa tu clave de acceso...")
+
+    # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
     nombre_url = st.query_params.get("nombre", "")
     edad_url = st.query_params.get("edad", "")
     cont_url = st.query_params.get("continuidad", "")
     salud_url = st.query_params.get("salud", "")
     dep_url = st.query_params.get("dependientes", "0") 
-    clinicas_url = st.query_params.get("clinicas", "") # <--- ¡Agregamos esta línea de regreso!
+    clinicas_url = st.query_params.get("clinicas", "")
 
-    # Convertimos la edad a número
-    try:
-        edad_default = int(edad_url) if edad_url else None
-    except:
-        edad_default = None
+    try: edad_default = int(edad_url) if edad_url else None
+    except: edad_default = None
 
-    # Extractor inteligente de dependientes (Saca el número aunque el texto diga "0 (Solo para mí)")
-    try:
-        num_dep = int(''.join(filter(str.isdigit, dep_url))) if any(c.isdigit() for c in dep_url) else 0
-    except:
-        num_dep = 0
+    try: num_dep = int(''.join(filter(str.isdigit, dep_url))) if any(c.isdigit() for c in dep_url) else 0
+    except: num_dep = 0
 
-    # Índice para estado de salud (A prueba de tildes y mayúsculas)
     salud_lower = salud_url.lower()
     index_salud = 1 if "cronic" in salud_lower or "crónic" in salud_lower else 0
 
-    # Autocompletado del nombre
     nom = st.text_input("Nombres completos", value=nombre_url)
     
     col_edad, col_salud = st.columns(2)
@@ -666,9 +657,10 @@ else:
         salud = st.radio("Estado de salud", ["Sano", "Crónico"], index=index_salud, horizontal=True)
         
     st.write("### 👨‍👩‍👧‍👦 2. Familia")
+    # REQUERIMIENTO 3: Mejor UX en Familia
+    st.caption("💡 *Si deseas asegurar a tu cónyuge o hijos, indica cuántos son aquí abajo. Luego ingresa la edad de cada uno para calcular el descuento familiar.*")
     
-    # El formulario ahora arranca con el número de dependientes que puso en WhatsApp
-    n_dep = st.number_input("Número de dependientes", 0, 10, value=num_dep)
+    n_dep = st.number_input("Número de dependientes adicionales", 0, 10, value=num_dep)
     
     familia = [{'edad': edad_calculo, 'salud': salud, 'rol': 'Titular'}]
     txt_fam = []
@@ -686,22 +678,44 @@ else:
 
     st.write("### ⚙️ 3. Filtros y Preferencias")
     
-    # Autocompletado de Continuidad
     index_continuidad = 1 if "continuidad" in cont_url.lower() else 0
     cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"], index=index_continuidad)
 
-    # Cobertura por defecto: Integral y Básica
     cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral", "Básica"])
     
-    # Autocompletado Inteligente de Clínicas
     clinicas_default = []
     if clinicas_url:
         for clinica in clinicas_unicas:
-            # Busca si alguna clínica de tu base de datos está mencionada en la URL
             if clinica.lower() in clinicas_url.lower():
                 clinicas_default.append(clinica)
 
-    clinicas = st.multiselect("Clínicas de preferencia", clinicas_unicas, default=clinicas_default, placeholder="Puedes elegir más de una")
+    # REQUERIMIENTO 2: Texto de ayuda experto en Clínicas
+    clinicas = st.multiselect(
+        "Clínicas de preferencia", 
+        clinicas_unicas, 
+        default=clinicas_default, 
+        placeholder="Ej: Escribe el nombre de tu clínica (Puedes elegir varias)"
+    )
+    
+    if es_cliente:
+        score_rimac = "ROJO"
+        cliente_rimac = "No"
+    else:
+        col_sc, col_cr = st.columns(2)
+        with col_sc:
+            score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"], index=2)
+        with col_cr:
+            cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], index=1, horizontal=True)
+    
+    correo, celular = "", ""
+    if es_cliente:
+        st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
+        # REQUERIMIENTO 4: Invertir Celular y Correo (Celular aporta más valor y debe ir primero)
+        col_cel, col_mail = st.columns(2)
+        with col_cel:
+            celular = st.text_input("Celular / Whatsapp", max_chars=9, placeholder="Ej: 999123456")
+        with col_mail:
+            correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com")
     
     if es_cliente:
         score_rimac = "ROJO"
