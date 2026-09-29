@@ -442,7 +442,7 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
     return pd.DataFrame(candidatos).sort_values('Precio_Final') if candidatos else pd.DataFrame()
 
 # --- PDF ---
-def generar_pdf(perfil, df, id_sel, razon, folio):
+def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
     try:
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=15, leftMargin=15, topMargin=20, bottomMargin=20)
@@ -578,6 +578,14 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
             t_cont.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#E8F5E9")), ('BOX', (0,0), (-1,-1), 0.5, VERDE), ('PADDING', (0,0), (-1,-1), 8)]))
             elements.append(t_cont)
 # --- NUEVA REGLA: NOTA EXCLUSIVA PARA PLAN SALUD TOTAL (MAPFRE) ---
+        # --- AVISO ESTRATÉGICO RÍMAC (Brecha de curiosidad solo para clientes) ---
+        tiene_rimac = any("RIMAC" in str(cia).upper() or "RÍMAC" in str(cia).upper() for cia in df['Aseguradora'].values)
+        if es_vista_cliente and tiene_rimac:
+            elements.append(Spacer(1, 10))
+            aviso_rimac = "<b>🎁 DESCUENTO OCULTO RÍMAC:</b> Esta aseguradora otorga descuentos exclusivos según tu perfil crediticio que no podemos mostrar aquí. Haz clic en el botón de WhatsApp o escríbenos para revelar tu tarifa final con descuento."
+            t_rimac = Table([[Paragraph(aviso_rimac, ParagraphStyle('W', parent=st_norm, textColor=colors.HexColor("#E65100")))]], colWidths=[18*cm])
+            t_rimac.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FFF3E0")), ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor("#E65100")), ('PADDING', (0,0), (-1,-1), 8)]))
+            elements.append(t_rimac)
         tiene_salud_total = any("SALUD TOTAL" in str(p).upper() for p in df['Plan'].values)
         if tiene_salud_total:
             elements.append(Spacer(1, 10))
@@ -851,7 +859,7 @@ else:
                 if cont == "Nuevo": razon += " Recuerde revisar los periodos de carencia."
 
                 with col_btn_pdf:
-                    pdf_res = generar_pdf(st.session_state['perfil'], mejores_planes, op[sel], razon, incrementar_folio())
+                    pdf_res = generar_pdf(st.session_state['perfil'], mejores_planes, op[sel], razon, incrementar_folio(), es_vista_cliente=True)
                     if isinstance(pdf_res, str): 
                         st.error(pdf_res)
                     else:
@@ -913,7 +921,7 @@ else:
                     razon = st.text_area("Motivo (Análisis del Experto):", value=txt_motivo)
                     
                     if st.button("Generar PDF", type="secondary"):
-                        pdf_res = generar_pdf(st.session_state['perfil'], res_filtrado, op[sel], razon, incrementar_folio())
+                        pdf_res = generar_pdf(st.session_state['perfil'], res_filtrado, op[sel], razon, incrementar_folio(), es_vista_cliente=False)
                         if isinstance(pdf_res, str): 
                             st.error(pdf_res)
                         else:
@@ -924,19 +932,19 @@ else:
                             nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
                             st.download_button("📥 Descargar PDF", pdf_res, f"COTISALUD_{nom_clean}.pdf", "application/pdf")
 
-    # --- CIERRE HUMANO (Salvavidas UX) ---
-    st.divider()
-    st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona un seguro de salud/Continuidad?**")
-    st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.\n\n¡Escríbenos y nosotros te asesoramos completamente gratis!")
-    numero_whatsapp = "51906462225"
-    mensaje_base = "Hola. Acabo de usar el cotizador web de salud y necesito ayuda para elegir mi plan."
-    if "nombre" in st.query_params: mensaje_base += f" Mi nombre es {st.query_params['nombre']}."
+   # --- CIERRE HUMANO (Salvavidas UX Dinámico) ---
+    if st.session_state.get('resultados') is None:
+        st.divider()
+        st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona un seguro de salud/Continuidad?**")
+        st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.\n\n¡Escríbenos y nosotros te asesoramos completamente gratis!")
+        numero_whatsapp = "51906462225"
+        mensaje_ayuda = "Hola. Acabo de ingresar al cotizador web de salud y necesito ayuda para completarlo."
+        if "nombre" in st.query_params: mensaje_ayuda += f" Mi nombre es {st.query_params['nombre']}."
+        enlace_ayuda = f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_ayuda)}"
 
-    enlace_wa = f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_base)}"
-
-    # Botón HTML 100% Verde WhatsApp
-    st.markdown(f"""
-        <a href="{enlace_wa}" target="_blank" style="display: block; width: 100%; text-align: center; background-color: #25D366; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: sans-serif; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);">
-            💬 Chatear con un experto
-        </a>
-    """, unsafe_allow_html=True)
+        # Botón HTML 100% Verde WhatsApp
+        st.markdown(f"""
+            <a href='{enlace_ayuda}' target='_blank' style='display: block; width: 100%; text-align: center; background-color: #25D366; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: sans-serif; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);'>
+                💬 Chatear con un experto
+            </a>
+        """, unsafe_allow_html=True)
