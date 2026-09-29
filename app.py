@@ -480,25 +480,21 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
 
         elements.append(Paragraph("TU PERFIL", st_sub))
         elements.append(Spacer(1, 5))
-        data_perfil = [
-            [Paragraph("<b>Titular:</b>", st_bold), Paragraph(perfil['Titular'], st_norm),
-             Paragraph("<b>Cobertura:</b>", st_bold), Paragraph(perfil['Cobertura'], st_norm)],
-            [Paragraph("<b>Dependientes:</b>", st_bold), Paragraph(perfil['Dependientes'], st_norm),
-             Paragraph("<b>Condición:</b>", st_bold), Paragraph(perfil['Continuidad'], st_norm)]
-        ]
-        t_perf = Table(data_perfil, colWidths=[3.0*cm, 7.5*cm, 2.5*cm, 5.0*cm])
-        t_perf.setStyle(TableStyle([('LINEBELOW', (0,0), (-1,-1), 0.5, colors.lightgrey), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('PADDING', (0,0), (-1,-1), 5)]))
-        elements.append(t_perf)
-        elements.append(Spacer(1, 20))
-
-        es_int = "Internacional" in perfil['Cobertura']
-        if es_int:
-            headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
-            anchos = [3.1*cm, 3.2*cm, 3.6*cm, 3.8*cm, 2.1*cm, 2.2*cm]
-        else:
-            headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
-            anchos = [3.1*cm, 3.2*cm, 3.6*cm, 3.8*cm, 2.1*cm, 2.2*cm]
-
+        # REQUERIMIENTO 7: Instructivo de cómo leer el PDF
+        texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
+        • <b>Cartilla:</b> Haz clic en la palabra <font color='blue'><u>Cartilla</u></font> para abrir la red oficial y ver el 100% de clínicas afiliadas.<br/>
+        • <b>Carencia:</b> Haz clic en <font color='green'><u>Carencia</u></font> para revisar los tiempos de espera oficiales antes de usar ciertos servicios.<br/>
+        • <b>Int. Amb / Hosp:</b> Aquí verás el deducible (S/) o porcentaje (%) que pagarás en tus clínicas preferidas al atenderte."""
+        
+        t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
+        t_guia.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F4F8")), 
+            ('BOX', (0,0), (-1,-1), 0.5, AZUL), 
+            ('PADDING', (0,0), (-1,-1), 8)
+        ]))
+        elements.append(t_guia)
+        elements.append(Spacer(1, 10))
+            
         data = [[Paragraph(h, st_th) for h in headers]]
         
         for _, row in df.iterrows():
