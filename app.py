@@ -59,6 +59,21 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+/* 3. Botón de Descarga PDF (Azul corporativo llamativo, idéntico al botón principal) */
+    button[kind="secondary"] {
+        background-color: #2456A6 !important;
+        color: white !important;
+        border: 2px solid #2456A6 !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        width: 100% !important;
+    }
+    button[kind="secondary"]:hover {
+        background-color: #1a428a !important;
+        border-color: #1a428a !important;
+        color: white !important;
+    }
 
 try:
     from reportlab.lib import colors
@@ -622,7 +637,7 @@ else:
         with col_g2:
             st.info("**2. Preferencias**\n\nCobertura y clínicas.")
         with col_g3:
-            st.success("**3. Cotización**\n\nComparativo y PDF.")
+            st.info("**3. Cotización**\n\nComparativo y PDF.")
 
     st.divider()
 
