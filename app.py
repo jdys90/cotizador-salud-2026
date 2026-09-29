@@ -857,13 +857,34 @@ else:
                 if cont == "Nuevo": razon += " Recuerde revisar los periodos de carencia."
 
                 with col_btn_pdf:
-                    # Aquí está tu código del PASO C (es_vista_cliente=True)
                     pdf_res = generar_pdf(st.session_state['perfil'], mejores_planes, op[sel], razon, incrementar_folio(), es_vista_cliente=True)
                     if isinstance(pdf_res, str): 
                         st.error(pdf_res)
                     else:
                         nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
                         fecha_str = obtener_hora_peru().strftime("%d%m%y")
+                        
+                        datos_para_sheet = [obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, "Cliente"]
+                        
+                        # SOLUCIÓN 1: El parámetro 'key' evita el choque y elimina el error rojo
+                        st.download_button(
+                            label="📄 Descargar Cotización Detallada", 
+                            data=pdf_res, 
+                            file_name=f"COTISALUD_{nom_clean}_{fecha_str}.pdf", 
+                            mime="application/pdf", 
+                            use_container_width=True,
+                            on_click=guardar_en_sheets,
+                            args=(datos_para_sheet,),
+                            key="btn_descarga_pdf_cliente"
+                        )
+                
+                with col_btn_wa:
+                    # SOLUCIÓN 2: Botón HTML para recuperar el verde, con altura (42px) para alinear
+                    st.markdown(f"""
+                        <a href='{enlace_wa}' target='_blank' style='display: flex; align-items: center; justify-content: center; width: 100%; height: 42px; background-color: #25D366; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;'>
+                            📲 Contratar vía WhatsApp
+                        </a>
+                    """, unsafe_allow_html=True)
                         
                         # RECUPERAMOS EL GUARDADO EN SHEETS USANDO ON_CLICK
                         datos_para_sheet = [obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, "Cliente"]
