@@ -53,13 +53,7 @@ st.markdown("""
         color: white !important;
     }
     
-    /* Limpieza visual extra */
-    div[data-testid="stSidebarHeader"] {
-        padding-bottom: 0px;
-    }
-    </style>
-""", unsafe_allow_html=True)
-/* 3. Botón de Descarga PDF (Azul corporativo llamativo, idéntico al botón principal) */
+    /* 3. Botón de Descarga PDF (Azul corporativo llamativo, idéntico al botón principal) */
     button[kind="secondary"] {
         background-color: #2456A6 !important;
         color: white !important;
@@ -75,6 +69,12 @@ st.markdown("""
         color: white !important;
     }
 
+    /* Limpieza visual extra */
+    div[data-testid="stSidebarHeader"] {
+        padding-bottom: 0px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 try:
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
