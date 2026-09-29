@@ -802,7 +802,11 @@ else:
                 st.dataframe(df_resumen, hide_index=True, use_container_width=True)
                 
                 st.info("👇 Descarga tu cotización detallada para ver coberturas, o contáctanos para contratar.")
-                
+                # --- DEFINIMOS EL ENLACE DE WHATSAPP ANTES DE CREAR EL BOTÓN ---
+                numero_whatsapp = "51906462225"
+                mensaje_wa = f"Hola, mi nombre es {nom}. Acabo de usar el cotizador web de salud y quiero contratar el plan que me sugirieron."
+                enlace_wa = f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_wa)}"
+                            
                 # REQUERIMIENTO 6: Botones en la misma línea
                 col_btn_pdf, col_btn_wa = st.columns(2)
                 
