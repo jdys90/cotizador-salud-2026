@@ -478,7 +478,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio):
         elements.append(Paragraph("En YQ Corredores de Seguros, entendemos la importancia de proteger tu salud. Te presentamos esta cotización personalizada con precios exclusivos.", st_norm))
         elements.append(Spacer(1, 10))
 
-       elements.append(Paragraph("TU PERFIL", st_sub))
+        elements.append(Paragraph("TU PERFIL", st_sub))
         elements.append(Spacer(1, 5))
         data_perfil = [
             [Paragraph("<b>Titular:</b>", st_bold), Paragraph(perfil['Titular'], st_norm),
