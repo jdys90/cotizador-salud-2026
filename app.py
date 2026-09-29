@@ -628,7 +628,7 @@ else:
 
   # LA CAJA SECRETA: Mover al menú lateral (Sidebar) - REQUERIMIENTO 1
     with st.sidebar.expander("🔒 Acceso Interno YQ"):
-        st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="Ingresa tu clave de acceso...")
+        st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="ADMIN2026")
 
     # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
     nombre_url = st.query_params.get("nombre", "")
@@ -726,11 +726,7 @@ else:
             score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"], index=2)
         with col_cr:
             cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], index=1, horizontal=True)
-    
-    # LA CAJA SECRETA: Oculta en un desplegable discreto
-    with st.expander("🔒 Acceso Interno YQ"):
-        st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="Ingresa tu clave de acceso...")
-    
+       
     correo, celular = "", ""
     if es_cliente:
         st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
