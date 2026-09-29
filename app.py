@@ -855,7 +855,7 @@ else:
 
     # --- CIERRE HUMANO (Salvavidas UX) ---
     st.divider()
-    st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona una EPS/Continuidad?**")
+    st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona un seguro de salud/Continuidad?**")
     st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.")
     numero_whatsapp = "51906462225"
     mensaje_base = "Hola. Acabo de usar el cotizador web de salud y necesito ayuda para elegir mi plan."
