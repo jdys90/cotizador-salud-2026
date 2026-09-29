@@ -10,9 +10,6 @@ from email.mime.multipart import MIMEMultipart
 import gspread
 from google.oauth2.service_account import Credentials
 import unicodedata
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 import requests
 
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
@@ -20,7 +17,7 @@ st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layou
 
 st.markdown("""
     <style>
-    /* 1. Botón Principal: Cotizar (Azul sólido corporativo, elimina bordes rojos) */
+    /* 1. Botón Principal: Cotizar */
     div.stButton > button {
         background-color: #2456A6 !important;
         color: white !important;
@@ -36,7 +33,7 @@ st.markdown("""
         box-shadow: none !important;
     }
 
-    /* 2. Botón Salvavidas: WhatsApp (Verde oficial, llamativo y centrado) */
+    /* 2. Botón Salvavidas HTML: WhatsApp */
     a[data-testid="stLinkButton"] {
         background-color: #25D366 !important;
         color: white !important;
@@ -53,7 +50,7 @@ st.markdown("""
         color: white !important;
     }
     
-    /* 3. Botón de Descarga PDF (Azul corporativo llamativo, idéntico al botón principal) */
+    /* 3. Botón de Descarga PDF */
     button[kind="secondary"] {
         background-color: #2456A6 !important;
         color: white !important;
@@ -62,6 +59,7 @@ st.markdown("""
         font-weight: 600 !important;
         font-size: 15px !important;
         width: 100% !important;
+        height: 42px !important;
     }
     button[kind="secondary"]:hover {
         background-color: #1a428a !important;
@@ -75,6 +73,7 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
 try:
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
@@ -120,19 +119,15 @@ def get_gspread_client():
         return None
 
 def guardar_en_sheets(datos_fila):
-    """Guarda la cotización en Google Sheets."""
     try:
         client = get_gspread_client()
         if not client: return
         sheet = client.open("historial_cotizador_salud").sheet1 
         sheet.append_row(datos_fila)
-
     except Exception as e:
         st.error(f"❌ Error al guardar en Sheets: {e}")
 
-
 def descargar_historial_sheets():
-    
     try:
         client = get_gspread_client()
         if not client: return None
@@ -145,15 +140,9 @@ def descargar_historial_sheets():
 
 # --- FUNCIONES DE CORREO ---
 def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, edad, clinicas, continuidad, score_rimac, cliente_rimac):
-    """
-    Intenta inyectar el Lead de Salud en Zoho CRM. Si falla, activa el protocolo
-    de emergencia enviando el correo clásico a administración.
-    """
-    # Formateo previo de las variables
     clinicas_txt = ", ".join(clinicas) if clinicas else "Sin preferencia específica"
     cobertura_txt = ", ".join(plan_interes_list) if isinstance(plan_interes_list, list) else str(plan_interes_list)
     
-    # Manejo seguro de la fecha
     try:
         fecha_hora_peru = obtener_hora_peru().strftime('%d/%m/%Y %H:%M')
     except:
@@ -161,7 +150,6 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
         
     descripcion_crm = f"Edad Titular: {edad} | Interés: {cobertura_txt} | Condición: {continuidad} | Scoring Rímac: {score_rimac} | Cliente Rímac: {cliente_rimac} | Clínicas: {clinicas_txt} | Total Asegurados: {n_familia + 1} | Fecha: {fecha_hora_peru}"
 
-    # 1. Intentar inyectar en Zoho CRM
     try:
         url_auth = "https://accounts.zoho.com/oauth/v2/token"
         datos_auth = {
@@ -176,7 +164,6 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
         if not access_token:
             raise Exception("No se pudo obtener el Access Token de Zoho")
 
-        # Inyectar el Lead
         url_crm = "https://www.zohoapis.com/crm/v2/Leads"
         headers = {"Authorization": f"Zoho-oauthtoken {access_token}"}
         
@@ -195,15 +182,12 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
         res_crm = requests.post(url_crm, headers=headers, json=payload)
         
         if res_crm.status_code in [200, 201]:
-            # Éxito en CRM
             return True, "¡Cotización generada y enviada a un asesor exitosamente!"
         else:
             raise Exception(f"Fallo en API Zoho CRM: {res_crm.text}")
 
-    # 2. Sistema de Respaldo (Si Zoho falla, se envía tu correo clásico)
     except Exception as e:
         print(f"⚠️ Error CRM (Salud): {e}. Activando envío de correo de respaldo...")
-        
         try:
             if "EMAIL_PASSWORD" in st.secrets:
                 SENDER_PASSWORD = st.secrets["EMAIL_PASSWORD"]
@@ -233,6 +217,7 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
         except Exception as email_error:
             print(f"❌ Fallo crítico en CRM y Correo (Salud): {email_error}")
             return False, "Experimentamos intermitencias. Por favor, intenta de nuevo en unos minutos."
+
 # --- SOPORTE ---
 def obtener_nuevo_folio():
     try:
@@ -259,7 +244,6 @@ def cargar_datos_base():
         df_precios['Aseguradora'] = df_precios['Aseguradora'].astype(str).str.strip()
         df_precios['Plan'] = df_precios['Plan'].astype(str).str.strip()
 
-        # Cargar info_adicional.csv si existe para los links
         if os.path.exists('info_adicional.csv'):
             try: df_int = pd.read_csv('info_adicional.csv')
             except: df_int = pd.read_csv('info_adicional.csv', sep=';')
@@ -330,7 +314,7 @@ def obtener_descuento_matriz(campanas, cia, plan, continuidad, edad, n_asegurado
     score_norm = quitar_tildes(score_rimac)
     cliente_norm = "SI" if quitar_tildes(cliente_rimac) in ["SI", "S", "YES"] else "NO"
     salud_norm = quitar_tildes(salud)
-   
+    
     for c in campanas:
         if not (cia_norm in c['Aseguradora'] or c['Aseguradora'] in cia_norm): continue
         if c['Plan'] != plan_norm: continue
@@ -378,7 +362,7 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
     for (cia, plan), grupo in df_redes.groupby(['Aseguradora', 'Plan']):
         cia_clean = quitar_tildes(cia)
         plan_clean = quitar_tildes(plan)
-        # 1. NUEVA REGLA RÍMAC: "Plan Vital" es SOLO para NUEVOS. Si tiene continuidad, lo ocultamos.
+        
         if continuidad == "Vengo con continuidad" and "RIMAC" in cia_clean and plan_clean == "PLAN VITAL": 
             continue
         if "Vengo con continuidad" == continuidad and "MAPFRE" in cia_clean: continue
@@ -409,7 +393,6 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
         base = calcular_precio(df_precios, cia, plan, familia)
         if base is None: continue
         
-        # OBTENCIÓN DE DESCUENTOS USANDO LOS DICCIONARIOS (Permite la edición manual)
         dsc_men = 0
         dsc_anu = 0
         for (d_cia, d_plan), v in desc_men_dict.items():
@@ -461,7 +444,6 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         st_td_b = ParagraphStyle('TDB', parent=st_td, fontName='Helvetica-Bold', textColor=AZUL)
 
         elements = []
-        # LOGO MÁS GRANDE (Se aumentó el width a 6.0cm y height a 2.2cm proporcionalmente)
         img = ImageRL("logo.png", width=4.0*cm, height=2.2*cm, kind='proportional') if os.path.exists("logo.png") else Paragraph("", st_norm)
         txt_header = """<b>YQ CORREDORES DE SEGUROS</b><br/>Propuesta de seguro de salud"""
         p_header = Paragraph(txt_header, st_tit)
@@ -491,7 +473,6 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(t_perf)
         elements.append(Spacer(1, 15))
 
-        # 1. PRIMERO DEFINIMOS LAS CABECERAS (headers) ANTES DE USARLAS
         es_int = "Internacional" in perfil['Cobertura']
         if es_int:
             headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
@@ -500,7 +481,6 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
             anchos = [3.1*cm, 3.2*cm, 3.6*cm, 3.8*cm, 2.1*cm, 2.2*cm]
 
-        # 2. LUEGO COLOCAMOS EL INSTRUCTIVO DEL PDF
         texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
         • <b>Cartilla / Carencia:</b> Haz clic en <font color='blue'><u>Cartilla</u></font> para ver todas las clínicas afiliadas, o en <font color='green'><u>Carencia</u></font> para ver los tiempos de carencia y espera.<br/>
         • <b>Int. Amb / Hosp:</b> Es el deducible (S/) o porcentaje (%) que pagarás al atenderte.<br/>
@@ -515,7 +495,6 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(t_guia)
         elements.append(Spacer(1, 10))
 
-        # 3. Y FINALMENTE INICIALIZAMOS LA TABLA DE DATOS
         data = [[Paragraph(h, st_th) for h in headers]]
         
         for _, row in df.iterrows():
@@ -524,7 +503,6 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             if rec: txt_p = "⭐ RECOMENDADO ⭐<br/>" + txt_p
             
             links = []
-            # LOGICA DE ENLACES A PRUEBA DE FALLOS
             cartilla = str(row.get('Link_Cartilla', '')).strip()
             if cartilla and cartilla != '-' and cartilla.lower() != 'nan':
                 href = cartilla if cartilla.startswith('http') else 'https://' + cartilla
@@ -577,8 +555,8 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             t_cont = Table([[Paragraph(aviso_cont, ParagraphStyle('W', parent=st_norm, textColor=VERDE))]], colWidths=[18*cm])
             t_cont.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#E8F5E9")), ('BOX', (0,0), (-1,-1), 0.5, VERDE), ('PADDING', (0,0), (-1,-1), 8)]))
             elements.append(t_cont)
-# --- NUEVA REGLA: NOTA EXCLUSIVA PARA PLAN SALUD TOTAL (MAPFRE) ---
-        # --- AVISO ESTRATÉGICO RÍMAC (Brecha de curiosidad solo para clientes) ---
+
+        # --- AVISO ESTRATÉGICO RÍMAC ---
         tiene_rimac = any("RIMAC" in str(cia).upper() or "RÍMAC" in str(cia).upper() for cia in df['Aseguradora'].values)
         if es_vista_cliente and tiene_rimac:
             elements.append(Spacer(1, 10))
@@ -586,6 +564,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             t_rimac = Table([[Paragraph(aviso_rimac, ParagraphStyle('W', parent=st_norm, textColor=colors.HexColor("#E65100")))]], colWidths=[18*cm])
             t_rimac.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FFF3E0")), ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor("#E65100")), ('PADDING', (0,0), (-1,-1), 8)]))
             elements.append(t_rimac)
+            
         tiene_salud_total = any("SALUD TOTAL" in str(p).upper() for p in df['Plan'].values)
         if tiene_salud_total:
             elements.append(Spacer(1, 10))
@@ -629,7 +608,7 @@ else:
 
     if 'resultados' not in st.session_state: st.session_state['resultados'] = None
     
-    # 1. EVALUACIÓN DE SEGURIDAD INVISIBLE (Se lee de la memoria al instante)
+    # 1. EVALUACIÓN DE SEGURIDAD INVISIBLE
     codigo_actual = st.session_state.get('codigo_secreto', '')
     es_admin = (codigo_actual == CODIGO_ADMIN)
     es_asesor = (codigo_actual in CODIGOS_ASESORES)
@@ -637,25 +616,21 @@ else:
 
     # LOGO EN PANTALLA PRINCIPAL
     if os.path.exists("logo_web.png"):
-        col1, col2, col3 = st.columns([1, 2, 1]) # Crea 3 columnas (la del medio es el doble de ancha)
+        col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.image("logo_web.png", use_container_width=True) # Se centra perfectamente
+            st.image("logo_web.png", use_container_width=True)
 
     # --- 2. EL SALUDO Y GUÍA DE CONVERSIÓN ---
-    # --- 2. EL SALUDO Y GUÍA DE CONVERSIÓN (Dinámico) ---
     nombre_url = st.query_params.get("nombre", "")
 
     if nombre_url:
-        # 🟢 VISTA PARA USUARIOS DE WHATSAPP (Acelera el cierre)
         st.title(f"¡Hola {nombre_url}! 👋")
         st.subheader("Hemos guardado tus respuestas del chat. 🚀")
         st.info("Ya tienes la mitad del camino hecho. Solo elige tus **clínicas favoritas**, ingresa tus **datos de contacto** y haz clic en Cotizar.")
     else:
-        # 🔵 VISTA PARA USUARIOS ORGÁNICOS (Guía paso a paso)
         st.title("¡Hola! 👋")
         st.subheader("Descubre el seguro de salud ideal para ti en 3 simples pasos.")
         
-        # Guía visual amigable (solo se muestra si entran de cero)
         col_g1, col_g2, col_g3 = st.columns(3)
         with col_g1:
             st.info("**1. Tu Perfil**\n\nDatos básicos y familiares.")
@@ -666,7 +641,7 @@ else:
 
     st.divider()
 
-  # LA CAJA SECRETA: Mover al menú lateral (Sidebar) - REQUERIMIENTO 1
+    # LA CAJA SECRETA: Menú lateral (Sidebar)
     with st.sidebar.expander("🔒 Acceso Interno YQ"):
         st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="")
 
@@ -696,8 +671,7 @@ else:
     with col_salud:
         salud = st.radio("Estado de salud", ["Sano", "Crónico"], index=index_salud, horizontal=True)
         
-    st.write("### 👨‍👩‍👧‍👦 2. Familia")
-    # REQUERIMIENTO 3: Mejor UX en Familia
+    st.write("### 👨‍👩‍👧‍‍👦 2. Familia")
     st.caption("💡 *Si deseas asegurar a tu cónyuge o hijos, indica cuántos son aquí abajo. Luego ingresa la edad de cada uno para calcular el descuento familiar.*")
     
     n_dep = st.number_input("Número de dependientes adicionales", 0, 10, value=num_dep)
@@ -729,7 +703,6 @@ else:
             if clinica.lower() in clinicas_url.lower():
                 clinicas_default.append(clinica)
 
-    # REQUERIMIENTO 2: Texto de ayuda experto en Clínicas
     clinicas = st.multiselect(
         "Clínicas de preferencia", 
         clinicas_unicas, 
@@ -750,13 +723,11 @@ else:
     correo, celular = "", ""
     if es_cliente:
         st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
-        # REQUERIMIENTO 4: Invertir Celular y Correo (Celular aporta más valor y debe ir primero)
         col_cel, col_mail = st.columns(2)
         with col_cel:
             celular = st.text_input("Celular / Whatsapp", max_chars=9, placeholder="Ej: 999123456")
         with col_mail:
             correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com")
-           
 
     # --- GENERACIÓN DE DICCIONARIOS EN MEMORIA ---
     descuentos_mensual = {}
@@ -830,11 +801,9 @@ else:
             op = {f"{r['Aseguradora']} {r['Plan']}": r['ID'] for _,r in res.iterrows()}
             
             if es_cliente:
-                # REQUERIMIENTO 5: Filtrar el plan más barato por aseguradora
                 mejores_planes = res.drop_duplicates(subset=['Aseguradora'], keep='first')
                 st.success(f"¡Hemos analizado todas las opciones y seleccionamos los {len(mejores_planes)} mejores planes para ti!")
                 
-                # Cuadro resumen
                 df_resumen = mejores_planes[['Aseguradora', 'Plan', 'Precio_Mensual_Final', 'Precio_Anual_Final']].copy()
                 df_resumen.columns = ['Aseguradora', 'Mejor Plan Sugerido', 'Mensual', 'Anual']
                 df_resumen['Mensual'] = df_resumen['Mensual'].apply(lambda x: f"S/ {x:,.0f}")
@@ -842,16 +811,15 @@ else:
                 st.dataframe(df_resumen, hide_index=True, use_container_width=True)
                 
                 st.info("👇 Descarga tu cotización detallada para ver coberturas, o contáctanos para contratar.")
-                # --- DEFINIMOS EL ENLACE DE WHATSAPP ANTES DE CREAR EL BOTÓN ---
+                
                 numero_whatsapp = "51906462225"
                 mensaje_wa = f"Hola, mi nombre es {nom}. Acabo de usar el cotizador web de salud y quiero contratar el plan que me sugirieron."
                 enlace_wa = f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_wa)}"
                             
-                # REQUERIMIENTO 6 Y SOLUCIÓN DE ERROR: Botones en la misma línea
                 col_btn_pdf, col_btn_wa = st.columns(2)
                 
                 planes_seleccionados = mejores_planes.apply(lambda r: f"{r['Aseguradora']} {r['Plan']}", axis=1).tolist()
-                sel = planes_seleccionados[0] # Se marca como favorito el más barato
+                sel = planes_seleccionados[0]
                 clin_txt = ", ".join(st.session_state.get('clinicas_sel', [])) or "su red de afiliados"
                 razon = f"Este plan es el que tiene mejor precio considerando las clínicas que prefiere ({clin_txt}) y sus beneficios."
                 if cont == "Nuevo": razon += " Recuerde revisar los periodos de carencia."
@@ -866,7 +834,6 @@ else:
                         
                         datos_para_sheet = [obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, "Cliente"]
                         
-                        # SOLUCIÓN 1: El parámetro 'key' evita el choque y elimina el error rojo
                         st.download_button(
                             label="📄 Descargar Cotización Detallada", 
                             data=pdf_res, 
@@ -879,67 +846,13 @@ else:
                         )
                 
                 with col_btn_wa:
-                    # SOLUCIÓN 2: Botón HTML para recuperar el verde, con altura (42px) para alinear
                     st.markdown(f"""
                         <a href='{enlace_wa}' target='_blank' style='display: flex; align-items: center; justify-content: center; width: 100%; height: 42px; background-color: #25D366; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;'>
                             📲 Contratar vía WhatsApp
                         </a>
                     """, unsafe_allow_html=True)
-                        
-                        # RECUPERAMOS EL GUARDADO EN SHEETS USANDO ON_CLICK
-                        datos_para_sheet = [obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, "Cliente"]
-                        
-                        st.download_button(
-                            label="📄 Descargar Cotización Detallada", 
-                            data=pdf_res, 
-                            file_name=f"COTISALUD_{nom_clean}_{fecha_str}.pdf", 
-                            mime="application/pdf", 
-                            use_container_width=True,
-                            on_click=guardar_en_sheets,
-                            args=(datos_para_sheet,)
-                        )
-                
-                with col_btn_wa:
-                    # Usamos el botón nativo de enlace de Streamlit para una alineación 100% perfecta
-                    st.link_button("📲 Contratar vía WhatsApp", enlace_wa, use_container_width=True)
-                
-                planes_seleccionados = mejores_planes.apply(lambda r: f"{r['Aseguradora']} {r['Plan']}", axis=1).tolist()
-                sel = planes_seleccionados[0] # Se marca como favorito el más barato
-                clin_txt = ", ".join(st.session_state.get('clinicas_sel', [])) or "su red de afiliados"
-                razon = f"Este plan es el que tiene mejor precio considerando las clínicas que prefiere ({clin_txt}) y sus beneficios."
-                if cont == "Nuevo": razon += " Recuerde revisar los periodos de carencia."
-
-                with col_btn_pdf:
-                    pdf_res = generar_pdf(st.session_state['perfil'], mejores_planes, op[sel], razon, incrementar_folio(), es_vista_cliente=True)
-                    if isinstance(pdf_res, str): 
-                        st.error(pdf_res)
-                    else:
-                        nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
-                        fecha_str = obtener_hora_peru().strftime("%d%m%y")
-                        
-                        # RECUPERAMOS EL GUARDADO EN SHEETS USANDO ON_CLICK
-                        datos_para_sheet = [obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, "Cliente"]
-                        
-                        st.download_button(
-                            label="📄 Descargar Cotización Detallada", 
-                            data=pdf_res, 
-                            file_name=f"COTISALUD_{nom_clean}_{fecha_str}.pdf", 
-                            mime="application/pdf", 
-                            use_container_width=True,
-                            on_click=guardar_en_sheets,
-                            args=(datos_para_sheet,)
-                        )
-                
-                with col_btn_wa:
-                    # Botón WhatsApp
-                    st.markdown(f"""
-                        <a href='{enlace_wa}' target='_blank' style='display: block; width: 100%; text-align: center; background-color: #25D366; color: white; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 2px;'>
-                            📲 Contratar vía WhatsApp
-                        </a>
-                    """, unsafe_allow_html=True)
             
             else:
-                # VISTA ADMIN: Muestra todos los resultados detallados
                 st.success(f"Vista Asesor: {len(res)} opciones compatibles.")
                 cols = ['Aseguradora','Plan']
                 if "Integral + Cobertura Internacional" in cob: cols += ['Int_Amb_Full', 'Int_Hosp_Full']
@@ -976,14 +889,13 @@ else:
                         if isinstance(pdf_res, str): 
                             st.error(pdf_res)
                         else:
-                            # RECUPERAMOS EL GUARDADO EN SHEETS PARA EL ASESOR (Alerta normal)
                             datos_para_sheet = [obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, "Admin/Asesor"]
                             guardar_en_sheets(datos_para_sheet)
                             
                             nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
                             st.download_button("📥 Descargar PDF", pdf_res, f"COTISALUD_{nom_clean}.pdf", "application/pdf")
 
-   # --- CIERRE HUMANO (Salvavidas UX Dinámico) ---
+    # --- CIERRE HUMANO (Salvavidas UX Dinámico) ---
     if st.session_state.get('resultados') is None:
         st.divider()
         st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona un seguro de salud/Continuidad?**")
@@ -993,9 +905,8 @@ else:
         if "nombre" in st.query_params: mensaje_ayuda += f" Mi nombre es {st.query_params['nombre']}."
         enlace_ayuda = f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_ayuda)}"
 
-        # Botón HTML 100% Verde WhatsApp
         st.markdown(f"""
-            <a href='{enlace_ayuda}' target='_blank' style='display: block; width: 100%; text-align: center; background-color: #25D366; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: sans-serif; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);'>
+            <a href='{enlace_ayuda}' target='_blank' style='display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; background-color: #25D366; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: sans-serif; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);'>
                 💬 Chatear con un experto
             </a>
         """, unsafe_allow_html=True)
