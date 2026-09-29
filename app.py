@@ -847,7 +847,37 @@ else:
                 mensaje_wa = f"Hola, mi nombre es {nom}. Acabo de usar el cotizador web de salud y quiero contratar el plan que me sugirieron."
                 enlace_wa = f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_wa)}"
                             
-                # REQUERIMIENTO 6: Botones en la misma línea
+                # REQUERIMIENTO 6 Y SOLUCIÓN DE ERROR: Botones en la misma línea
+                col_btn_pdf, col_btn_wa = st.columns(2)
+                
+                planes_seleccionados = mejores_planes.apply(lambda r: f"{r['Aseguradora']} {r['Plan']}", axis=1).tolist()
+                sel = planes_seleccionados[0] # Se marca como favorito el más barato
+                clin_txt = ", ".join(st.session_state.get('clinicas_sel', [])) or "su red de afiliados"
+                razon = f"Este plan es el que tiene mejor precio considerando las clínicas que prefiere ({clin_txt}) y sus beneficios."
+                if cont == "Nuevo": razon += " Recuerde revisar los periodos de carencia."
+
+                with col_btn_pdf:
+                    # Aquí está tu código del PASO C (es_vista_cliente=True)
+                    pdf_res = generar_pdf(st.session_state['perfil'], mejores_planes, op[sel], razon, incrementar_folio(), es_vista_cliente=True)
+                    if isinstance(pdf_res, str): 
+                        st.error(pdf_res)
+                    else:
+                        nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
+                        fecha_str = obtener_hora_peru().strftime("%d%m%y")
+                        
+                        # RECUPERAMOS EL GUARDADO EN SHEETS USANDO ON_CLICK
+                        datos_para_sheet = [obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, "Cliente"]
+                        
+                        st.download_button(
+                            label="📄 Descargar Cotización Detallada", 
+                            data=pdf_res, 
+                            file_name=f"COTISALUD_{nom_clean}_{fecha_str}.pdf", 
+                            mime="application/pdf", 
+                            use_container_width=True,
+                            on_click=guardar_en_sheets,
+                            args=(datos_para_sheet,)
+                        )
+                
                 with col_btn_wa:
                     # Usamos el botón nativo de enlace de Streamlit para una alineación 100% perfecta
                     st.link_button("📲 Contratar vía WhatsApp", enlace_wa, use_container_width=True)
