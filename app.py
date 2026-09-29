@@ -781,15 +781,69 @@ else:
             st.session_state['nombre_cliente'] = nom
             st.session_state['clinicas_sel'] = clinicas
 
-    # --- RESULTADOS ---
+   # --- RESULTADOS ---
     if st.session_state['resultados'] is not None:
         res = st.session_state['resultados']
         if res.empty:
             st.error(f"⚠️ No se encontraron planes. Intenta cambiar los filtros.")
         else:
-            st.success(f"¡Hemos encontrado {len(res)} opciones compatibles!")
+            op = {f"{r['Aseguradora']} {r['Plan']}": r['ID'] for _,r in res.iterrows()}
             
-            if not es_cliente:
+            if es_cliente:
+                # REQUERIMIENTO 5: Filtrar el plan más barato por aseguradora
+                mejores_planes = res.drop_duplicates(subset=['Aseguradora'], keep='first')
+                st.success(f"¡Hemos analizado todas las opciones y seleccionamos los {len(mejores_planes)} mejores planes para ti!")
+                
+                # Cuadro resumen
+                df_resumen = mejores_planes[['Aseguradora', 'Plan', 'Precio_Mensual_Final', 'Precio_Anual_Final']].copy()
+                df_resumen.columns = ['Aseguradora', 'Mejor Plan Sugerido', 'Mensual', 'Anual']
+                df_resumen['Mensual'] = df_resumen['Mensual'].apply(lambda x: f"S/ {x:,.0f}")
+                df_resumen['Anual'] = df_resumen['Anual'].apply(lambda x: f"S/ {x:,.0f}")
+                st.dataframe(df_resumen, hide_index=True, use_container_width=True)
+                
+                st.info("👇 Descarga tu cotización detallada para ver coberturas, o contáctanos para contratar.")
+                
+                # REQUERIMIENTO 6: Botones en la misma línea
+                col_btn_pdf, col_btn_wa = st.columns(2)
+                
+                planes_seleccionados = mejores_planes.apply(lambda r: f"{r['Aseguradora']} {r['Plan']}", axis=1).tolist()
+                sel = planes_seleccionados[0] # Se marca como favorito el más barato
+                clin_txt = ", ".join(st.session_state.get('clinicas_sel', [])) or "su red de afiliados"
+                razon = f"Este plan es el que tiene mejor precio considerando las clínicas que prefiere ({clin_txt}) y sus beneficios."
+                if cont == "Nuevo": razon += " Recuerde revisar los periodos de carencia."
+
+                with col_btn_pdf:
+                    pdf_res = generar_pdf(st.session_state['perfil'], mejores_planes, op[sel], razon, incrementar_folio())
+                    if isinstance(pdf_res, str): 
+                        st.error(pdf_res)
+                    else:
+                        nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
+                        fecha_str = obtener_hora_peru().strftime("%d%m%y")
+                        
+                        # RECUPERAMOS EL GUARDADO EN SHEETS USANDO ON_CLICK
+                        datos_para_sheet = [obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, "Cliente"]
+                        
+                        st.download_button(
+                            label="📄 Descargar Cotización Detallada", 
+                            data=pdf_res, 
+                            file_name=f"COTISALUD_{nom_clean}_{fecha_str}.pdf", 
+                            mime="application/pdf", 
+                            use_container_width=True,
+                            on_click=guardar_en_sheets,
+                            args=(datos_para_sheet,)
+                        )
+                
+                with col_btn_wa:
+                    # Botón WhatsApp
+                    st.markdown(f"""
+                        <a href='{enlace_wa}' target='_blank' style='display: block; width: 100%; text-align: center; background-color: #25D366; color: white; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 2px;'>
+                            📲 Contratar vía WhatsApp
+                        </a>
+                    """, unsafe_allow_html=True)
+            
+            else:
+                # VISTA ADMIN: Muestra todos los resultados detallados
+                st.success(f"Vista Asesor: {len(res)} opciones compatibles.")
                 cols = ['Aseguradora','Plan']
                 if "Integral + Cobertura Internacional" in cob: cols += ['Int_Amb_Full', 'Int_Hosp_Full']
                 if any(c != "Integral + Cobertura Internacional" for c in cob): cols += ['Txt_Cob_Amb', 'Txt_Cob_Hosp']
@@ -802,48 +856,35 @@ else:
                 cols_final = [c for c in cols if c in df_view.columns]
                 columnas_precios = ['Precio_Mensual_Base', 'Pct_Dscto_Mensual', 'Precio_Mensual_Final', 'Precio_Anual_Base', 'Pct_Dscto_Anual', 'Precio_Anual_Final']
                 st.dataframe(df_view[cols_final + columnas_precios], hide_index=True)
-            else:
-                st.info("👇 Descarga el PDF para ver el comparativo detallado.")
-
-            st.divider()
-            
-            # SELECCIÓN DE PLANES PDF
-            st.subheader("Configuración del PDF")
-            st.write("Desmarca los planes que **NO** deseas incluir en el documento final:")
-            
-            op = {f"{r['Aseguradora']} {r['Plan']}": r['ID'] for _,r in res.iterrows()}
-            op_keys = list(op.keys())
-            
-            planes_seleccionados = []
-            
-            for i, opcion in enumerate(op_keys):
-                if st.checkbox(opcion, value=True, key=f"pdf_chk_{i}"):
-                    planes_seleccionados.append(opcion)
-            
-            if not planes_seleccionados:
-                st.warning("⚠️ Debes dejar marcado al menos un plan para generar el PDF.")
-            else:
-                res_filtrado = res[res.apply(lambda r: f"{r['Aseguradora']} {r['Plan']}" in planes_seleccionados, axis=1)]
-                
-                clin_txt = ", ".join(st.session_state.get('clinicas_sel', [])) or "su red de afiliados"
-                txt_motivo = f"Este plan es el que tiene mejor precio considerando las clínicas que prefiere ({clin_txt}) y sus beneficios."
-                if cont == "Nuevo": txt_motivo += " Recuerde revisar los periodos de carencia."
 
                 st.divider()
-                st.write("### Recomendación Principal")
-                sel = planes_seleccionados[0] if es_cliente else st.radio("¿Qué plan deseas recomendar y resaltar con la estrella (⭐) en el PDF?", planes_seleccionados)
-                razon = txt_motivo if es_cliente else st.text_area("Motivo (Análisis del Experto):", value=txt_motivo)
+                st.subheader("Configuración del PDF (Asesor)")
+                op_keys = list(op.keys())
+                planes_seleccionados = []
+                for i, opcion in enumerate(op_keys):
+                    if st.checkbox(opcion, value=True, key=f"pdf_chk_{i}"):
+                        planes_seleccionados.append(opcion)
                 
-                if st.button("Generar PDF", type="secondary"):
-                    pdf_res = generar_pdf(st.session_state['perfil'], res_filtrado, op[sel], razon, incrementar_folio())
-                    if isinstance(pdf_res, str): st.error(pdf_res)
-                    else:
-                        rol_actual = "Cliente" if es_cliente else "Admin/Asesor"
-                        guardar_en_sheets([obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, rol_actual])
-                        nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
-                        cls_clean = "_".join([c.strip().split()[0] for c in st.session_state.get('clinicas_sel', [])])
-                        fecha_str = obtener_hora_peru().strftime("%d%m%y_%H%M")
-                        st.download_button("📥 Descargar PDF", pdf_res, f"COTISALUD_{nom_clean}_{cls_clean}_{fecha_str}.pdf", "application/pdf")
+                if not planes_seleccionados:
+                    st.warning("⚠️ Debes dejar marcado al menos un plan.")
+                else:
+                    res_filtrado = res[res.apply(lambda r: f"{r['Aseguradora']} {r['Plan']}" in planes_seleccionados, axis=1)]
+                    clin_txt = ", ".join(st.session_state.get('clinicas_sel', [])) or "su red de afiliados"
+                    txt_motivo = f"Este plan es el que tiene mejor precio considerando las clínicas que prefiere ({clin_txt})."
+                    sel = st.radio("Resaltar con la estrella (⭐):", planes_seleccionados)
+                    razon = st.text_area("Motivo (Análisis del Experto):", value=txt_motivo)
+                    
+                    if st.button("Generar PDF", type="secondary"):
+                        pdf_res = generar_pdf(st.session_state['perfil'], res_filtrado, op[sel], razon, incrementar_folio())
+                        if isinstance(pdf_res, str): 
+                            st.error(pdf_res)
+                        else:
+                            # RECUPERAMOS EL GUARDADO EN SHEETS PARA EL ASESOR (Alerta normal)
+                            datos_para_sheet = [obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, "Admin/Asesor"]
+                            guardar_en_sheets(datos_para_sheet)
+                            
+                            nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
+                            st.download_button("📥 Descargar PDF", pdf_res, f"COTISALUD_{nom_clean}.pdf", "application/pdf")
 
     # --- CIERRE HUMANO (Salvavidas UX) ---
     st.divider()
