@@ -895,10 +895,3 @@ else:
     st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona un seguro de salud/Continuidad?**")
     st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.")
    
-    
-    # Botón HTML 100% Verde WhatsApp
-    st.markdown(f"""
-        <a href="{enlace_wa}" target="_blank" style="display: block; width: 100%; text-align: center; background-color: #25D366; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: sans-serif; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);">
-            💬 Chatear con un experto
-        </a>
-    """, unsafe_allow_html=True)
