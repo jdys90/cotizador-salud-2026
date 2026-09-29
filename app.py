@@ -628,7 +628,7 @@ else:
 
   # LA CAJA SECRETA: Mover al menú lateral (Sidebar) - REQUERIMIENTO 1
     with st.sidebar.expander("🔒 Acceso Interno YQ"):
-        st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="ADMIN2026")
+        st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="")
 
     # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
     nombre_url = st.query_params.get("nombre", "")
@@ -651,7 +651,7 @@ else:
     
     col_edad, col_salud = st.columns(2)
     with col_edad:
-        edad = st.number_input("Edad", min_value=0, max_value=99, value=edad_default, placeholder="Obligatorio")
+        edad = st.number_input("Edad", min_value=0, max_value=99, value=edad_default, placeholder="Edad del asegurado")
         edad_calculo = edad if edad is not None else 0 
     with col_salud:
         salud = st.radio("Estado de salud", ["Sano", "Crónico"], index=index_salud, horizontal=True)
@@ -716,25 +716,7 @@ else:
             celular = st.text_input("Celular / Whatsapp", max_chars=9, placeholder="Ej: 999123456")
         with col_mail:
             correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com")
-    
-    if es_cliente:
-        score_rimac = "ROJO"
-        cliente_rimac = "No"
-    else:
-        col_sc, col_cr = st.columns(2)
-        with col_sc:
-            score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"], index=2)
-        with col_cr:
-            cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], index=1, horizontal=True)
-       
-    correo, celular = "", ""
-    if es_cliente:
-        st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
-        col_mail, col_cel = st.columns(2)
-        with col_mail:
-            correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com")
-        with col_cel:
-            celular = st.text_input("Celular / Whatsapp", max_chars=9, placeholder="Ej: 999123456")
+           
 
     # --- GENERACIÓN DE DICCIONARIOS EN MEMORIA ---
     descuentos_mensual = {}
