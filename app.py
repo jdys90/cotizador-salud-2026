@@ -18,6 +18,11 @@ st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layou
 
 st.markdown("""
     <style>
+    /* Ocultar marca de agua y cabecera nativa de Streamlit */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    
     /* 1. Botón Principal: Cotizar */
     div.stButton > button {
         background-color: #2456A6 !important;
@@ -678,32 +683,76 @@ else:
     es_asesor = (codigo_actual in CODIGOS_ASESORES)
     es_cliente = (not es_admin and not es_asesor)
 
-    # LOGO EN PANTALLA PRINCIPAL
-    if os.path.exists("logo_web.png"):
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            st.image("logo_web.png", use_container_width=True)
-
-    # --- 2. EL SALUDO Y GUÍA DE CONVERSIÓN ---
+    # --- 2. HERO SECTION & LANDING PAGE (MODO CAMALEÓN) ---
     nombre_url = st.query_params.get("nombre", "")
+    origen_url = st.query_params.get("origen", "")
 
-    if nombre_url:
-        st.title(f"¡Hola {nombre_url}! 👋")
-        st.subheader("Hemos guardado tus respuestas del chat. 🚀")
-        st.info("Ya tienes la mitad del camino hecho. Solo elige tus **clínicas favoritas**, ingresa tus **datos de contacto** y haz clic en Cotizar.")
-    else:
-        st.title("¡Hola! 👋")
-        st.subheader("Descubre el seguro de salud ideal para ti en 3 simples pasos.")
+    # Si NO viene de WordPress, mostramos logo y diseño completo
+    if origen_url != "web":
         
-        col_g1, col_g2, col_g3 = st.columns(3)
-        with col_g1:
-            st.info("**1. Tu Perfil**\n\nDatos básicos y familiares.")
-        with col_g2:
-            st.info("**2. Preferencias**\n\nCobertura y clínicas.")
-        with col_g3:
-            st.info("**3. Cotización**\n\nComparativo y PDF.")
+        # 2.1 Mostramos el Logo
+        if os.path.exists("logo_web.png"):
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                st.image("logo_web.png", use_container_width=True)
+                
+        # 2.2 Textos y Gatillos de Confianza
+        if nombre_url:
+            st.markdown(f"""
+                <div style="text-align: center; padding: 15px 0px;">
+                    <h1 style="color: #2456A6; font-size: 2.2rem; font-weight: 800; margin-bottom: 5px;">
+                        ¡Hola {nombre_url}! 👋 Ya tenemos tus datos.
+                    </h1>
+                    <p style="color: #555555; font-size: 1.1rem;">
+                        Estás a un paso de encontrar tu plan ideal. Completa tus clínicas favoritas y obtén tu cotización al instante.
+                    </p>
+                </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+                <div style="text-align: center; padding: 20px 0px 10px 0px;">
+                    <h1 style="color: #2456A6; font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; line-height: 1.2;">
+                        Cotiza y compara el mejor seguro de salud en 3 minutos ⏱️
+                    </h1>
+                    <p style="color: #666666; font-size: 1.2rem; font-weight: 400; margin-bottom: 25px;">
+                        Analizamos planes de <b>Pacífico, Mapfre, Rímac y La Positiva</b> para mostrarte las tarifas más bajas del mercado, garantizado.
+                    </p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # Prueba Social y Gatillos de Confianza (Trust Badges)
+            col_t1, col_t2, col_t3 = st.columns(3)
+            with col_t1:
+                st.markdown("""
+                <div style="background-color: #F8F9FA; padding: 15px; border-radius: 8px; border-left: 4px solid #28A745; text-align: center; height: 100px;">
+                    <h4 style="margin:0; color: #2456A6; font-size: 1.1rem;">🔒 Respaldo SBS</h4>
+                    <p style="margin:5px 0 0 0; color: #666; font-size: 0.85rem;">Corredores oficiales y regulados</p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+            with col_t2:
+                st.markdown("""
+                <div style="background-color: #F8F9FA; padding: 15px; border-radius: 8px; border-left: 4px solid #28A745; text-align: center; height: 100px;">
+                    <h4 style="margin:0; color: #2456A6; font-size: 1.1rem;">💰 Tarifas VIP</h4>
+                    <p style="margin:5px 0 0 0; color: #666; font-size: 0.85rem;">Descuentos exclusivos de agencia</p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+            with col_t3:
+                st.markdown("""
+                <div style="background-color: #F8F9FA; padding: 15px; border-radius: 8px; border-left: 4px solid #28A745; text-align: center; height: 100px;">
+                    <h4 style="margin:0; color: #2456A6; font-size: 1.1rem;">⚡ 100% Online</h4>
+                    <p style="margin:5px 0 0 0; color: #666; font-size: 0.85rem;">Cotización inmediata y sin compromiso</p>
+                </div>
+                """, unsafe_allow_html=True)
 
-    st.divider()
+        st.divider()
+    else:
+        # MODO CAMALEÓN (Para WordPress): Minimalista y directo al grano
+        if nombre_url:
+            st.write(f"### 👋 ¡Hola {nombre_url}! Completa tus preferencias para cotizar:")
+        else:
+            st.write("### ⚙️️ Completa tus datos para ver tus opciones:")
 
     # LA CAJA SECRETA: Menú lateral (Sidebar)
     with st.sidebar.expander("🔒 Acceso Interno YQ"):
