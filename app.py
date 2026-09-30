@@ -423,7 +423,7 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
         })
 
     return pd.DataFrame(candidatos).sort_values('Precio_Final') if candidatos else pd.DataFrame()
-
+    
 # --- PDF ---
 def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
     try:
@@ -431,27 +431,30 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=15, leftMargin=15, topMargin=20, bottomMargin=20)
         estilos = getSampleStyleSheet()
         
-        AZUL = colors.HexColor("#2456A6"); DORADO_FONDO = colors.HexColor("#FFF2CC"); DORADO_BORDE = colors.HexColor("#D6B656")
-        VERDE = colors.HexColor("#28A745"); ROJO = colors.HexColor("#D32F2F"); GRIS = colors.HexColor("#6E7A8A"); AZUL_CLARO = colors.HexColor("#E6F3FF")
+        # 1. PALETA MINIMALISTA Y CORPORATIVA (CRO)
+        AZUL_CORP = colors.HexColor("#2456A6")
+        AZUL_CLARO = colors.HexColor("#F0F6FF")  # Fondo suave para el recomendado
+        VERDE_EXITO = colors.HexColor("#28A745") # Exclusivo para ahorros y botones
+        GRIS_TEXTO = colors.HexColor("#444444")  # Gris oscuro elegante para lectura
+        GRIS_FONDO = colors.HexColor("#F8F9FA")  # Fondo limpio para cajas de info
+        BORDE_SUAVE = colors.HexColor("#DEE2E6") # Líneas divisorias minimalistas
         
-        st_tit = ParagraphStyle('T', parent=estilos['Heading1'], fontName='Helvetica-Bold', fontSize=14, textColor=AZUL, leading=16)
-        st_sub = ParagraphStyle('S', parent=estilos['Normal'], fontName='Helvetica-Bold', fontSize=11, textColor=AZUL)
-        st_norm = ParagraphStyle('N', parent=estilos['Normal'], fontSize=9, textColor=GRIS, leading=11)
-        st_bold = ParagraphStyle('B', parent=st_norm, fontName='Helvetica-Bold', textColor=AZUL)
-        st_analysis = ParagraphStyle('Analysis', parent=st_norm, leading=14, fontSize=9)
+        st_tit = ParagraphStyle('T', parent=estilos['Heading1'], fontName='Helvetica-Bold', fontSize=14, textColor=AZUL_CORP, leading=16)
+        st_sub = ParagraphStyle('S', parent=estilos['Normal'], fontName='Helvetica-Bold', fontSize=11, textColor=AZUL_CORP)
+        st_norm = ParagraphStyle('N', parent=estilos['Normal'], fontSize=8.5, textColor=GRIS_TEXTO, leading=11)
+        st_bold = ParagraphStyle('B', parent=st_norm, fontName='Helvetica-Bold', textColor=AZUL_CORP)
         st_th = ParagraphStyle('TH', parent=estilos['Normal'], fontSize=8, fontName='Helvetica-Bold', textColor=colors.white, alignment=1)
-        st_td = ParagraphStyle('TD', parent=estilos['Normal'], fontSize=7.5, textColor=colors.black, leading=9)
-        st_td_b = ParagraphStyle('TDB', parent=st_td, fontName='Helvetica-Bold', textColor=AZUL)
+        # Ajustamos el interlineado de la tabla para que respire mejor
+        st_td = ParagraphStyle('TD', parent=estilos['Normal'], fontSize=7.5, textColor=GRIS_TEXTO, leading=9.5)
+        st_td_b = ParagraphStyle('TDB', parent=st_td, fontName='Helvetica-Bold', textColor=AZUL_CORP)
 
         elements = []
+        # Cabecera
         img = ImageRL("logo.png", width=4.0*cm, height=2.2*cm, kind='proportional') if os.path.exists("logo.png") else Paragraph("", st_norm)
-        txt_header = """<b>YQ CORREDORES DE SEGUROS</b><br/>Propuesta de seguro de salud"""
-        p_header = Paragraph(txt_header, st_tit)
-        
+        p_header = Paragraph("<b>YQ CORREDORES DE SEGUROS</b><br/>Propuesta de Seguro de Salud", st_tit)
         fecha_peru = obtener_hora_peru().strftime('%d/%m/%Y')
-        txt_folio = f"<b>Folio:</b> {folio}<br/><b>Fecha:</b> {fecha_peru}"
+        p_folio = Paragraph(f"<font color='#666666'><b>Folio:</b> {folio}<br/><b>Fecha:</b> {fecha_peru}</font>", ParagraphStyle('F', parent=st_norm, alignment=2))
         
-        p_folio = Paragraph(txt_folio, ParagraphStyle('F', parent=st_norm, alignment=2))
         t_head = Table([[img, p_header, p_folio]], colWidths=[4.0*cm, 8.5*cm, 3.5*cm])
         t_head.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'MIDDLE')]))
         elements.append(t_head)
@@ -460,6 +463,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(Paragraph("En YQ Corredores de Seguros, entendemos la importancia de proteger tu salud. Te presentamos esta cotización personalizada con precios exclusivos.", st_norm))
         elements.append(Spacer(1, 10))
 
+        # Perfil del Cliente
         elements.append(Paragraph("TU PERFIL", st_sub))
         elements.append(Spacer(1, 5))
         data_perfil = [
@@ -468,50 +472,42 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             [Paragraph("<b>Dependientes:</b>", st_bold), Paragraph(perfil['Dependientes'], st_norm),
              Paragraph("<b>Condición:</b>", st_bold), Paragraph(perfil['Continuidad'], st_norm)]
         ]
-        t_perf = Table(data_perfil, colWidths=[3.0*cm, 7.5*cm, 2.5*cm, 5.0*cm])
-        t_perf.setStyle(TableStyle([('LINEBELOW', (0,0), (-1,-1), 0.5, colors.lightgrey), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('PADDING', (0,0), (-1,-1), 5)]))
+        t_perf = Table(data_perfil, colWidths=[2.5*cm, 8.0*cm, 2.5*cm, 5.0*cm])
+        t_perf.setStyle(TableStyle([('LINEBELOW', (0,0), (-1,-1), 0.5, BORDE_SUAVE), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('PADDING', (0,0), (-1,-1), 5)]))
         elements.append(t_perf)
         elements.append(Spacer(1, 15))
 
-        es_int = "Internacional" in perfil['Cobertura']
-        if es_int:
-            headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
-            anchos = [3.1*cm, 3.2*cm, 3.6*cm, 3.8*cm, 2.1*cm, 2.2*cm]
-        else:
-            headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
-            anchos = [3.1*cm, 3.2*cm, 3.6*cm, 3.8*cm, 2.1*cm, 2.2*cm]
-
+        # Instructivo Limpio y Unificado
         texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
-        • <b>Cartilla / Carencia:</b> Haz clic en <font color='blue'><u>Cartilla</u></font> para ver todas las clínicas afiliadas,\n\no en <font color='green'><u>Carencia</u></font> para ver los tiempos de carencia y espera.<br/>
-        • <b>Int. Amb / Hosp:</b> Es el deducible (S/) o porcentaje (%) que pagarás al atenderte.<br/>
-        • <b>Precios y Descuentos:</b> El precio <strike color='grey'>tachado en gris</strike> es la tarifa regular de la aseguradora.\n\nEl precio en <b>negrita</b> es tu costo final exclusivo por contratar con nosotros.\n\nEl monto en <font color='#28A745'><b>verde</b></font> es el dinero que te ahorras hoy."""
+        • <b>Enlaces:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> para ver la red de clínicas, o en <font color='#2456A6'><u>Carencia</u></font> para ver los tiempos de espera.<br/>
+        • <b>Precios y Ahorro:</b> El precio <strike color='#999999'>tachado</strike> es la tarifa pública de la aseguradora. El monto en <font color='#28A745'><b>verde</b></font> es tu ahorro directo al contratar con YQ."""
         
         t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
-        t_guia.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F4F8")), 
-            ('BOX', (0,0), (-1,-1), 0.5, AZUL), 
-            ('PADDING', (0,0), (-1,-1), 8)
-        ]))
+        t_guia.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), GRIS_FONDO), ('BOX', (0,0), (-1,-1), 0.5, BORDE_SUAVE), ('PADDING', (0,0), (-1,-1), 8)]))
         elements.append(t_guia)
         elements.append(Spacer(1, 10))
 
+        # Tabla Principal
+        es_int = "Internacional" in perfil['Cobertura']
+        headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
+        anchos = [3.1*cm, 3.2*cm, 3.6*cm, 3.8*cm, 2.1*cm, 2.2*cm]
         data = [[Paragraph(h, st_th) for h in headers]]
         
         for _, row in df.iterrows():
             rec = (row['ID'] == id_sel)
             txt_p = f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}"
-            if rec: txt_p = "⭐ RECOMENDADO ⭐<br/>" + txt_p
+            if rec: txt_p = "<font color='#2456A6'>★ RECOMENDADO</font><br/>" + txt_p
             
             links = []
             cartilla = str(row.get('Link_Cartilla', '')).strip()
             if cartilla and cartilla != '-' and cartilla.lower() != 'nan':
                 href = cartilla if cartilla.startswith('http') else 'https://' + cartilla
-                links.append(f"<a href='{href}' color='blue'><u>Cartilla</u></a>")
+                links.append(f"<a href='{href}' color='#2456A6'><u>Cartilla</u></a>")
                 
             carencia = str(row.get('Link_Carencia', '')).strip()
             if carencia and carencia != '-' and carencia.lower() != 'nan':
                 href_c = carencia if carencia.startswith('http') else 'https://' + carencia
-                links.append(f"<a href='{href_c}' color='green'><u>Carencia</u></a>")
+                links.append(f"<a href='{href_c}' color='#2456A6'><u>Carencia</u></a>")
             
             if links: txt_p += "<br/>" + " | ".join(links)
 
@@ -521,13 +517,14 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             precio_anual_str = f"S/ {row['Precio_Anual_Final']:,.2f}"
             precio_mensual_str = f"S/ {row['Precio_Mensual_Final']:,.0f}"
 
+            # Estilo limpio para los precios: tachado más pequeño y discreto
             if dsc_anu > 0:
                 ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
-                precio_anual_str = f"<strike color='grey'>S/ {row['Precio_Anual_Base']:,.0f}</strike><br/><b>{precio_anual_str}</b><br/><font color='#28A745' size='7'><b>Ahorras S/ {ahorro_anual:,.0f}</b></font>"
+                precio_anual_str = f"<font size='6.5'><strike color='#999999'>S/ {row['Precio_Anual_Base']:,.0f}</strike></font><br/><b>{precio_anual_str}</b><br/><font color='#28A745' size='6.5'><b>Ahorras S/ {ahorro_anual:,.0f}</b></font>"
             
             if dsc_men > 0:
                 ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
-                precio_mensual_str = f"<strike color='grey'>S/ {row['Precio_Mensual_Base']:,.0f}</strike><br/><b>{precio_mensual_str}</b><br/><font color='#28A745' size='7'><b>Ahorras S/ {ahorro_mensual:,.0f}</b></font>"
+                precio_mensual_str = f"<font size='6.5'><strike color='#999999'>S/ {row['Precio_Mensual_Base']:,.0f}</strike></font><br/><b>{precio_mensual_str}</b><br/><font color='#28A745' size='6.5'><b>Ahorras S/ {ahorro_mensual:,.0f}</b></font>"
                 
             if es_int:
                 fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Int_Amb_Full'], st_td), Paragraph(row['Int_Hosp_Full'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
@@ -536,60 +533,65 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             data.append(fila)
 
         t = Table(data, colWidths=anchos, repeatRows=1)
-        estilos_t = [('BACKGROUND', (0,0), (-1,0), AZUL), ('GRID', (0,0), (-1,-1), 0.5, colors.grey), ('VALIGN', (0,0), (-1,-1), 'TOP'), ('PADDING', (0,0), (-1,-1), 4)]
+        estilos_t = [('BACKGROUND', (0,0), (-1,0), AZUL_CORP), ('GRID', (0,0), (-1,-1), 0.5, BORDE_SUAVE), ('VALIGN', (0,0), (-1,-1), 'TOP'), ('PADDING', (0,0), (-1,-1), 4)]
+        
         for i, row in enumerate(df.iterrows()):
             if row[1]['ID'] == id_sel:
-                estilos_t.append(('BACKGROUND', (0, i+1), (-1, i+1), DORADO_FONDO))
-                estilos_t.append(('BOX', (0, i+1), (-1, i+1), 1.5, DORADO_BORDE))
+                # Estilo premium para el recomendado: Fondo celeste suave y bordes azules
+                estilos_t.append(('BACKGROUND', (0, i+1), (-1, i+1), AZUL_CLARO))
+                estilos_t.append(('BOX', (0, i+1), (-1, i+1), 1.5, AZUL_CORP))
         t.setStyle(TableStyle(estilos_t))
         elements.append(t)
-        
         elements.append(Spacer(1, 10))
-        if perfil['Continuidad'] == "Nuevo":
-            aviso = "<b>IMPORTANTE:</b> Al ser un seguro nuevo, aplican periodos de carencia (30 días) y espera (para preexistencias). Por favor revise el enlace de 'carencia' en la tabla superior."
-            t_warn = Table([[Paragraph(aviso, ParagraphStyle('W', parent=st_norm, textColor=AZUL))]], colWidths=[18*cm])
-            t_warn.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), AZUL_CLARO), ('BOX', (0,0), (-1,-1), 0.5, AZUL), ('PADDING', (0,0), (-1,-1), 8)]))
-            elements.append(t_warn)
-        elif perfil['Continuidad'] == "Vengo con continuidad":
-            aviso_cont = "<b>BENEFICIO DE CONTINUIDAD:</b> Para gozar del beneficio de continuidad debe haber estado asegurado dentro de los últimos 90 días con una póliza de salud EPS o Individual."
-            t_cont = Table([[Paragraph(aviso_cont, ParagraphStyle('W', parent=st_norm, textColor=VERDE))]], colWidths=[18*cm])
-            t_cont.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#E8F5E9")), ('BOX', (0,0), (-1,-1), 0.5, VERDE), ('PADDING', (0,0), (-1,-1), 8)]))
-            elements.append(t_cont)
 
-        # --- AVISO ESTRATÉGICO RÍMAC ---
+        # --- SISTEMA UNIFICADO DE ALERTAS (Diseño Limpio) ---
+        def crear_caja_aviso(texto):
+            tabla = Table([[Paragraph(texto, st_norm)]], colWidths=[18*cm])
+            tabla.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), GRIS_FONDO), ('BOX', (0,0), (-1,-1), 0.5, BORDE_SUAVE), ('PADDING', (0,0), (-1,-1), 8)]))
+            return tabla
+
+        if perfil['Continuidad'] == "Nuevo":
+            elements.append(crear_caja_aviso("<b>🚨 IMPORTANTE:</b> Al ser un seguro nuevo, aplican periodos de carencia (30 días) y espera (preexistencias). Revisa el enlace de 'Carencia'."))
+            elements.append(Spacer(1, 5))
+        elif perfil['Continuidad'] == "Vengo con continuidad":
+            elements.append(crear_caja_aviso("<b>✅ BENEFICIO DE CONTINUIDAD:</b> Para mantenerlo, debes haber estado asegurado en los últimos 90 días con una póliza EPS o Individual."))
+            elements.append(Spacer(1, 5))
+
         tiene_rimac = any("RIMAC" in str(cia).upper() or "RÍMAC" in str(cia).upper() for cia in df['Aseguradora'].values)
         if es_vista_cliente and tiene_rimac:
-            elements.append(Spacer(1, 10))
-            aviso_rimac = "<b>🎁 DESCUENTO OCULTO RÍMAC:</b> Esta aseguradora otorga descuentos exclusivos según tu perfil crediticio que no podemos mostrar aquí. Haz clic en el botón de WhatsApp o escríbenos para revelar tu tarifa final con descuento."
-            t_rimac = Table([[Paragraph(aviso_rimac, ParagraphStyle('W', parent=st_norm, textColor=colors.HexColor("#E65100")))]], colWidths=[18*cm])
-            t_rimac.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FFF3E0")), ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor("#E65100")), ('PADDING', (0,0), (-1,-1), 8)]))
-            elements.append(t_rimac)
+            elements.append(crear_caja_aviso("<b>🎁 DESCUENTO OCULTO RÍMAC:</b> Esta aseguradora otorga descuentos exclusivos por perfil crediticio que no podemos mostrar aquí. Escríbenos al WhatsApp para revelar tu tarifa final."))
+            elements.append(Spacer(1, 5))
             
         tiene_salud_total = any("SALUD TOTAL" in str(p).upper() for p in df['Plan'].values)
         if tiene_salud_total:
-            elements.append(Spacer(1, 10))
-            aviso_st = "<b>PLAN SALUD TOTAL:</b> La atención en la clínica Ricardo Palma y la hospitalización, será previa evaluación y autorización por parte de Mapfre."
-            t_st = Table([[Paragraph(aviso_st, ParagraphStyle('W', parent=st_norm, textColor=VERDE))]], colWidths=[18*cm])
-            t_st.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#E8F5E9")), ('BOX', (0,0), (-1,-1), 0.5, VERDE), ('PADDING', (0,0), (-1,-1), 8)]))
-            elements.append(t_st)
+            elements.append(crear_caja_aviso("<b>🏥 PLAN SALUD TOTAL:</b> La atención y hospitalización en la clínica Ricardo Palma está sujeta a previa evaluación de Mapfre."))
+            elements.append(Spacer(1, 5))
             
-        elements.append(Spacer(1, 20))
+        elements.append(Spacer(1, 15))
+
+        # Análisis del Experto (Estilo "Cita" Minimalista)
         if razon:
             elements.append(Paragraph(f"¿POR QUÉ RECOMENDAMOS EL PLAN {str(df[df['ID']==id_sel]['Plan'].values[0]).upper()}?", st_sub))
-            elements.append(Spacer(1, 15)) 
-            t_box = Table([[Paragraph(f"<b>ANÁLISIS DEL EXPERTO:</b><br/><br/>{razon}", st_analysis)]], colWidths=[18*cm])
-            t_box.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), DORADO_FONDO), ('BOX', (0,0), (-1,-1), 1, DORADO_BORDE), ('PADDING', (0,0), (-1,-1), 12)]))
+            elements.append(Spacer(1, 8)) 
+            t_box = Table([[Paragraph(f"<b>ANÁLISIS DEL EXPERTO:</b><br/><br/>{razon}", st_norm)]], colWidths=[18*cm])
+            t_box.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,-1), GRIS_FONDO), 
+                ('LINELEFT', (0,0), (-1,-1), 2, AZUL_CORP), # Fina línea azul a la izquierda
+                ('BOX', (0,0), (-1,-1), 0.5, BORDE_SUAVE), 
+                ('PADDING', (0,0), (-1,-1), 12)
+            ]))
             elements.append(t_box)
             elements.append(Spacer(1, 25))
 
+        # Footer y Botones
         elements.append(Paragraph("¿Listo para estar protegido?", st_sub))
         elements.append(Spacer(1, 5))
         st_btn = ParagraphStyle('Btn', parent=st_norm, textColor=colors.white, alignment=1, fontName='Helvetica-Bold', fontSize=10)
-        t_btns = Table([[Paragraph('<a href="https://wa.link/czc7jg">TENGO DUDAS: QUIERO MI ASESORÍA GRATUITA</a>', st_btn), "", Paragraph('<a href="https://wa.link/zwdc6r">¡QUIERO CONTRATAR AHORA!</a>', st_btn)]], colWidths=[7*cm, 1*cm, 7*cm], rowHeights=[1.2*cm])
-        t_btns.setStyle(TableStyle([('BACKGROUND', (0,0), (0,0), AZUL), ('BACKGROUND', (2,0), (2,0), VERDE), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('ROUNDED', (0,0), (-1,-1), 8)]))
+        t_btns = Table([[Paragraph('<a href="https://wa.link/czc7jg">TENGO DUDAS: ASESORÍA GRATUITA</a>', st_btn), "", Paragraph('<a href="https://wa.link/zwdc6r">¡QUIERO CONTRATAR AHORA!</a>', st_btn)]], colWidths=[7*cm, 1*cm, 7*cm], rowHeights=[1.2*cm])
+        t_btns.setStyle(TableStyle([('BACKGROUND', (0,0), (0,0), AZUL_CORP), ('BACKGROUND', (2,0), (2,0), VERDE_EXITO), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('ROUNDED', (0,0), (-1,-1), 8)]))
         elements.append(t_btns)
-        elements.append(Spacer(1, 30))
-        elements.append(Paragraph("Nota: Precios referenciales sujetos a evaluación médica. Incluyen IGV. Esta cotización dura sólo por 7 días.", ParagraphStyle('D', parent=st_norm, fontSize=9)))
+        elements.append(Spacer(1, 20))
+        elements.append(Paragraph("Nota: Precios referenciales sujetos a evaluación médica. Incluyen IGV. Cotización válida por 7 días.", ParagraphStyle('D', parent=st_norm, fontSize=8, textColor=colors.grey)))
 
         doc.build(elements)
         buffer.seek(0)
