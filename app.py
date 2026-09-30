@@ -17,21 +17,21 @@ import re
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="centered")
 st.markdown("""
     <style>
-    /* 1. Ocultar cabeceras y pies de página nativos (Fuerza Bruta) */
-    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stStreamlitFooter"], [data-testid="viewerBadge"] {
+    /* 1. Ocultar cabeceras y pies de página nativos (Fuerza Bruta a nuevos identificadores) */
+    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stBottom"] {
         display: none !important; 
         visibility: hidden !important; 
     }
     
-    /* 2. Destruir la barra flotante de Embed (Selectores Avanzados) */
-    .stApp a[href^="https://streamlit.io"] { display: none !important; }
-    button[title="View fullscreen"] { display: none !important; }
-    div:has(> a[href^="https://streamlit.io"]) { display: none !important; }
+    /* 2. Destruir cualquier rastro de la marca de agua rastreando su enlace */
+    a[href^="https://streamlit.io"] { 
+        display: none !important; 
+    }
     
-    /* 1. Botón Principal: Cotizar */
-    div.stButton > button {
-        background-color: #2456A6 !important;
-        /* ... MANTÉN EL RESTO DE TU CSS EXACTAMENTE IGUAL A PARTIR DE AQUÍ ... */
+    /* 3. Ajustar el margen inferior para que el botón verde no quede volando */
+    .block-container {
+        padding-bottom: 2rem !important;
+    }
     
     /* 1. Botón Principal: Cotizar */
     div.stButton > button {
