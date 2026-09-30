@@ -645,7 +645,8 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         
         # Gatillo de Confianza Institucional con un Check mark (✓)
         autoridad_text = "<b>✓</b> <i>YQ Corredores de Seguros opera bajo los más altos estándares y regulaciones del mercado asegurador peruano.</i>"
-        elements.append(Paragraph(autoridad_text, ParagraphStyle('D2', parent=st_norm, fontSize=7.5, textColor=AZUL_CORP)))        doc.build(elements)
+        elements.append(Paragraph(autoridad_text, ParagraphStyle('D2', parent=st_norm, fontSize=7.5, textColor=AZUL_CORP)))        
+        doc.build(elements)
         buffer.seek(0)
         return buffer
     except Exception as e:
