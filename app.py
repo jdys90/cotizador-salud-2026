@@ -481,14 +481,14 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
        # AJUSTE UX 1: Redistribución de columnas (Le damos más espacio a los precios)
         es_int = "Internacional" in perfil['Cobertura']
         if es_int:
-            headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
+            headers = ['Plan', 'Clínicas: Redes', 'Atención Amb', 'Atención Hosp', 'Pago Mensual', 'Pago Anual']
             anchos = [3.0*cm, 3.3*cm, 3.4*cm, 3.5*cm, 2.3*cm, 2.5*cm] # Total 18cm
         else:
-            headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
+            headers = ['Plan', 'Clínicas: Redes', 'Atención Amb', 'Atención Hosp', 'Pago Mensual', 'Pago Anual']
             anchos = [3.0*cm, 3.3*cm, 3.4*cm, 3.5*cm, 2.3*cm, 2.5*cm] # Total 18cm
 
         texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
-        • <b>Coberturas (Int. Amb/Hosp):</b> Muestra tu deducible o copago al atenderte por consulta (Amb) o por hospitalización (Hosp).<br/>
+        • <b>Coberturas (Atención Amb/Hosp):</b> Muestra tu deducible o copago al atenderte por consulta (Amb) o por hospitalización (Hosp).<br/>
         • <b>Precios y Ahorro:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#28A745'><b>verde</b></font> verás el dinero que ahorras.<br/>
         • <b>Enlaces Activos:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> o <font color='#2456A6'><u>Carencia</u></font> para ver los detalles del plan, y en <font color='#28A745'><b>► CONTRATAR</b></font> para iniciar tu solicitud por WhatsApp."""
         
