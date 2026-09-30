@@ -493,9 +493,29 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(Spacer(1, 10))
 
         # Tabla Principal
+       # AJUSTE UX 1: Redistribución de columnas (Le damos más espacio a los precios)
         es_int = "Internacional" in perfil['Cobertura']
-        headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
-        anchos = [3.1*cm, 3.2*cm, 3.6*cm, 3.8*cm, 2.1*cm, 2.2*cm]
+        if es_int:
+            headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
+            anchos = [3.0*cm, 3.3*cm, 3.4*cm, 3.5*cm, 2.3*cm, 2.5*cm] # Total 18cm
+        else:
+            headers = ['Plan', 'Clínicas: Redes', 'Int. Amb', 'Int. Hosp', 'Pago Mensual', 'Pago Anual']
+            anchos = [3.0*cm, 3.3*cm, 3.4*cm, 3.5*cm, 2.3*cm, 2.5*cm] # Total 18cm
+
+        texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
+        • <b>Coberturas (Int. Amb/Hosp):</b> Muestra tu deducible o copago al atenderte por consulta (Amb) o por hospitalización (Hosp).<br/>
+        • <b>Precios y Ahorro:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#28A745'><b>verde</b></font> verás el dinero que ahorras.<br/>
+        • <b>Enlaces Activos:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> o <font color='#2456A6'><u>Carencia</u></font> para ver los detalles del plan, y en <font color='#28A745'><b>► CONTRATAR</b></font> para iniciar tu solicitud por WhatsApp."""
+        
+        t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
+        t_guia.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F4F8")), 
+            ('BOX', (0,0), (-1,-1), 0.5, AZUL_CORP), 
+            ('PADDING', (0,0), (-1,-1), 8)
+        ]))
+        elements.append(t_guia)
+        elements.append(Spacer(1, 10))
+
         data = [[Paragraph(h, st_th) for h in headers]]
         
         for _, row in df.iterrows():
@@ -516,7 +536,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             
             if links: txt_p += "<br/>" + " | ".join(links)
 
-            # NUEVO CTA: Texto más corto para evitar que se parta en dos líneas
+            # AJUSTE UX 2: CTA más agresivo y visible (Verde y Negrita)
             nombre_titular = perfil['Titular'].split('(')[0].strip()
             msg_plan = f"Hola, soy {nombre_titular}. Revisé mi cotización (Folio {folio}) y deseo contratar el plan {row['Aseguradora']} {row['Plan']}."
             enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
@@ -528,26 +548,26 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             precio_anual_str = f"S/ {row['Precio_Anual_Final']:,.2f}"
             precio_mensual_str = f"S/ {row['Precio_Mensual_Final']:,.0f}"
 
-            # FORMATO DE PRECIOS CRO: Palabras cortas y tamaños equilibrados (7.5 y 8.5)
+            # AJUSTE UX 3: Tachado correcto (Solo el número) y &nbsp; para que no se partan los precios
             if dsc_anu > 0:
                 ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
                 precio_anual_str = (
-                    f"<font color='#666666' size='7.5'>Antes: <strike>S/ {row['Precio_Anual_Base']:,.0f}</strike></font><br/>"
-                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/ {ahorro_anual:,.0f}</b></font><br/>"
-                    f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
+                    f"<font color='#666666' size='7.5'>Antes: S/&nbsp;<strike>{row['Precio_Anual_Base']:,.0f}</strike></font><br/>"
+                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/&nbsp;{ahorro_anual:,.0f}</b></font><br/>"
+                    f"<font color='#2456A6' size='8.5'><b>Final: S/&nbsp;{row['Precio_Anual_Final']:,.0f}</b></font>"
                 )
             else:
-                precio_anual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
+                precio_anual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/&nbsp;{row['Precio_Anual_Final']:,.0f}</b></font>"
             
             if dsc_men > 0:
                 ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
                 precio_mensual_str = (
-                    f"<font color='#666666' size='7.5'>Antes: <strike>S/ {row['Precio_Mensual_Base']:,.0f}</strike></font><br/>"
-                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/ {ahorro_mensual:,.0f}</b></font><br/>"
-                    f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
+                    f"<font color='#666666' size='7.5'>Antes: S/&nbsp;<strike>{row['Precio_Mensual_Base']:,.0f}</strike></font><br/>"
+                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/&nbsp;{ahorro_mensual:,.0f}</b></font><br/>"
+                    f"<font color='#2456A6' size='8.5'><b>Final: S/&nbsp;{row['Precio_Mensual_Final']:,.0f}</b></font>"
                 )
             else:
-                precio_mensual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
+                precio_mensual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/&nbsp;{row['Precio_Mensual_Final']:,.0f}</b></font>"
                 
             if es_int:
                 fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Int_Amb_Full'], st_td), Paragraph(row['Int_Hosp_Full'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
@@ -607,15 +627,38 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             elements.append(Spacer(1, 25))
 
         # Footer y Botones
-        elements.append(Paragraph("¿Listo para estar protegido?", st_sub))
+        # --- CIERRE PREMIUM (Manejo de Objeciones y Autoridad) ---
+        elements.append(Paragraph("¿Aún tienes dudas sobre cuál elegir?", st_sub))
         elements.append(Spacer(1, 5))
-        st_btn = ParagraphStyle('Btn', parent=st_norm, textColor=colors.white, alignment=1, fontName='Helvetica-Bold', fontSize=10)
-        t_btns = Table([[Paragraph('<a href="https://wa.link/czc7jg">TENGO DUDAS: ASESORÍA GRATUITA</a>', st_btn), "", Paragraph('<a href="https://wa.link/zwdc6r">¡QUIERO CONTRATAR AHORA!</a>', st_btn)]], colWidths=[7*cm, 1*cm, 7*cm], rowHeights=[1.2*cm])
-        t_btns.setStyle(TableStyle([('BACKGROUND', (0,0), (0,0), AZUL_CORP), ('BACKGROUND', (2,0), (2,0), VERDE_EXITO), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('ROUNDED', (0,0), (-1,-1), 8)]))
+        
+        # En diseño premium, los botones inferiores son para consultoría, no para venta repetida.
+        st_btn = ParagraphStyle('Btn', parent=st_norm, textColor=colors.white, alignment=1, fontName='Helvetica-Bold', fontSize=9)
+        t_btns = Table([
+            [Paragraph('<a href="https://wa.link/czc7jg">💬 RESOLVER DUDAS POR WHATSAPP</a>', st_btn), 
+             "", 
+             Paragraph('<a href="https://wa.link/czc7jg">📅 AGENDAR LLAMADA CON UN EXPERTO</a>', st_btn)]
+        ], colWidths=[7.5*cm, 0.5*cm, 7.5*cm], rowHeights=[1.1*cm])
+        
+        t_btns.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (0,0), AZUL_CORP), 
+            ('BACKGROUND', (2,0), (2,0), colors.HexColor("#333333")), # Gris oscuro/negro súper elegante para agendar
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), 
+            ('ROUNDED', (0,0), (-1,-1), 6)
+        ]))
         elements.append(t_btns)
         elements.append(Spacer(1, 20))
-        elements.append(Paragraph("Nota: Precios referenciales sujetos a evaluación médica. Incluyen IGV. Cotización válida por 7 días.", ParagraphStyle('D', parent=st_norm, fontSize=8, textColor=colors.grey)))
 
+        # Textos de autoridad y legales limpios
+        legal_text = (
+            "<b>Condiciones de la Propuesta:</b> Los precios son referenciales, incluyen IGV y están sujetos a evaluación médica de la aseguradora. "
+            "Tarifas válidas por 7 días hábiles desde la fecha de emisión."
+        )
+        elements.append(Paragraph(legal_text, ParagraphStyle('D', parent=st_norm, fontSize=7.5, textColor=colors.grey)))
+        elements.append(Spacer(1, 5))
+        
+        # Gatillo de Confianza Institucional (¡Esto sube el estatus de la agencia!)
+        autoridad_text = "🔒 <i>YQ Corredores de Seguros opera bajo los más altos estándares y regulaciones del mercado asegurador peruano.</i>"
+        elements.append(Paragraph(autoridad_text, ParagraphStyle('D2', parent=st_norm, fontSize=7.5, textColor=AZUL_CORP)))
         doc.build(elements)
         buffer.seek(0)
         return buffer
