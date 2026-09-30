@@ -771,7 +771,7 @@ else:
         "Clínicas de preferencia", 
         clinicas_unicas, 
         default=clinicas_default, 
-        max_selections=5,  # <--- ESTE PARÁMETRO ELIMINA EL "SELECT ALL" AUTOMÁTICAMENTE
+        max_selections=3,  # <--- ESTE PARÁMETRO ELIMINA EL "SELECT ALL" AUTOMÁTICAMENTE
         placeholder="Ej: Escribe el nombre de tu clínica (Puedes elegir varias)"
     )
     
