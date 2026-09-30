@@ -11,6 +11,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 import unicodedata
 import requests
+import re
 
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="centered")
@@ -836,26 +837,7 @@ else:
     requiere_clinica = not es_solo_internacional and es_cliente
 
     st.divider()
-    if st.button("Cotizar", type="primary", use_container_width=True):
-        if edad is None:
-            st.error("⚠️ ALERTA: Has olvidado ingresar la EDAD del titular. Es obligatorio para calcular los descuentos correctos.")
-        elif not cob:
-            st.error("⚠️ Por favor selecciona al menos un tipo de Cobertura.")
-        elif requiere_clinica and not clinicas:
-            st.error("⚠️ Por favor selecciona al menos una Clínica de preferencia.")
-        elif es_cliente and (not correo or not celular or len(celular) != 9):
-            st.error("⚠️ Correo y/o celular no completados correctamente.")
-        else:
-            rol_actual = "Cliente" if es_cliente else "Admin/Asesor"
-            
-            if es_cliente: enviar_notificacion(nom, correo, celular, cob, len(familia)-1, edad, clinicas, cont, score_rimac, cliente_rimac)
-            
-            st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos_mensual, descuentos_anual)
-            st.session_state['perfil'] = {'Titular': f"{nom} ({edad} años)", 'Dependientes': txt_dependientes, 'Continuidad': cont, 'Cobertura': ", ".join(cob)}
-            st.session_state['nombre_cliente'] = nom
-            st.session_state['clinicas_sel'] = clinicas
-
-   # --- RESULTADOS ---
+    if st.button("Cotizar", type="primary", use_container_width=True):   # --- RESULTADOS ---
     if st.session_state['resultados'] is not None:
         res = st.session_state['resultados']
         if res.empty:
