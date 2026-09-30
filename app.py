@@ -527,33 +527,35 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
             txt_p += f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='7.5'><b>► CONTRATAR</b></font></a>"
 
+            # Limpiamos la estrella por un símbolo soportado nativamente
+            txt_p = f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}"
+            if rec: txt_p = "<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>" + txt_p
+            
+            # (Mantienes tu código de links de cartilla, carencia y whatsapp igual...)
+            
             dsc_men = row['Dsc_Num_Mensual']
             dsc_anu = row['Dsc_Num_Anual']
             
-            precio_anual_str = f"S/ {row['Precio_Anual_Final']:,.2f}"
-            precio_mensual_str = f"S/ {row['Precio_Mensual_Final']:,.0f}"
-
-            # AJUSTE UX 3: Tachado correcto (Solo el número) y &nbsp; para que no se partan los precios
+            # FORMATO DE PRECIOS SIMÉTRICO: Espacio fijo después de "S/ " en todas las líneas
             if dsc_anu > 0:
                 ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
                 precio_anual_str = (
-                    f"<font color='#666666' size='7.5'>Antes: S/&nbsp;<strike>{row['Precio_Anual_Base']:,.0f}</strike></font><br/>"
-                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/&nbsp;{ahorro_anual:,.0f}</b></font><br/>"
-                    f"<font color='#2456A6' size='8.5'><b>Final: S/&nbsp;{row['Precio_Anual_Final']:,.0f}</b></font>"
+                    f"<font color='#666666' size='7.5'>Antes: S/ <strike>{row['Precio_Anual_Base']:,.0f}</strike></font><br/>"
+                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/ {ahorro_anual:,.0f}</b></font><br/>"
+                    f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
                 )
             else:
-                precio_anual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/&nbsp;{row['Precio_Anual_Final']:,.0f}</b></font>"
+                precio_anual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
             
             if dsc_men > 0:
                 ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
                 precio_mensual_str = (
-                    f"<font color='#666666' size='7.5'>Antes: S/&nbsp;<strike>{row['Precio_Mensual_Base']:,.0f}</strike></font><br/>"
-                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/&nbsp;{ahorro_mensual:,.0f}</b></font><br/>"
-                    f"<font color='#2456A6' size='8.5'><b>Final: S/&nbsp;{row['Precio_Mensual_Final']:,.0f}</b></font>"
+                    f"<font color='#666666' size='7.5'>Antes: S/ <strike>{row['Precio_Mensual_Base']:,.0f}</strike></font><br/>"
+                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/ {ahorro_mensual:,.0f}</b></font><br/>"
+                    f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
                 )
             else:
-                precio_mensual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/&nbsp;{row['Precio_Mensual_Final']:,.0f}</b></font>"
-                
+                precio_mensual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"                
             if es_int:
                 fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Int_Amb_Full'], st_td), Paragraph(row['Int_Hosp_Full'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
             else:
@@ -616,17 +618,17 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(Paragraph("¿Aún tienes dudas sobre cuál elegir?", st_sub))
         elements.append(Spacer(1, 5))
         
-        # En diseño premium, los botones inferiores son para consultoría, no para venta repetida.
+        # Botones sin Emojis (Uso de símbolo ► nativo de PDF para máxima compatibilidad)
         st_btn = ParagraphStyle('Btn', parent=st_norm, textColor=colors.white, alignment=1, fontName='Helvetica-Bold', fontSize=9)
         t_btns = Table([
-            [Paragraph('<a href="https://wa.link/czc7jg">💬 RESOLVER DUDAS POR WHATSAPP</a>', st_btn), 
+            [Paragraph('<a href="https://wa.link/czc7jg">► RESOLVER DUDAS POR WHATSAPP</a>', st_btn), 
              "", 
-             Paragraph('<a href="https://wa.link/czc7jg">📅 AGENDAR LLAMADA CON UN EXPERTO</a>', st_btn)]
+             Paragraph('<a href="https://wa.link/czc7jg">► AGENDAR LLAMADA CON UN EXPERTO</a>', st_btn)]
         ], colWidths=[7.5*cm, 0.5*cm, 7.5*cm], rowHeights=[1.1*cm])
         
         t_btns.setStyle(TableStyle([
             ('BACKGROUND', (0,0), (0,0), AZUL_CORP), 
-            ('BACKGROUND', (2,0), (2,0), colors.HexColor("#333333")), # Gris oscuro/negro súper elegante para agendar
+            ('BACKGROUND', (2,0), (2,0), colors.HexColor("#333333")), 
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), 
             ('ROUNDED', (0,0), (-1,-1), 6)
         ]))
@@ -641,10 +643,9 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(Paragraph(legal_text, ParagraphStyle('D', parent=st_norm, fontSize=7.5, textColor=colors.grey)))
         elements.append(Spacer(1, 5))
         
-        # Gatillo de Confianza Institucional (¡Esto sube el estatus de la agencia!)
-        autoridad_text = "🔒 <i>YQ Corredores de Seguros opera bajo los más altos estándares y regulaciones del mercado asegurador peruano.</i>"
-        elements.append(Paragraph(autoridad_text, ParagraphStyle('D2', parent=st_norm, fontSize=7.5, textColor=AZUL_CORP)))
-        doc.build(elements)
+        # Gatillo de Confianza Institucional con un Check mark (✓)
+        autoridad_text = "<b>✓</b> <i>YQ Corredores de Seguros opera bajo los más altos estándares y regulaciones del mercado asegurador peruano.</i>"
+        elements.append(Paragraph(autoridad_text, ParagraphStyle('D2', parent=st_norm, fontSize=7.5, textColor=AZUL_CORP)))        doc.build(elements)
         buffer.seek(0)
         return buffer
     except Exception as e:
