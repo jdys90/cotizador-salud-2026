@@ -15,13 +15,14 @@ import re
 
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="centered")
-
 st.markdown("""
     <style>
-    /* Ocultar marca de agua y cabecera nativa de Streamlit */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    /* Ocultar marca de agua y cabecera nativa de Streamlit (Fuerza Bruta) */
+    #MainMenu {visibility: hidden !important; display: none !important;}
+    footer {visibility: hidden !important; display: none !important;}
+    header {visibility: hidden !important; display: none !important;}
+    [data-testid="stHeader"] {display: none !important;}
+    [data-testid="stToolbar"] {display: none !important;}
     
     /* 1. Botón Principal: Cotizar */
     div.stButton > button {
@@ -79,7 +80,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
 try:
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
