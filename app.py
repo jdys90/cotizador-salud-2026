@@ -19,10 +19,12 @@ st.markdown("""
     <style>
     /* Ocultar marca de agua y cabecera nativa de Streamlit (Fuerza Bruta) */
     #MainMenu {visibility: hidden !important; display: none !important;}
-    footer {visibility: hidden !important; display: none !important;}
     header {visibility: hidden !important; display: none !important;}
+    footer {visibility: hidden !important; display: none !important;}
     [data-testid="stHeader"] {display: none !important;}
     [data-testid="stToolbar"] {display: none !important;}
+    [data-testid="stStreamlitFooter"] {display: none !important; visibility: hidden !important;}
+    [data-testid="viewerBadge"] {display: none !important; visibility: hidden !important;}
     
     /* 1. Botón Principal: Cotizar */
     div.stButton > button {
