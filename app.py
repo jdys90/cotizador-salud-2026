@@ -498,6 +498,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             txt_p = f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}"
             if rec: txt_p = "<font color='#2456A6'>★ RECOMENDADO</font><br/>" + txt_p
             
+            # ENLACES DE CADA PLAN (Incluyendo WhatsApp Directo con Contexto)
             links = []
             cartilla = str(row.get('Link_Cartilla', '')).strip()
             if cartilla and cartilla != '-' and cartilla.lower() != 'nan':
@@ -508,6 +509,12 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             if carencia and carencia != '-' and carencia.lower() != 'nan':
                 href_c = carencia if carencia.startswith('http') else 'https://' + carencia
                 links.append(f"<a href='{href_c}' color='#2456A6'><u>Carencia</u></a>")
+
+            # ENLACE WHASTAPP PERSONALIZADO POR PLAN PARA EL PDF
+            nombre_titular = perfil['Titular'].split('(')[0].strip()
+            msg_plan = f"Hola, soy {nombre_titular}. Revisé mi cotización (Folio {folio}) y deseo contratar el plan {row['Aseguradora']} {row['Plan']}."
+            enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
+            links.append(f"<a href='{enlace_plan_wa}' color='#28A745'><u><b>📲 Cotizar</b></u></a>")
             
             if links: txt_p += "<br/>" + " | ".join(links)
 
