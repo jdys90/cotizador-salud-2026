@@ -616,7 +616,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(Paragraph("¿Aún tienes dudas sobre cuál elegir?", st_sub))
         elements.append(Spacer(1, 5))
         
-        # Botones sin Emojis (Uso de símbolo ► nativo de PDF para máxima compatibilidad)
+        # Botones con símbolo ► nativo de PDF para máxima compatibilidad
         st_btn = ParagraphStyle('Btn', parent=st_norm, textColor=colors.white, alignment=1, fontName='Helvetica-Bold', fontSize=9)
         t_btns = Table([
             [Paragraph('<a href="https://wa.link/czc7jg">► RESOLVER DUDAS POR WHATSAPP</a>', st_btn), 
@@ -632,6 +632,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         ]))
         elements.append(t_btns)
         elements.append(Spacer(1, 20))
+
 
         # Textos de autoridad y legales limpios
         legal_text = (
