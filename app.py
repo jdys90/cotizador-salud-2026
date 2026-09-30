@@ -550,6 +550,8 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             else:
                 fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Txt_Cob_Amb'], st_td), Paragraph(row['Txt_Cob_Hosp'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
             data.append(fila)
+            # 👇 ESTA ES LA LÍNEA QUE DEBES AGREGAR 👇
+        t = Table(data, colWidths=anchos, repeatRows=1)
         estilos_t = [('BACKGROUND', (0,0), (-1,0), AZUL_CORP), ('GRID', (0,0), (-1,-1), 0.5, BORDE_SUAVE), ('VALIGN', (0,0), (-1,-1), 'TOP'), ('PADDING', (0,0), (-1,-1), 4)]
         
         for i, row in enumerate(df.iterrows()):
