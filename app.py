@@ -477,13 +477,18 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(t_perf)
         elements.append(Spacer(1, 15))
 
-        # Instructivo Limpio y Unificado
+        # 2. LUEGO COLOCAMOS EL INSTRUCTIVO DEL PDF
         texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
-        • <b>Enlaces:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> para ver la red de clínicas, o en <font color='#2456A6'><u>Carencia</u></font> para ver los tiempos de espera.<br/>
-        • <b>Precios y Ahorro:</b> El precio <strike color='#999999'>tachado</strike> es la tarifa pública de la aseguradora. El monto en <font color='#28A745'><b>verde</b></font> es tu ahorro directo al contratar con YQ."""
+        • <b>Coberturas (Int. Amb/Hosp):</b> Muestra tu deducible o copago al atenderte por consulta (Amb) o por hospitalización (Hosp).<br/>
+        • <b>Precios y Ahorro:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#28A745'><b>verde</b></font> verás el dinero que ahorras.<br/>
+        • <b>Enlaces Activos:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> o <font color='#2456A6'><u>Carencia</u></font> para ver los detalles del plan, y en <font color='#28A745'><b>► CONTRATAR</b></font> para iniciar tu solicitud por WhatsApp."""
         
         t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
-        t_guia.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), GRIS_FONDO), ('BOX', (0,0), (-1,-1), 0.5, BORDE_SUAVE), ('PADDING', (0,0), (-1,-1), 8)]))
+        t_guia.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F4F8")), 
+            ('BOX', (0,0), (-1,-1), 0.5, AZUL), 
+            ('PADDING', (0,0), (-1,-1), 8)
+        ]))
         elements.append(t_guia)
         elements.append(Spacer(1, 10))
 
