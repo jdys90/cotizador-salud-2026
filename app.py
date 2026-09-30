@@ -612,16 +612,25 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             elements.append(Spacer(1, 25))
 
         # Footer y Botones
-                # --- CIERRE PREMIUM (Manejo de Objeciones y Autoridad) ---
+        # --- CIERRE PREMIUM (Manejo de Objeciones y Autoridad) ---
         elements.append(Paragraph("¿Aún tienes dudas sobre cuál elegir?", st_sub))
         elements.append(Spacer(1, 5))
         
-        # Botones usando caracteres universales ">>" 
+        # 1. Obtenemos el nombre del cliente y construimos los mensajes dinámicos
+        nombre_titular = perfil['Titular'].split('(')[0].strip()
+        
+        msg_dudas = f"Hola, soy {nombre_titular}. Estaba revisando mi cotización de salud (Folio {folio}) y tengo algunas consultas rápidas antes de elegir mi plan."
+        link_dudas = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_dudas)}"
+        
+        msg_llamada = f"Hola, soy {nombre_titular}. Me gustaría agendar una breve llamada para que me ayuden a elegir el mejor plan de mi cotización (Folio {folio})."
+        link_llamada = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_llamada)}"
+        
+        # 2. Botones usando caracteres universales ">>" y enlaces dinámicos
         st_btn = ParagraphStyle('Btn', parent=st_norm, textColor=colors.white, alignment=1, fontName='Helvetica-Bold', fontSize=9)
         t_btns = Table([
-            [Paragraph('<a href="https://wa.link/czc7jg">>> RESOLVER DUDAS POR WHATSAPP</a>', st_btn), 
+            [Paragraph(f'<a href="{link_dudas}">>> RESOLVER DUDAS POR WHATSAPP</a>', st_btn), 
              "", 
-             Paragraph('<a href="https://wa.link/czc7jg">>> AGENDAR LLAMADA CON UN EXPERTO</a>', st_btn)]
+             Paragraph(f'<a href="{link_llamada}">>> AGENDAR LLAMADA CON UN EXPERTO</a>', st_btn)]
         ], colWidths=[7.5*cm, 0.5*cm, 7.5*cm], rowHeights=[1.1*cm])
         
         t_btns.setStyle(TableStyle([
@@ -641,7 +650,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(Paragraph(legal_text, ParagraphStyle('D', parent=st_norm, fontSize=7.5, textColor=colors.grey)))
         elements.append(Spacer(1, 5))
         
-        # Gatillo de Confianza Institucional (Cambiamos el símbolo por texto en negrita)
+        # Gatillo de Confianza Institucional 
         autoridad_text = "<b>RESPALDO:</b> <i>YQ Corredores de Seguros opera bajo los más altos estándares y regulaciones del mercado asegurador peruano.</i>"
         elements.append(Paragraph(autoridad_text, ParagraphStyle('D2', parent=st_norm, fontSize=7.5, textColor=AZUL_CORP)))
         
