@@ -498,7 +498,6 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             txt_p = f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}"
             if rec: txt_p = "<font color='#2456A6'>★ RECOMENDADO</font><br/>" + txt_p
             
-            # ENLACES DE CADA PLAN (Incluyendo WhatsApp Directo con Contexto)
             links = []
             cartilla = str(row.get('Link_Cartilla', '')).strip()
             if cartilla and cartilla != '-' and cartilla.lower() != 'nan':
@@ -509,14 +508,15 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             if carencia and carencia != '-' and carencia.lower() != 'nan':
                 href_c = carencia if carencia.startswith('http') else 'https://' + carencia
                 links.append(f"<a href='{href_c}' color='#2456A6'><u>Carencia</u></a>")
+            
+            # Unimos Cartilla y Carencia en su propia línea
+            if links: txt_p += "<br/>" + " | ".join(links)
 
-            # ENLACE WHASTAPP PERSONALIZADO POR PLAN PARA EL PDF
+            # NUEVO CTA: Enlace directo a WhatsApp en una línea nueva y limpia
             nombre_titular = perfil['Titular'].split('(')[0].strip()
             msg_plan = f"Hola, soy {nombre_titular}. Revisé mi cotización (Folio {folio}) y deseo contratar el plan {row['Aseguradora']} {row['Plan']}."
             enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
-            links.append(f"<a href='{enlace_plan_wa}' color='#28A745'><u><b>📲 Cotizar</b></u></a>")
-            
-            if links: txt_p += "<br/>" + " | ".join(links)
+            txt_p += f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><b>► CONTRATAR AQUÍ</b></a>"
 
             dsc_men = row['Dsc_Num_Mensual']
             dsc_anu = row['Dsc_Num_Anual']
@@ -524,22 +524,32 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             precio_anual_str = f"S/ {row['Precio_Anual_Final']:,.2f}"
             precio_mensual_str = f"S/ {row['Precio_Mensual_Final']:,.0f}"
 
-            # Estilo limpio para los precios: tachado más pequeño y discreto
+            # FORMATO DE PRECIOS A 3 LÍNEAS (Estrategia CRO)
             if dsc_anu > 0:
                 ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
-                precio_anual_str = f"<font size='6.5'><strike color='#999999'>S/ {row['Precio_Anual_Base']:,.0f}</strike></font><br/><b>{precio_anual_str}</b><br/><font color='#28A745' size='6.5'><b>Ahorras S/ {ahorro_anual:,.0f}</b></font>"
+                precio_anual_str = (
+                    f"<font color='#666666' size='6.5'>P. Normal: <strike>S/ {row['Precio_Anual_Base']:,.0f}</strike></font><br/>"
+                    f"<font color='#28A745' size='6.5'><b>Ahorras: S/ {ahorro_anual:,.0f}</b></font><br/>"
+                    f"<font color='#2456A6' size='8.5'><b>Tu Precio: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
+                )
+            else:
+                precio_anual_str = f"<font color='#2456A6' size='8.5'><b>S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
             
             if dsc_men > 0:
                 ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
-                precio_mensual_str = f"<font size='6.5'><strike color='#999999'>S/ {row['Precio_Mensual_Base']:,.0f}</strike></font><br/><b>{precio_mensual_str}</b><br/><font color='#28A745' size='6.5'><b>Ahorras S/ {ahorro_mensual:,.0f}</b></font>"
+                precio_mensual_str = (
+                    f"<font color='#666666' size='6.5'>P. Normal: <strike>S/ {row['Precio_Mensual_Base']:,.0f}</strike></font><br/>"
+                    f"<font color='#28A745' size='6.5'><b>Ahorras: S/ {ahorro_mensual:,.0f}</b></font><br/>"
+                    f"<font color='#2456A6' size='8.5'><b>Tu Precio: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
+                )
+            else:
+                precio_mensual_str = f"<font color='#2456A6' size='8.5'><b>S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
                 
             if es_int:
                 fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Int_Amb_Full'], st_td), Paragraph(row['Int_Hosp_Full'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
             else:
                 fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Txt_Cob_Amb'], st_td), Paragraph(row['Txt_Cob_Hosp'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
             data.append(fila)
-
-        t = Table(data, colWidths=anchos, repeatRows=1)
         estilos_t = [('BACKGROUND', (0,0), (-1,0), AZUL_CORP), ('GRID', (0,0), (-1,-1), 0.5, BORDE_SUAVE), ('VALIGN', (0,0), (-1,-1), 'TOP'), ('PADDING', (0,0), (-1,-1), 4)]
         
         for i, row in enumerate(df.iterrows()):
