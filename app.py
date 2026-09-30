@@ -30,7 +30,7 @@ st.markdown("""
     
     /* 3. Ajustar el margen inferior para que el botón verde no quede volando */
     .block-container {
-        padding-bottom: 2rem !important;
+        padding-bottom: 6rem !important;
     }
     
     /* 1. Botón Principal: Cotizar */
