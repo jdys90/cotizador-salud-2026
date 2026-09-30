@@ -17,14 +17,21 @@ import re
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="centered")
 st.markdown("""
     <style>
-    /* Ocultar marca de agua y cabecera nativa de Streamlit (Fuerza Bruta) */
-    #MainMenu {visibility: hidden !important; display: none !important;}
-    header {visibility: hidden !important; display: none !important;}
-    footer {visibility: hidden !important; display: none !important;}
-    [data-testid="stHeader"] {display: none !important;}
-    [data-testid="stToolbar"] {display: none !important;}
-    [data-testid="stStreamlitFooter"] {display: none !important; visibility: hidden !important;}
-    [data-testid="viewerBadge"] {display: none !important; visibility: hidden !important;}
+    /* 1. Ocultar cabeceras y pies de página nativos (Fuerza Bruta) */
+    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stStreamlitFooter"], [data-testid="viewerBadge"] {
+        display: none !important; 
+        visibility: hidden !important; 
+    }
+    
+    /* 2. Destruir la barra flotante de Embed (Selectores Avanzados) */
+    .stApp a[href^="https://streamlit.io"] { display: none !important; }
+    button[title="View fullscreen"] { display: none !important; }
+    div:has(> a[href^="https://streamlit.io"]) { display: none !important; }
+    
+    /* 1. Botón Principal: Cotizar */
+    div.stButton > button {
+        background-color: #2456A6 !important;
+        /* ... MANTÉN EL RESTO DE TU CSS EXACTAMENTE IGUAL A PARTIR DE AQUÍ ... */
     
     /* 1. Botón Principal: Cotizar */
     div.stButton > button {
