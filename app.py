@@ -612,16 +612,16 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             elements.append(Spacer(1, 25))
 
         # Footer y Botones
-        # --- CIERRE PREMIUM (Manejo de Objeciones y Autoridad) ---
+                # --- CIERRE PREMIUM (Manejo de Objeciones y Autoridad) ---
         elements.append(Paragraph("¿Aún tienes dudas sobre cuál elegir?", st_sub))
         elements.append(Spacer(1, 5))
         
-        # Botones con símbolo ► nativo de PDF para máxima compatibilidad
+        # Botones usando caracteres universales ">>" 
         st_btn = ParagraphStyle('Btn', parent=st_norm, textColor=colors.white, alignment=1, fontName='Helvetica-Bold', fontSize=9)
         t_btns = Table([
-            [Paragraph('<a href="https://wa.link/czc7jg">► RESOLVER DUDAS POR WHATSAPP</a>', st_btn), 
+            [Paragraph('<a href="https://wa.link/czc7jg">>> RESOLVER DUDAS POR WHATSAPP</a>', st_btn), 
              "", 
-             Paragraph('<a href="https://wa.link/czc7jg">► AGENDAR LLAMADA CON UN EXPERTO</a>', st_btn)]
+             Paragraph('<a href="https://wa.link/czc7jg">>> AGENDAR LLAMADA CON UN EXPERTO</a>', st_btn)]
         ], colWidths=[7.5*cm, 0.5*cm, 7.5*cm], rowHeights=[1.1*cm])
         
         t_btns.setStyle(TableStyle([
@@ -633,7 +633,6 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(t_btns)
         elements.append(Spacer(1, 20))
 
-
         # Textos de autoridad y legales limpios
         legal_text = (
             "<b>Condiciones de la Propuesta:</b> Los precios son referenciales, incluyen IGV y están sujetos a evaluación médica de la aseguradora. "
@@ -642,9 +641,10 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(Paragraph(legal_text, ParagraphStyle('D', parent=st_norm, fontSize=7.5, textColor=colors.grey)))
         elements.append(Spacer(1, 5))
         
-        # Gatillo de Confianza Institucional con un Check mark (✓)
-        autoridad_text = "<b>✓</b> <i>YQ Corredores de Seguros opera bajo los más altos estándares y regulaciones del mercado asegurador peruano.</i>"
-        elements.append(Paragraph(autoridad_text, ParagraphStyle('D2', parent=st_norm, fontSize=7.5, textColor=AZUL_CORP)))        
+        # Gatillo de Confianza Institucional (Cambiamos el símbolo por texto en negrita)
+        autoridad_text = "<b>RESPALDO:</b> <i>YQ Corredores de Seguros opera bajo los más altos estándares y regulaciones del mercado asegurador peruano.</i>"
+        elements.append(Paragraph(autoridad_text, ParagraphStyle('D2', parent=st_norm, fontSize=7.5, textColor=AZUL_CORP)))
+        
         doc.build(elements)
         buffer.seek(0)
         return buffer
