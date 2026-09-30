@@ -514,14 +514,13 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
                 href_c = carencia if carencia.startswith('http') else 'https://' + carencia
                 links.append(f"<a href='{href_c}' color='#2456A6'><u>Carencia</u></a>")
             
-            # Unimos Cartilla y Carencia en su propia línea
             if links: txt_p += "<br/>" + " | ".join(links)
 
-            # NUEVO CTA: Enlace directo a WhatsApp en una línea nueva y limpia
+            # NUEVO CTA: Texto más corto para evitar que se parta en dos líneas
             nombre_titular = perfil['Titular'].split('(')[0].strip()
             msg_plan = f"Hola, soy {nombre_titular}. Revisé mi cotización (Folio {folio}) y deseo contratar el plan {row['Aseguradora']} {row['Plan']}."
             enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
-            txt_p += f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><b>► CONTRATAR AQUÍ</b></a>"
+            txt_p += f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='7.5'><b>► CONTRATAR</b></font></a>"
 
             dsc_men = row['Dsc_Num_Mensual']
             dsc_anu = row['Dsc_Num_Anual']
@@ -529,26 +528,26 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             precio_anual_str = f"S/ {row['Precio_Anual_Final']:,.2f}"
             precio_mensual_str = f"S/ {row['Precio_Mensual_Final']:,.0f}"
 
-            # FORMATO DE PRECIOS A 3 LÍNEAS (Estrategia CRO)
+            # FORMATO DE PRECIOS CRO: Palabras cortas y tamaños equilibrados (7.5 y 8.5)
             if dsc_anu > 0:
                 ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
                 precio_anual_str = (
-                    f"<font color='#666666' size='6.5'>P. Normal: <strike>S/ {row['Precio_Anual_Base']:,.0f}</strike></font><br/>"
-                    f"<font color='#28A745' size='6.5'><b>Ahorras: S/ {ahorro_anual:,.0f}</b></font><br/>"
-                    f"<font color='#2456A6' size='8.5'><b>Tu Precio: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
+                    f"<font color='#666666' size='7.5'>Antes: <strike>S/ {row['Precio_Anual_Base']:,.0f}</strike></font><br/>"
+                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/ {ahorro_anual:,.0f}</b></font><br/>"
+                    f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
                 )
             else:
-                precio_anual_str = f"<font color='#2456A6' size='8.5'><b>S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
+                precio_anual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
             
             if dsc_men > 0:
                 ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
                 precio_mensual_str = (
-                    f"<font color='#666666' size='6.5'>P. Normal: <strike>S/ {row['Precio_Mensual_Base']:,.0f}</strike></font><br/>"
-                    f"<font color='#28A745' size='6.5'><b>Ahorras: S/ {ahorro_mensual:,.0f}</b></font><br/>"
-                    f"<font color='#2456A6' size='8.5'><b>Tu Precio: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
+                    f"<font color='#666666' size='7.5'>Antes: <strike>S/ {row['Precio_Mensual_Base']:,.0f}</strike></font><br/>"
+                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/ {ahorro_mensual:,.0f}</b></font><br/>"
+                    f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
                 )
             else:
-                precio_mensual_str = f"<font color='#2456A6' size='8.5'><b>S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
+                precio_mensual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
                 
             if es_int:
                 fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Int_Amb_Full'], st_td), Paragraph(row['Int_Hosp_Full'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
@@ -575,7 +574,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             return tabla
 
         if perfil['Continuidad'] == "Nuevo":
-            elements.append(crear_caja_aviso("<b>🚨 IMPORTANTE:</b> Al ser un seguro nuevo, aplican periodos de carencia (30 días) y espera (preexistencias). Revisa el enlace de 'Carencia'."))
+            elements.append(crear_caja_aviso("<b>🚨 IMPORTANTE:</b> Al ser un seguro nuevo, aplican periodos de carencia (30 días) y espera. Revisa el enlace de 'Carencia'."))
             elements.append(Spacer(1, 5))
         elif perfil['Continuidad'] == "Vengo con continuidad":
             elements.append(crear_caja_aviso("<b>✅ BENEFICIO DE CONTINUIDAD:</b> Para mantenerlo, debes haber estado asegurado en los últimos 90 días con una póliza EPS o Individual."))
@@ -583,7 +582,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
 
         tiene_rimac = any("RIMAC" in str(cia).upper() or "RÍMAC" in str(cia).upper() for cia in df['Aseguradora'].values)
         if es_vista_cliente and tiene_rimac:
-            elements.append(crear_caja_aviso("<b>🎁 DESCUENTO OCULTO RÍMAC:</b> Esta aseguradora otorga descuentos exclusivos por perfil crediticio que no podemos mostrar aquí. Escríbenos al WhatsApp para revelar tu tarifa final."))
+            elements.append(crear_caja_aviso("<b>🎁 DESCUENTO EN RÍMAC:</b> Esta aseguradora otorga descuentos exclusivos por perfil crediticio que no podemos mostrar aquí. Escríbenos al WhatsApp para revelar tu tarifa final."))
             elements.append(Spacer(1, 5))
             
         tiene_salud_total = any("SALUD TOTAL" in str(p).upper() for p in df['Plan'].values)
