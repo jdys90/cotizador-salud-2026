@@ -477,21 +477,6 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(t_perf)
         elements.append(Spacer(1, 15))
 
-        # 2. LUEGO COLOCAMOS EL INSTRUCTIVO DEL PDF
-        texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
-        • <b>Coberturas (Int. Amb/Hosp):</b> Muestra tu deducible o copago al atenderte por consulta (Amb) o por hospitalización (Hosp).<br/>
-        • <b>Precios y Ahorro:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#28A745'><b>verde</b></font> verás el dinero que ahorras.<br/>
-        • <b>Enlaces Activos:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> o <font color='#2456A6'><u>Carencia</u></font> para ver los detalles del plan, y en <font color='#28A745'><b>► CONTRATAR</b></font> para iniciar tu solicitud por WhatsApp."""
-        
-        t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
-        t_guia.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F4F8")), 
-            ('BOX', (0,0), (-1,-1), 0.5, AZUL_CORP), 
-            ('PADDING', (0,0), (-1,-1), 8)
-        ]))
-        elements.append(t_guia)
-        elements.append(Spacer(1, 10))
-
         # Tabla Principal
        # AJUSTE UX 1: Redistribución de columnas (Le damos más espacio a los precios)
         es_int = "Internacional" in perfil['Cobertura']
