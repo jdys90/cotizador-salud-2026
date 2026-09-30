@@ -837,7 +837,41 @@ else:
     requiere_clinica = not es_solo_internacional and es_cliente
 
     st.divider()
-    if st.button("Cotizar", type="primary", use_container_width=True):   # --- RESULTADOS ---
+    if st.button("Cotizar", type="primary", use_container_width=True):
+        # 1. LIMPIEZA Y VALIDACIÓN MATEMÁTICA DE LEADS
+        celular_limpio = "".join(filter(str.isdigit, str(celular))) if celular else ""
+
+        if edad is None:
+            st.error("⚠️ Has olvidado ingresar la EDAD del titular. Es indispensable para el cálculo.")
+        elif not cob:
+            st.error("⚠️ Por favor selecciona al menos un tipo de Cobertura.")
+        elif requiere_clinica and not clinicas:
+            st.error("⚠️️ Por favor selecciona al menos una Clínica de preferencia.")
+        elif es_cliente and (len(celular_limpio) != 9 or not celular_limpio.startswith('9')):
+            st.error("📱 Por favor ingresa un número de celular válido de 9 dígitos (Ej: 999123456).")
+        elif es_cliente and (not correo or not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", correo)):
+            st.error("📧 Por favor ingresa un correo electrónico real para enviarte el respaldo de tu cotización.")
+        else:
+            # 2. MICRO-COPY (EXPERIENCIA DE CARGA VIP)
+            with st.status("🔍 Analizando más de 50 planes médicos para ti...", expanded=True) as status:
+                st.write("🏦 Verificando coberturas en Pacífico, Mapfre, Rímac y La Positiva...")
+                
+                rol_actual = "Cliente" if es_cliente else "Admin/Asesor"
+                
+                # Inyección silenciosa al CRM / Correo
+                if es_cliente: 
+                    enviar_notificacion(nom, correo, celular_limpio, cob, len(familia)-1, edad, clinicas, cont, score_rimac, cliente_rimac)
+                
+                st.write("✅ Aplicando tus descuentos exclusivos de YQ Corredores...")
+                st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos_mensual, descuentos_anual)
+                st.session_state['perfil'] = {'Titular': f"{nom} ({edad} años)", 'Dependientes': txt_dependientes, 'Continuidad': cont, 'Cobertura': ", ".join(cob)}
+                st.session_state['nombre_cliente'] = nom
+                st.session_state['clinicas_sel'] = clinicas
+                
+                # Cierre triunfal de la caja de carga
+                status.update(label="¡Cotización lista! Descubre tus opciones abajo 👇", state="complete", expanded=False)
+
+    # --- RESULTADOS ---
     if st.session_state['resultados'] is not None:
         res = st.session_state['resultados']
         if res.empty:
