@@ -486,7 +486,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
         t_guia.setStyle(TableStyle([
             ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F4F8")), 
-            ('BOX', (0,0), (-1,-1), 0.5, AZUL), 
+            ('BOX', (0,0), (-1,-1), 0.5, AZUL_CORP), 
             ('PADDING', (0,0), (-1,-1), 8)
         ]))
         elements.append(t_guia)
