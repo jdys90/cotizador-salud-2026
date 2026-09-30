@@ -505,9 +505,11 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         
         for _, row in df.iterrows():
             rec = (row['ID'] == id_sel)
+            # 1. Nombre del plan y etiqueta
             txt_p = f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}"
-            if rec: txt_p = "<font color='#2456A6'>★ RECOMENDADO</font><br/>" + txt_p
+            if rec: txt_p = "<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>" + txt_p
             
+            # 2. Enlaces de Cartilla y Carencia
             links = []
             cartilla = str(row.get('Link_Cartilla', '')).strip()
             if cartilla and cartilla != '-' and cartilla.lower() != 'nan':
@@ -521,22 +523,16 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             
             if links: txt_p += "<br/>" + " | ".join(links)
 
-            # AJUSTE UX 2: CTA más agresivo y visible (Verde y Negrita)
+            # 3. Botón directo de WhatsApp por plan
             nombre_titular = perfil['Titular'].split('(')[0].strip()
             msg_plan = f"Hola, soy {nombre_titular}. Revisé mi cotización (Folio {folio}) y deseo contratar el plan {row['Aseguradora']} {row['Plan']}."
             enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
             txt_p += f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='7.5'><b>► CONTRATAR</b></font></a>"
 
-            # Limpiamos la estrella por un símbolo soportado nativamente
-            txt_p = f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}"
-            if rec: txt_p = "<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>" + txt_p
-            
-            # (Mantienes tu código de links de cartilla, carencia y whatsapp igual...)
-            
+            # 4. Formateo de Precios Simétricos
             dsc_men = row['Dsc_Num_Mensual']
             dsc_anu = row['Dsc_Num_Anual']
             
-            # FORMATO DE PRECIOS SIMÉTRICO: Espacio fijo después de "S/ " en todas las líneas
             if dsc_anu > 0:
                 ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
                 precio_anual_str = (
@@ -555,7 +551,9 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
                     f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
                 )
             else:
-                precio_mensual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"                
+                precio_mensual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
+                
+            # 5. Cierre de fila
             if es_int:
                 fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Int_Amb_Full'], st_td), Paragraph(row['Int_Hosp_Full'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
             else:
