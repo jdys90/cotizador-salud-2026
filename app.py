@@ -768,10 +768,10 @@ else:
     else:
         # MODO CAMALEÓN (Para WordPress): Minimalista y directo al grano
         # Título principal
-    if nombre_url:
-        st.write(f"### 👤 1. Perfil del Titular")
-    else:
-        st.write("### 👤 1. Perfil del Titular")
+        if nombre_url:
+            st.write(f"### 👤 1. Perfil del Titular")
+        else:
+            st.write("### 👤 1. Perfil del Titular")
 
 
     # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
