@@ -767,11 +767,11 @@ else:
         st.divider()
     else:
         # MODO CAMALEÓN (Para WordPress): Minimalista y directo al grano
-        if nombre_url:
-            st.write(f"### 👋 ¡Hola {nombre_url}! Completa tus preferencias para cotizar:")
-        else:
-            st.write("### ⚙️️ Completa tus datos para ver tus opciones:")
-
+        # Título principal
+    if nombre_url:
+        st.write(f"### 👤 1. Perfil del Titular")
+    else:
+        st.write("### 👤 1. Perfil del Titular")
 
 
     # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
@@ -808,8 +808,9 @@ else:
     else:
         salud = "Sano"
         
-    st.write("### 👨‍👩‍👧‍‍👦 2. Familia")
-    st.caption("💡 *Si deseas asegurar a tu cónyuge o hijos, indica cuántos son aquí abajo. Luego ingresa la edad de cada uno para calcular el descuento familiar.*")
+    # Sección Familia
+    st.write("### 👥 2. Grupo Familiar")
+    st.caption("💡 *Agrega a tu cónyuge o hijos para calcular automáticamente las tarifas con descuento familiar.*")
     
     n_dep = st.number_input("Número de dependientes adicionales", 0, 10, value=num_dep)
     
@@ -835,7 +836,7 @@ else:
 
     # Solo mostramos el título si el cliente tiene algo que llenar aquí
     if es_admin or clinicas_unicas:
-        st.write("### ⚙️ 3. Filtros y Preferencias")
+        st.write("### 🏥 3. Preferencias de Atención")
     
     if es_admin:
         index_continuidad = 1 if "continuidad" in cont_url.lower() else 0
@@ -918,9 +919,9 @@ else:
     
     # --- DISCLAIMER DE CONTINUIDAD (SOLO CLIENTE) ---
     if not es_admin:
-        st.info("⚠️ **Aviso Importante:** Estas tarifas son exclusivas para personas que **NO cuentan con un seguro EPS o privado actualmente**. Si ya estás asegurado con alguna compañía, solicita tu cotización especial por WhatsApp para garantizar la continuidad de tus preexistencias.")
+        st.info("⚠️ **Importante:** Las tarifas mostradas aplican para nuevas afiliaciones. Si actualmente cuentas con una EPS o seguro privado, solicita una cotización personalizada con nuestros asesores para garantizar la **portabilidad y continuidad de tus preexistencias**.")
         
-    if st.button("Cotizar", type="primary", use_container_width=True):
+    if st.button("Generar Propuesta", type="primary", use_container_width=True): # Cambiamos 'Cotizar' por 'Generar Propuesta'
         # 1. LIMPIEZA Y VALIDACIÓN MATEMÁTICA DE LEADS
         celular_limpio = "".join(filter(str.isdigit, str(celular))) if celular else ""
 
@@ -1057,19 +1058,20 @@ else:
                             nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
                             st.download_button("📥 Descargar PDF", pdf_res, f"COTISALUD_{nom_clean}.pdf", "application/pdf")
 
-    # --- CIERRE HUMANO (Salvavidas UX Dinámico) ---
+    # --- CIERRE PREMIUM (Salvavidas UX Dinámico) ---
     if st.session_state.get('resultados') is None:
         st.divider()
-        st.write("💡 **¿Tienes dudas sobre qué cobertura elegir o cómo funciona un seguro de salud/Continuidad?**")
-        st.write("Recuerda que somos tu aliado, no un vendedor. No tienes que tomar esta decisión a solas.\n\n¡Escríbenos y nosotros te asesoramos completamente gratis!")
+        st.write("#### ¿Requieres asesoría corporativa o tienes preexistencias?")
+        st.write("Diseñar un plan de salud a medida requiere evaluar múltiples variables médicas y financieras. Nuestro equipo de especialistas está a tu disposición para analizar tu caso de forma confidencial y sin compromiso.")
+        
         numero_whatsapp = "51906462225"
-        mensaje_ayuda = "Hola. Acabo de ingresar al cotizador web de salud y necesito ayuda para completarlo."
-        if "nombre" in st.query_params: mensaje_ayuda += f" Mi nombre es {st.query_params['nombre']}."
+        mensaje_ayuda = "Hola. Estoy en la plataforma de salud y requiero asesoría personalizada para elegir el plan adecuado."
+        if "nombre" in st.query_params: mensaje_ayuda = f"Hola, soy {st.query_params['nombre']}. Estoy en la plataforma de salud y requiero asesoría personalizada."
         enlace_ayuda = f"https://wa.me/{numero_whatsapp}?text={urllib.parse.quote(mensaje_ayuda)}"
 
         st.markdown(f"""
-            <a href='{enlace_ayuda}' target='_blank' style='display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; background-color: #25D366; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: sans-serif; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);'>
-                💬 Chatear con un experto
+            <a href='{enlace_ayuda}' target='_blank' style='display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; background-color: #25D366; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: sans-serif; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2); transition: 0.3s;'>
+                💬 Solicitar Asesoría Privada
             </a>
         """, unsafe_allow_html=True)
 
