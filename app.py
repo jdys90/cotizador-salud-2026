@@ -867,8 +867,9 @@ else:
         "Clínicas de preferencia", 
         clinicas_unicas, 
         default=clinicas_default, 
-        max_selections=3,  
-        placeholder="Ej: Clínica Delgado (Opcional)" # <--- ESTO RELAJA AL CLIENTE
+        max_selections=3,
+        select_all=False,  # <--- ESTE PARÁMETRO NATIVO EXTERMINA EL BOTÓN
+        placeholder="Ej: Clínica Delgado (Opcional)"
     )
     
     if es_cliente:
@@ -1088,7 +1089,9 @@ else:
 # 8. PIE DE PÁGINA: ACCESO ADMIN Y ASESOR
 # ==========================================
 # --- SALVAVIDAS PARA EL EFECTO GUILLOTINA DE WORDPRESS ---
-st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
+# ==========================================
+# 8. PIE DE PÁGINA: ACCESO ADMIN Y ASESOR
+# ==========================================
 
 with st.expander("🛡️ Acceso Interno YQ (Solo Empleados)"):
     # Este input se conecta automáticamente con tu validación de seguridad de la línea 385
@@ -1098,3 +1101,6 @@ with st.expander("🛡️ Acceso Interno YQ (Solo Empleados)"):
     codigo_actual = st.session_state.get('codigo_secreto', '')
     if codigo_actual == CODIGO_ADMIN or codigo_actual in CODIGOS_ASESORES:
         st.success("✅ Modo Interno Activado. Sube al inicio de la página para aplicar descuentos manuales o ver opciones avanzadas.")
+
+# --- SALVAVIDAS PARA EL EFECTO GUILLOTINA DE WORDPRESS (TIENE QUE IR AL FINAL ABSOLUTO) ---
+st.markdown("<br><br><br><br><br><br><br>", unsafe_allow_html=True)
