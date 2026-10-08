@@ -667,8 +667,9 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
 
         # Textos de autoridad y legales limpios
         legal_text = (
-            "<b>Condiciones de la Propuesta:</b> Los precios son referenciales, incluyen IGV y están sujetos a evaluación médica de la aseguradora. "
-            "Tarifas válidas por 7 días hábiles desde la fecha de emisión."
+            "<b>Condiciones:</b> Precios referenciales sujetos a evaluación médica de la aseguradora. Válidos por 7 días hábiles. "
+            "<b>Aviso de Continuidad:</b> Esta cotización asume el estatus de 'Asegurado Nuevo'. Si usted ya cuenta con un seguro privado o EPS activo, "
+            "las tarifas y condiciones variarán para poder aplicar el beneficio legal de Continuidad de Preexistencias. Consulte con su asesor."
         )
         elements.append(Paragraph(legal_text, ParagraphStyle('D', parent=st_norm, fontSize=7.5, textColor=colors.grey)))
         elements.append(Spacer(1, 5))
@@ -792,12 +793,20 @@ else:
 
     nom = st.text_input("Nombres completos", value=nombre_url)
     
-    col_edad, col_salud = st.columns(2)
-    with col_edad:
+    col_ed, col_cel = st.columns(2)
+    with col_ed:
         edad = st.number_input("Edad", min_value=0, max_value=99, value=edad_default, placeholder="Edad del asegurado")
         edad_calculo = edad if edad is not None else 0 
-    with col_salud:
-        salud = st.radio("Estado de salud", ["Sano", "Crónico"], index=index_salud, horizontal=True)
+    with col_cel:
+        celular = st.text_input("Celular / Whatsapp", max_chars=9, placeholder="Ej: 999123456") if es_cliente else st.text_input("Celular (Admin)", max_chars=9)
+        
+    correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com") if es_cliente else st.text_input("Correo (Admin)")
+    
+    # Ocultamos la condición de salud para el cliente (asumimos Sano)
+    if es_admin:
+        salud = st.radio("Estado de salud (Titular)", ["Sano", "Crónico"], index=index_salud, horizontal=True)
+    else:
+        salud = "Sano"
         
     st.write("### 👨‍👩‍👧‍‍👦 2. Familia")
     st.caption("💡 *Si deseas asegurar a tu cónyuge o hijos, indica cuántos son aquí abajo. Luego ingresa la edad de cada uno para calcular el descuento familiar.*")
@@ -808,22 +817,35 @@ else:
     txt_fam = []
     if n_dep > 0:
         for i in range(n_dep):
-            col_edep, col_sdep = st.columns(2)
-            with col_edep:
-                e = st.number_input(f"Edad Dep {i+1}", 0, 99, 10, key=f"edad_dep_{i}")
-            with col_sdep:
-                s = st.radio(f"Salud Dep {i+1}", ["Sano", "Crónico"], horizontal=True, key=f"salud_dep_{i}")
+            if es_admin:
+                col_edep, col_sdep = st.columns(2)
+                with col_edep:
+                    e = st.number_input(f"Edad Dep {i+1}", 0, 99, 10, key=f"edad_dep_{i}")
+                with col_sdep:
+                    s = st.radio(f"Salud Dep {i+1}", ["Sano", "Crónico"], horizontal=True, key=f"salud_dep_{i}")
+            else:
+                # Vista limpia y minimalista para el cliente
+                e = st.number_input(f"Edad Dependiente {i+1}", 0, 99, 10, key=f"edad_dep_{i}")
+                s = "Sano"
+                
             familia.append({'edad': e, 'salud': s, 'rol': 'Dependiente'})
             txt_fam.append(f"Dep ({e}a)")
     
     txt_dependientes = ", ".join(txt_fam) if txt_fam else "Ninguno"
 
-    st.write("### ⚙️ 3. Filtros y Preferencias")
+    # Solo mostramos el título si el cliente tiene algo que llenar aquí
+    if es_admin or clinicas_unicas:
+        st.write("### ⚙️ 3. Filtros y Preferencias")
     
-    index_continuidad = 1 if "continuidad" in cont_url.lower() else 0
-    cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"], index=index_continuidad)
-
-    cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral", "Básica"])
+    if es_admin:
+        index_continuidad = 1 if "continuidad" in cont_url.lower() else 0
+        cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"], index=index_continuidad)
+        cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral", "Básica"])
+    else:
+        # Modo Cliente (Minimalista): Forzamos valores óptimos por debajo de la mesa
+        cont = "Nuevo"
+        # Seleccionamos todas las coberturas estándar para que el motor busque la más barata globalmente
+        cob = ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"]
     
     clinicas_default = []
     if clinicas_url:
@@ -835,8 +857,8 @@ else:
         "Clínicas de preferencia", 
         clinicas_unicas, 
         default=clinicas_default, 
-        max_selections=3,  # <--- ESTE PARÁMETRO ELIMINA EL "SELECT ALL" AUTOMÁTICAMENTE
-        placeholder="Ej: Escribe el nombre de tu clínica (Puedes elegir varias)"
+        max_selections=3,  
+        placeholder="Ej: Clínica Delgado (Opcional)" # <--- ESTO RELAJA AL CLIENTE
     )
     
     if es_cliente:
@@ -848,15 +870,6 @@ else:
             score_rimac = st.selectbox("Scoring Rímac", ["BUENO", "AMBAR", "ROJO", "GRIS"], index=2)
         with col_cr:
             cliente_rimac = st.radio("¿Es cliente Rímac?", ["Sí", "No"], index=1, horizontal=True)
-    
-    correo, celular = "", ""
-    if es_cliente:
-        st.info("Para generar tu cotización, por favor ingresa tus datos de contacto:")
-        col_cel, col_mail = st.columns(2)
-        with col_cel:
-            celular = st.text_input("Celular / Whatsapp", max_chars=9, placeholder="Ej: 999123456")
-        with col_mail:
-            correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com")
 
     # --- GENERACIÓN DE DICCIONARIOS EN MEMORIA ---
     descuentos_mensual = {}
@@ -902,6 +915,11 @@ else:
     requiere_clinica = not es_solo_internacional and es_cliente
 
     st.divider()
+    
+    # --- DISCLAIMER DE CONTINUIDAD (SOLO CLIENTE) ---
+    if not es_admin:
+        st.info("⚠️ **Aviso Importante:** Estas tarifas son exclusivas para personas que **NO cuentan con un seguro EPS o privado actualmente**. Si ya estás asegurado con alguna compañía, solicita tu cotización especial por WhatsApp para garantizar la continuidad de tus preexistencias.")
+        
     if st.button("Cotizar", type="primary", use_container_width=True):
         # 1. LIMPIEZA Y VALIDACIÓN MATEMÁTICA DE LEADS
         celular_limpio = "".join(filter(str.isdigit, str(celular))) if celular else ""
