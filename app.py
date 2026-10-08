@@ -793,47 +793,46 @@ else:
 
     nom = st.text_input("Nombres completos", value=nombre_url)
     
-    col_ed, col_cel = st.columns(2)
+    # 1. Agrupamos Edad (pequeño), Celular (mediano) y Correo (grande) en una fila
+    col_ed, col_cel, col_mail = st.columns([1, 2, 3])
     with col_ed:
-        edad = st.number_input("Edad", min_value=0, max_value=99, value=edad_default, placeholder="Edad del asegurado")
+        edad = st.number_input("Edad", min_value=0, max_value=99, value=edad_default, placeholder="Años")
         edad_calculo = edad if edad is not None else 0 
     with col_cel:
         celular = st.text_input("Celular / Whatsapp", max_chars=9, placeholder="Ej: 999123456") if es_cliente else st.text_input("Celular (Admin)", max_chars=9)
-        
-    correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com") if es_cliente else st.text_input("Correo (Admin)")
+    with col_mail:
+        correo = st.text_input("Correo Electrónico", placeholder="cliente@correo.com") if es_cliente else st.text_input("Correo (Admin)")
     
-    # Ocultamos la condición de salud para el cliente (asumimos Sano)
     if es_admin:
         salud = st.radio("Estado de salud (Titular)", ["Sano", "Crónico"], index=index_salud, horizontal=True)
     else:
         salud = "Sano"
         
-    # Sección Familia
     st.write("### 👥 2. Grupo Familiar")
-    st.caption("💡 *Agrega a tu cónyuge o hijos para calcular automáticamente las tarifas con descuento familiar.*")
+    st.caption("💡 *Agrega a tus dependientes para calcular automáticamente las tarifas con descuento.*")
     
-    n_dep = st.number_input("Número de dependientes adicionales", 0, 10, value=num_dep)
-    
+    # 2. Reducimos el tamaño del input de número de dependientes
+    col_dep_num, _ = st.columns([2, 4])
+    with col_dep_num:
+        n_dep = st.number_input("Número de dependientes adicionales", 0, 10, value=num_dep)
+        
     familia = [{'edad': edad_calculo, 'salud': salud, 'rol': 'Titular'}]
     txt_fam = []
+
     if n_dep > 0:
+        # 3. Ordenamos las edades de los dependientes en una cuadrícula compacta (3 por fila)
+        cols_deps = st.columns(3)
         for i in range(n_dep):
-            if es_admin:
-                col_edep, col_sdep = st.columns(2)
-                with col_edep:
-                    e = st.number_input(f"Edad Dep {i+1}", 0, 99, 10, key=f"edad_dep_{i}")
-                with col_sdep:
-                    s = st.radio(f"Salud Dep {i+1}", ["Sano", "Crónico"], horizontal=True, key=f"salud_dep_{i}")
-            else:
-                # Vista limpia y minimalista para el cliente
-                e = st.number_input(f"Edad Dependiente {i+1}", 0, 99, 10, key=f"edad_dep_{i}")
-                s = "Sano"
-                
+            with cols_deps[i % 3]:
+                e = st.number_input(f"Edad Dep. {i+1}", 0, 99, 10, key=f"edad_dep_{i}")
+                if es_admin:
+                    s = st.radio(f"Salud D.{i+1}", ["Sano", "Cr"], horizontal=True, key=f"salud_dep_{i}")
+                else:
+                    s = "Sano"
             familia.append({'edad': e, 'salud': s, 'rol': 'Dependiente'})
             txt_fam.append(f"Dep ({e}a)")
-    
+            
     txt_dependientes = ", ".join(txt_fam) if txt_fam else "Ninguno"
-
     # Solo mostramos el título si el cliente tiene algo que llenar aquí
     if es_admin or clinicas_unicas:
         st.write("### 🏥 3. Preferencias de Atención")
@@ -1078,7 +1077,8 @@ else:
 # ==========================================
 # 8. PIE DE PÁGINA: ACCESO ADMIN Y ASESOR
 # ==========================================
-st.markdown("<br><br><br>", unsafe_allow_html=True) # Espacio para separar la vista del cliente
+# --- SALVAVIDAS PARA EL EFECTO GUILLOTINA DE WORDPRESS ---
+st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
 
 with st.expander("🛡️ Acceso Interno YQ (Solo Empleados)"):
     # Este input se conecta automáticamente con tu validación de seguridad de la línea 385
