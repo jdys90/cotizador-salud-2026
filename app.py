@@ -17,22 +17,30 @@ import re
 st.set_page_config(page_title="Cotizador YQ Seguros", page_icon="🛡️", layout="centered")
 st.markdown("""
     <style>
-    /* 1. Ocultar cabeceras y pies de página nativos (Fuerza Bruta a nuevos identificadores) */
-    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stBottom"] {
-        display: none !important; 
-        visibility: hidden !important; 
-    }
-    
-    /* 2. Destruir cualquier rastro de la marca de agua rastreando su enlace */
-    a[href^="https://streamlit.io"] { 
-        display: none !important; 
-    }
-    
-    /* 3. Ajustar el margen inferior para que el botón verde no quede volando */
-    .block-container {
-        padding-bottom: 6rem !important;
-    }
-    
+        /* 1. Ocultar cabeceras y menú nativo */
+        header, [data-testid="stHeader"], [data-testid="stToolbar"] {
+            display: none !important; 
+            visibility: hidden !important; 
+        }
+        
+        /* 2. DESTRUIR MARCA DE AGUA Y FOOTERS */
+        footer {visibility: hidden !important; display: none !important;}
+        .stApp > footer {display: none !important;}
+        [data-testid="stBottom"], [data-testid="stBottomBar"] {display: none !important;}
+        
+        /* 3. CAZADOR DE LA FRANJA GRIS (Built con Streamlit / Fullscreen) */
+        [data-testid="stViewerBadge"] {display: none !important;}
+        [class*="embeddedAppMetaInfoBar"] { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; height: 0px !important; }
+        [class*="viewerBadge"] { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+        
+        /* 4. Cazar enlaces y botones residuales */
+        a[href*="streamlit"] {display: none !important; pointer-events: none !important;}
+        button[title*="fullscreen"], button[title*="Fullscreen"] {display: none !important;}
+        [data-testid="StyledFullScreenButton"] {display: none !important;}
+        
+        /* 5. Eliminar espacio sobrante al fondo de la página */
+        .block-container { padding-bottom: 0rem !important; }
+        
     /* 1. Botón Principal: Cotizar */
     div.stButton > button {
         background-color: #2456A6 !important;
