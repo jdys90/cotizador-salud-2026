@@ -41,6 +41,16 @@ st.markdown("""
         /* 5. Eliminar espacio sobrante al fondo de la página */
         .block-container { padding-bottom: 0rem !important; }
         
+        /* 6. DESTRUIR LA OPCIÓN "SELECT ALL" DEL MULTISELECT */
+        div[data-baseweb="popover"] ul[role="listbox"] li[id*="selectAll"],
+        div[data-baseweb="popover"] ul[role="listbox"] li[id*="SelectAll"],
+        div[data-baseweb="popover"] ul[role="listbox"] li[id*="select-all"] {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0px !important;
+            padding: 0px !important;
+            margin: 0px !important;
+        }
     /* 1. Botón Principal: Cotizar */
     div.stButton > button {
         background-color: #2456A6 !important;
