@@ -763,9 +763,7 @@ else:
         else:
             st.write("### ⚙️️ Completa tus datos para ver tus opciones:")
 
-    # LA CAJA SECRETA: Menú lateral (Sidebar)
-    with st.sidebar.expander("🔒 Acceso Interno YQ"):
-        st.text_input("Código", type="password", key="codigo_secreto", label_visibility="collapsed", placeholder="")
+
 
     # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
     nombre_url = st.query_params.get("nombre", "")
@@ -1048,3 +1046,17 @@ else:
                 💬 Chatear con un experto
             </a>
         """, unsafe_allow_html=True)
+
+# ==========================================
+# 8. PIE DE PÁGINA: ACCESO ADMIN Y ASESOR
+# ==========================================
+st.markdown("<br><br><br>", unsafe_allow_html=True) # Espacio para separar la vista del cliente
+
+with st.expander("🛡️ Acceso Interno YQ (Solo Empleados)"):
+    # Este input se conecta automáticamente con tu validación de seguridad de la línea 385
+    st.text_input("Código de Autorización", type="password", placeholder="Ingresa clave", key="codigo_secreto")
+    
+    # Leemos la clave en vivo para darle un aviso visual al asesor
+    codigo_actual = st.session_state.get('codigo_secreto', '')
+    if codigo_actual == CODIGO_ADMIN or codigo_actual in CODIGOS_ASESORES:
+        st.success("✅ Modo Interno Activado. Sube al inicio de la página para aplicar descuentos manuales o ver opciones avanzadas.")
