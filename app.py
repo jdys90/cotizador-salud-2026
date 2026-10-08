@@ -1088,13 +1088,12 @@ else:
 # ==========================================
 # 8. PIE DE PÁGINA: ACCESO ADMIN Y ASESOR
 # ==========================================
-# --- SALVAVIDAS PARA EL EFECTO GUILLOTINA DE WORDPRESS ---
-# ==========================================
-# 8. PIE DE PÁGINA: ACCESO ADMIN Y ASESOR
-# ==========================================
+
+# --- SEPARADOR VISUAL: Respiro entre el botón de WhatsApp y el Admin ---
+st.markdown("<br><br>", unsafe_allow_html=True)
 
 with st.expander("🛡️ Acceso Interno YQ (Solo Empleados)"):
-    # Este input se conecta automáticamente con tu validación de seguridad de la línea 385
+    # Este input se conecta automáticamente con tu validación de seguridad
     st.text_input("Código de Autorización", type="password", placeholder="Ingresa clave", key="codigo_secreto")
     
     # Leemos la clave en vivo para darle un aviso visual al asesor
