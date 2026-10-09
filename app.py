@@ -560,28 +560,43 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             else: ruta_logo = ""
 
             celda_plan = []
+            # Creamos los estilos centrados para que todo quede en perfecta simetría
+            st_center = ParagraphStyle('P_Center', parent=st_td, alignment=1)
+            st_rec_center = ParagraphStyle('Rec_Center', parent=st_td_b, alignment=1)
+            
             if rec: 
-                celda_plan.append(Paragraph("<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>", st_td_b))
+                celda_plan.append(Paragraph("<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>", st_rec_center))
                 
             if os.path.exists(ruta_logo):
                 if hay_clinicas:
-                    # Vista estrecha: Logo mediano, alineado a la izquierda (como estaba, pero más limpio)
-                    celda_plan.append(ImageRL(ruta_logo, width=2.8*cm, height=0.9*cm, kind='proportional'))
-                    celda_plan.append(Paragraph(f"<b>{row['Plan']}</b>", st_td))
+                    # Vista Estrecha (Con Clínicas): Logo y Plan centraditos en 3.0cm
+                    tabla_logo = Table([
+                        [ImageRL(ruta_logo, width=2.5*cm, height=0.8*cm, kind='proportional')],
+                        [Paragraph(f"<b>{row['Plan']}</b>", st_center)]
+                    ], colWidths=[2.8*cm]) # Ajustado al ancho de la columna
+                    
+                    tabla_logo.setStyle(TableStyle([
+                        ('ALIGN', (0,0), (-1,-1), 'CENTER'), 
+                        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                        ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+                        ('TOPPADDING', (0,0), (-1,-1), 2)
+                    ]))
+                    celda_plan.append(tabla_logo)
                 else:
-                    # Vista ancha (sin clínicas): Logo gigante y nombre CENTRADOS matemáticamente
-                    st_center = ParagraphStyle('P_Center', parent=st_td, alignment=1)
-                    # Truco de ReportLab: Usamos una tabla invisible de 1x2 para forzar el centrado absoluto
+                    # Vista Ancha (Sin Clínicas): Logo gigante y Plan centraditos en 7.0cm
                     tabla_logo = Table([
                         [ImageRL(ruta_logo, width=4.0*cm, height=1.3*cm, kind='proportional')],
                         [Paragraph(f"<b>{row['Plan']}</b>", st_center)]
                     ], colWidths=[6.5*cm])
-                    tabla_logo.setStyle(TableStyle([('ALIGN', (0,0), (-1,-1), 'CENTER'), ('VALIGN', (0,0), (-1,-1), 'MIDDLE')]))
+                    
+                    tabla_logo.setStyle(TableStyle([
+                        ('ALIGN', (0,0), (-1,-1), 'CENTER'), 
+                        ('VALIGN', (0,0), (-1,-1), 'MIDDLE')
+                    ]))
                     celda_plan.append(tabla_logo)
             else:
-                if hay_clinicas:
-                    celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", st_td))
-                else:
+                # Si no hay logo, centramos el texto puro de todos modos
+                celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", st_center))                else:
                     celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", ParagraphStyle('P_Center', parent=st_td, alignment=1)))
                     
             # --- COLUMNA DE INVERSIÓN ---
