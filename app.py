@@ -605,8 +605,11 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             celda_accion.append(Paragraph(f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='8'><b>► CONTRATAR</b></font></a>", st_td))
                 
             # --- ENSAMBLAJE DINÁMICO DE LA FILA ---
-            txt_amb = row['Int_Amb_Full'] if es_int else row['Txt_Cob_Amb']
-            txt_hosp = row['Int_Hosp_Full'] if es_int else row['Txt_Cob_Hosp']
+            # Identificamos si ESTE plan específico es internacional para aplicar su propio formato
+            es_plan_int = str(row['Plan']) in ['Salud Preferencial', 'Medicvida Internacional']
+            
+            txt_amb = row['Int_Amb_Full'] if es_plan_int else row['Txt_Cob_Amb']
+            txt_hosp = row['Int_Hosp_Full'] if es_plan_int else row['Txt_Cob_Hosp']
             
             if hay_clinicas:
                 fila = [celda_plan, Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(txt_amb, st_td), Paragraph(txt_hosp, st_td), celda_inversion, celda_accion]
@@ -698,7 +701,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
 
         # Textos de autoridad y legales limpios
         legal_text = (
-            "<b>Condiciones:</b> Precios referenciales sujetos a evaluación médica de la aseguradora. Válidos por 7 días hábiles. "
+            "<b>Condiciones:</b> Precios referenciales sujetos a evaluación médica de la aseguradora. Válidos por 7 días hábiles.<br/><br/>"
             "<b>Aviso de Continuidad:</b> Esta cotización asume el estatus de 'Asegurado Nuevo'. Si usted ya cuenta con un seguro privado o EPS activo, "
             "las tarifas y condiciones variarán para poder aplicar el beneficio legal de Continuidad de Preexistencias. Consulte con su asesor."
         )
@@ -873,10 +876,10 @@ else:
         cont = st.selectbox("Tipo de asegurado", ["Nuevo", "Vengo con continuidad"], index=index_continuidad)
         cob = st.multiselect("Cobertura", ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"], default=["Integral", "Básica"])
     else:
-        # Modo Cliente (Minimalista): Forzamos valores óptimos por debajo de la mesa
+        # Modo Cliente (Minimalista): Filtro exclusivo para planes comerciales
         cont = "Nuevo"
-        # Seleccionamos todas las coberturas estándar para que el motor busque la más barata globalmente
-        cob = ["Básica", "Integral", "Integral + Reembolso", "Integral + Cobertura Internacional"]
+        # Limitamos la búsqueda solo a planes estándar para no confundir al prospecto
+        cob = ["Básica", "Integral"]
     
     clinicas_default = []
     if clinicas_url:
