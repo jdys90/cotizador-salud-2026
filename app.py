@@ -512,21 +512,25 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
 
         # Tabla Principal
         hay_clinicas = bool(perfil.get('Clinicas_Sel'))
-        es_int = "Internacional" in perfil['Cobertura']
         
-        # AJUSTE UX/CRO: Distribución Ejecutiva (Precios agrupados, Acciones separadas)
+        # AJUSTE UX/CRO: Redistribución Total (3 columnas vs 6 columnas)
         if hay_clinicas:
             headers = ['Aseguradora / Plan', 'Clínicas', 'Amb', 'Hosp', 'Inversión', 'Acción']
             anchos = [3.5*cm, 3.2*cm, 3.0*cm, 3.0*cm, 2.5*cm, 2.8*cm] # Total 18cm
+            
+            texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
+            • <b>Coberturas:</b> Muestra tu deducible o copago al atenderte por consulta (Amb) o por hospitalización (Hosp).<br/>
+            • <b>Inversión:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#28A745'><b>verde</b></font> verás tu ahorro.<br/>
+            • <b>Acción:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> para ver detalles, y en <font color='#28A745'><b>► CONTRATAR</b></font> para contactar a tu asesor."""
         else:
-            headers = ['Aseguradora / Plan', 'Atención Ambulatoria', 'Atención Hospitalaria', 'Inversión', 'Acción']
-            anchos = [4.5*cm, 3.8*cm, 3.8*cm, 3.0*cm, 2.9*cm] # Total 18cm
-
-        texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
-        • <b>Coberturas:</b> Muestra tu deducible o copago al atenderte por consulta (Amb) o por hospitalización (Hosp).<br/>
-        • <b>Inversión:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#28A745'><b>verde</b></font> verás tu ahorro.<br/>
-        • <b>Acción:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> para ver detalles, y en <font color='#28A745'><b>► CONTRATAR</b></font> para contactar a tu asesor."""
-        
+            # Diseño Ultra-Minimalista: Solo 3 columnas gigantes y limpias
+            headers = ['Aseguradora / Plan', 'Inversión', 'Acción']
+            anchos = [7.0*cm, 5.5*cm, 5.5*cm] # Total 18cm
+            
+            texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
+            • <b>Inversión:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#28A745'><b>verde</b></font> verás tu ahorro.<br/>
+            • <b>Acción:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> o <font color='#2456A6'><u>Carencia</u></font> para ver los beneficios del plan al detalle, y en <font color='#28A745'><b>► CONTRATAR</b></font> para contactarnos."""
+            
         t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
         t_guia.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F4F8")), ('BOX', (0,0), (-1,-1), 0.5, AZUL_CORP), ('PADDING', (0,0), (-1,-1), 8)]))
         elements.append(t_guia)
@@ -540,7 +544,6 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             # --- COLUMNA 1: LOGO Y PLAN ---
             cia_limpia = str(row['Aseguradora']).lower().strip()
             
-            # Identificación exacta de tus archivos de logo
             if "pacifico" in cia_limpia or "pacífico" in cia_limpia: ruta_logo = "logo_pacifico.png"
             elif "rimac" in cia_limpia or "rímac" in cia_limpia: ruta_logo = "logo_rimac.png"
             elif "mapfre" in cia_limpia: ruta_logo = "logo_mapfre.png"
@@ -558,10 +561,9 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             else:
                 celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", st_td))
             
-            # --- COLUMNA DE INVERSIÓN (Precios agrupados) ---
+            # --- COLUMNA DE INVERSIÓN ---
             dsc_men, dsc_anu = row['Dsc_Num_Mensual'], row['Dsc_Num_Anual']
             
-            # Bloque Anual
             if dsc_anu > 0:
                 ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
                 txt_anual = (f"<b>ANUAL:</b><br/>"
@@ -571,7 +573,6 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             else:
                 txt_anual = f"<b>ANUAL:</b><br/><font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
             
-            # Bloque Mensual
             if dsc_men > 0:
                 ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
                 txt_mensual = (f"<b>MENSUAL:</b><br/>"
@@ -583,7 +584,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             
             celda_inversion = Paragraph(f"{txt_mensual}<br/><br/>{txt_anual}", st_td)
 
-            # --- COLUMNA DE ACCIÓN (Enlaces y WhatsApp) ---
+            # --- COLUMNA DE ACCIÓN ---
             celda_accion = []
             links = []
             cartilla = str(row.get('Link_Cartilla', '')).strip()
@@ -605,16 +606,15 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             celda_accion.append(Paragraph(f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='8'><b>► CONTRATAR</b></font></a>", st_td))
                 
             # --- ENSAMBLAJE DINÁMICO DE LA FILA ---
-            # Identificamos si ESTE plan específico es internacional para aplicar su propio formato
-            es_plan_int = str(row['Plan']) in ['Salud Preferencial', 'Medicvida Internacional']
-            
-            txt_amb = row['Int_Amb_Full'] if es_plan_int else row['Txt_Cob_Amb']
-            txt_hosp = row['Int_Hosp_Full'] if es_plan_int else row['Txt_Cob_Hosp']
-            
             if hay_clinicas:
+                es_plan_int = str(row['Plan']) in ['Salud Preferencial', 'Medicvida Internacional']
+                txt_amb = row['Int_Amb_Full'] if es_plan_int else row['Txt_Cob_Amb']
+                txt_hosp = row['Int_Hosp_Full'] if es_plan_int else row['Txt_Cob_Hosp']
+                
                 fila = [celda_plan, Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(txt_amb, st_td), Paragraph(txt_hosp, st_td), celda_inversion, celda_accion]
             else:
-                fila = [celda_plan, Paragraph(txt_amb, st_td), Paragraph(txt_hosp, st_td), celda_inversion, celda_accion]
+                # El cliente NO escogió clínicas. Mostramos solo las 3 columnas maestras.
+                fila = [celda_plan, celda_inversion, celda_accion]
             
             data.append(fila)
 
@@ -627,7 +627,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         
         t.setStyle(TableStyle(estilos_t))
         elements.append(t)
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 10)))
 
         # --- SISTEMA UNIFICADO DE ALERTAS (Diseño Limpio) ---
         def crear_caja_aviso(texto):
