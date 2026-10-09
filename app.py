@@ -480,7 +480,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         # Ajustamos el interlineado de la tabla para que respire mejor
         st_td = ParagraphStyle('TD', parent=estilos['Normal'], fontSize=7.5, textColor=GRIS_TEXTO, leading=9.5)
         st_td_b = ParagraphStyle('TDB', parent=st_td, fontName='Helvetica-Bold', textColor=AZUL_CORP)
-        st_td_c = ParagraphStyle('TDC', parent=st_td, alignment=1) # <--- NUEVO: Estilo centrado para la columna Acción
+        st_td_c = ParagraphStyle('TDC', parent=st_td, alignment=1) # Alineación centrada
 
         elements = []
         # Cabecera
@@ -558,7 +558,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
                 celda_plan.append(Paragraph("<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>", st_td_b))
                 
             if os.path.exists(ruta_logo):
-                celda_plan.append(ImageRL(ruta_logo, width=2.2*cm, height=0.7*cm, kind='proportional'))
+                celda_plan.append(ImageRL(ruta_logo, width=2.8*cm, height=0.9*cm, kind='proportional'))
                 celda_plan.append(Paragraph(f"<b>{row['Plan']}</b>", st_td))
             else:
                 celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", st_td))
@@ -566,19 +566,21 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             # --- COLUMNA DE INVERSIÓN ---
             dsc_men, dsc_anu = row['Dsc_Num_Mensual'], row['Dsc_Num_Anual']
             
+            # Bloque Anual
             if dsc_anu > 0:
                 ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
                 txt_anual = (f"<b>ANUAL:</b><br/>"
-                             f"<font color='#666666'>S/ <strike>{row['Precio_Anual_Base']:,.0f}</strike></font> | "
+                             f"<font color='#666666'>Antes: S/ <strike>{row['Precio_Anual_Base']:,.0f}</strike></font><br/>"
                              f"<font color='#28A745'>Ahorro: S/ {ahorro_anual:,.0f}</font><br/>"
                              f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>")
             else:
                 txt_anual = f"<b>ANUAL:</b><br/><font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
             
+            # Bloque Mensual
             if dsc_men > 0:
                 ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
                 txt_mensual = (f"<b>MENSUAL:</b><br/>"
-                               f"<font color='#666666'>S/ <strike>{row['Precio_Mensual_Base']:,.0f}</strike></font> | "
+                               f"<font color='#666666'>Antes: S/ <strike>{row['Precio_Mensual_Base']:,.0f}</strike></font><br/>"
                                f"<font color='#28A745'>Ahorro: S/ {ahorro_mensual:,.0f}</font><br/>"
                                f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>")
             else:
@@ -600,8 +602,12 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
                 links.append(f"<a href='{href_c}' color='#2456A6'><u>Carencia</u></a>")
             
             if links: 
-                # Inyectamos el estilo centrado (st_td_c) aquí
-                celda_accion.append(Paragraph(" | ".join(links), st_td_c)) 
+                celda_accion.append(Paragraph(" | ".join(links), st_td_c))
+
+            nombre_titular = perfil['Titular'].split('(')[0].strip()
+            msg_plan = f"Hola, soy {nombre_titular}. Revisé mi cotización (Folio {folio}) y deseo contratar el plan {row['Aseguradora']} {row['Plan']}."
+            enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
+            celda_accion.append(Paragraph(f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='8'><b>► CONTRATAR</b></font></a>", st_td_c))
 
             nombre_titular = perfil['Titular'].split('(')[0].strip()
             msg_plan = f"Hola, soy {nombre_titular}. Revisé mi cotización (Folio {folio}) y deseo contratar el plan {row['Aseguradora']} {row['Plan']}."
