@@ -557,27 +557,31 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             if rec: 
                 celda_plan.append(Paragraph("<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>", st_td_b))
                 
-            celda_plan = []
-            if rec: 
-                celda_plan.append(Paragraph("<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>", st_td_b))
-                
             if os.path.exists(ruta_logo):
-                # Si hay clínicas (espacio estrecho), usamos tamaño normal. Si no (espacio amplio), los hacemos gigantes.
                 if hay_clinicas:
+                    # Vista estrecha: Logo mediano, alineado a la izquierda (como estaba, pero más limpio)
                     celda_plan.append(ImageRL(ruta_logo, width=2.8*cm, height=0.9*cm, kind='proportional'))
                     celda_plan.append(Paragraph(f"<b>{row['Plan']}</b>", st_td))
                 else:
-                    # Tamaño gigante y centrado para la vista de 3 columnas
-                    celda_plan.append(ImageRL(ruta_logo, width=4.5*cm, height=1.4*cm, kind='proportional', hAlign='CENTER'))
-                    celda_plan.append(Paragraph(f"<br/><b>{row['Plan']}</b>", ParagraphStyle('P_Center', parent=st_td, alignment=1)))
+                    # Vista ancha (sin clínicas): Logo gigante y nombre CENTRADOS matemáticamente
+                    st_center = ParagraphStyle('P_Center', parent=st_td, alignment=1)
+                    # Truco de ReportLab: Usamos una tabla invisible de 1x2 para forzar el centrado absoluto
+                    tabla_logo = Table([
+                        [ImageRL(ruta_logo, width=4.0*cm, height=1.3*cm, kind='proportional')],
+                        [Paragraph(f"<b>{row['Plan']}</b>", st_center)]
+                    ], colWidths=[6.5*cm])
+                    tabla_logo.setStyle(TableStyle([('ALIGN', (0,0), (-1,-1), 'CENTER'), ('VALIGN', (0,0), (-1,-1), 'MIDDLE')]))
+                    celda_plan.append(tabla_logo)
             else:
                 if hay_clinicas:
                     celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", st_td))
                 else:
-                    celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", ParagraphStyle('P_Center', parent=st_td, alignment=1)))            # --- COLUMNA DE INVERSIÓN ---
+                    celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", ParagraphStyle('P_Center', parent=st_td, alignment=1)))
+                    
+            # --- COLUMNA DE INVERSIÓN ---
             dsc_men, dsc_anu = row['Dsc_Num_Mensual'], row['Dsc_Num_Anual']
             
-            # Bloque Anual
+            # Textos base de precios
             if dsc_anu > 0:
                 ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
                 txt_anual = (f"<b>ANUAL:</b><br/>"
@@ -587,7 +591,6 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             else:
                 txt_anual = f"<b>ANUAL:</b><br/><font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
             
-            # Bloque Mensual
             if dsc_men > 0:
                 ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
                 txt_mensual = (f"<b>MENSUAL:</b><br/>"
@@ -597,8 +600,19 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             else:
                 txt_mensual = f"<b>MENSUAL:</b><br/><font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
             
-            celda_inversion = Paragraph(f"{txt_mensual}<br/><br/>{txt_anual}", st_td)
-
+            # Decisión de Diseño: Apilado (Clínicas) vs Lado a Lado (Sin Clínicas)
+            if hay_clinicas:
+                # Si hay clínicas, el espacio es de 3.0cm. Se apilan verticalmente.
+                celda_inversion = Paragraph(f"{txt_mensual}<br/><br/>{txt_anual}", st_td)
+            else:
+                # Si NO hay clínicas, el espacio es gigante (5.5cm). Ponemos Mensual a la izq y Anual a la der.
+                tabla_precios = Table([[Paragraph(txt_mensual, st_td), Paragraph(txt_anual, st_td)]], colWidths=[2.7*cm, 2.7*cm])
+                tabla_precios.setStyle(TableStyle([
+                    ('VALIGN', (0,0), (-1,-1), 'TOP'), 
+                    ('LEFTPADDING', (0,0), (-1,-1), 0),
+                    ('RIGHTPADDING', (0,0), (-1,-1), 0)
+                ]))
+                celda_inversion = tabla_precios
             # --- COLUMNA DE ACCIÓN ---
             celda_accion = []
             links = []
