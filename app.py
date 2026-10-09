@@ -627,7 +627,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         
         t.setStyle(TableStyle(estilos_t))
         elements.append(t)
-        elements.append(Spacer(1, 10)))
+        elements.append(Spacer(1, 10))
 
         # --- SISTEMA UNIFICADO DE ALERTAS (Diseño Limpio) ---
         def crear_caja_aviso(texto):
