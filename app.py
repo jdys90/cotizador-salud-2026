@@ -557,13 +557,24 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             if rec: 
                 celda_plan.append(Paragraph("<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>", st_td_b))
                 
+            celda_plan = []
+            if rec: 
+                celda_plan.append(Paragraph("<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>", st_td_b))
+                
             if os.path.exists(ruta_logo):
-                celda_plan.append(ImageRL(ruta_logo, width=2.8*cm, height=0.9*cm, kind='proportional'))
-                celda_plan.append(Paragraph(f"<b>{row['Plan']}</b>", st_td))
+                # Si hay clínicas (espacio estrecho), usamos tamaño normal. Si no (espacio amplio), los hacemos gigantes.
+                if hay_clinicas:
+                    celda_plan.append(ImageRL(ruta_logo, width=2.8*cm, height=0.9*cm, kind='proportional'))
+                    celda_plan.append(Paragraph(f"<b>{row['Plan']}</b>", st_td))
+                else:
+                    # Tamaño gigante y centrado para la vista de 3 columnas
+                    celda_plan.append(ImageRL(ruta_logo, width=4.5*cm, height=1.4*cm, kind='proportional', hAlign='CENTER'))
+                    celda_plan.append(Paragraph(f"<br/><b>{row['Plan']}</b>", ParagraphStyle('P_Center', parent=st_td, alignment=1)))
             else:
-                celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", st_td))
-            
-            # --- COLUMNA DE INVERSIÓN ---
+                if hay_clinicas:
+                    celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", st_td))
+                else:
+                    celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", ParagraphStyle('P_Center', parent=st_td, alignment=1)))            # --- COLUMNA DE INVERSIÓN ---
             dsc_men, dsc_anu = row['Dsc_Num_Mensual'], row['Dsc_Num_Anual']
             
             # Bloque Anual
@@ -607,15 +618,8 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             nombre_titular = perfil['Titular'].split('(')[0].strip()
             msg_plan = f"Hola, soy {nombre_titular}. Revisé mi cotización (Folio {folio}) y deseo contratar el plan {row['Aseguradora']} {row['Plan']}."
             enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
-            celda_accion.append(Paragraph(f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='8'><b>► CONTRATAR</b></font></a>", st_td_c))
-
-            nombre_titular = perfil['Titular'].split('(')[0].strip()
-            msg_plan = f"Hola, soy {nombre_titular}. Revisé mi cotización (Folio {folio}) y deseo contratar el plan {row['Aseguradora']} {row['Plan']}."
-            enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
             
-            # Y también inyectamos el estilo centrado (st_td_c) al botón
-            celda_accion.append(Paragraph(f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='8'><b>► CONTRATAR</b></font></a>", st_td_c))
-            # --- ENSAMBLAJE DINÁMICO DE LA FILA ---
+            celda_accion.append(Paragraph(f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='8'><b>► CONTRATAR</b></font></a>", st_td_c))# --- ENSAMBLAJE DINÁMICO DE LA FILA ---
             if hay_clinicas:
                 es_plan_int = str(row['Plan']) in ['Salud Preferencial', 'Medicvida Internacional']
                 txt_amb = row['Int_Amb_Full'] if es_plan_int else row['Txt_Cob_Amb']
