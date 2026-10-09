@@ -511,26 +511,24 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(Spacer(1, 15))
 
         # Tabla Principal
-       # AJUSTE UX 1: Redistribución de columnas (Le damos más espacio a los precios)
+        hay_clinicas = bool(perfil.get('Clinicas_Sel'))
         es_int = "Internacional" in perfil['Cobertura']
-        if es_int:
-            headers = ['Plan', 'Clínicas: Redes', 'Atención Amb', 'Atención Hosp', 'Pago Mensual', 'Pago Anual']
-            anchos = [3.0*cm, 3.3*cm, 3.4*cm, 3.5*cm, 2.3*cm, 2.5*cm] # Total 18cm
+        
+        # AJUSTE UX/CRO: Distribución Ejecutiva (Precios agrupados, Acciones separadas)
+        if hay_clinicas:
+            headers = ['Aseguradora / Plan', 'Clínicas', 'Amb', 'Hosp', 'Inversión', 'Acción']
+            anchos = [3.5*cm, 3.2*cm, 3.0*cm, 3.0*cm, 2.5*cm, 2.8*cm] # Total 18cm
         else:
-            headers = ['Plan', 'Clínicas: Redes', 'Atención Amb', 'Atención Hosp', 'Pago Mensual', 'Pago Anual']
-            anchos = [3.0*cm, 3.3*cm, 3.4*cm, 3.5*cm, 2.3*cm, 2.5*cm] # Total 18cm
+            headers = ['Aseguradora / Plan', 'Atención Ambulatoria', 'Atención Hospitalaria', 'Inversión', 'Acción']
+            anchos = [4.5*cm, 3.8*cm, 3.8*cm, 3.0*cm, 2.9*cm] # Total 18cm
 
         texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
-        • <b>Coberturas (Atención Amb/Hosp):</b> Muestra tu deducible o copago al atenderte por consulta (Amb) o por hospitalización (Hosp).<br/>
-        • <b>Precios y Ahorro:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#28A745'><b>verde</b></font> verás el dinero que ahorras.<br/>
-        • <b>Enlaces Activos:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> o <font color='#2456A6'><u>Carencia</u></font> para ver los detalles del plan, y en <font color='#28A745'><b>► CONTRATAR</b></font> para iniciar tu solicitud por WhatsApp."""
+        • <b>Coberturas:</b> Muestra tu deducible o copago al atenderte por consulta (Amb) o por hospitalización (Hosp).<br/>
+        • <b>Inversión:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#28A745'><b>verde</b></font> verás tu ahorro.<br/>
+        • <b>Acción:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> para ver detalles, y en <font color='#28A745'><b>► CONTRATAR</b></font> para contactar a tu asesor."""
         
         t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
-        t_guia.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F4F8")), 
-            ('BOX', (0,0), (-1,-1), 0.5, AZUL_CORP), 
-            ('PADDING', (0,0), (-1,-1), 8)
-        ]))
+        t_guia.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F4F8")), ('BOX', (0,0), (-1,-1), 0.5, AZUL_CORP), ('PADDING', (0,0), (-1,-1), 8)]))
         elements.append(t_guia)
         elements.append(Spacer(1, 10))
 
@@ -538,11 +536,55 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         
         for _, row in df.iterrows():
             rec = (row['ID'] == id_sel)
-            # 1. Nombre del plan y etiqueta
-            txt_p = f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}"
-            if rec: txt_p = "<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>" + txt_p
             
-            # 2. Enlaces de Cartilla y Carencia
+            # --- COLUMNA 1: LOGO Y PLAN ---
+            cia_limpia = str(row['Aseguradora']).lower().strip()
+            
+            # Identificación exacta de tus archivos de logo
+            if "pacifico" in cia_limpia or "pacífico" in cia_limpia: ruta_logo = "logo_pacifico.png"
+            elif "rimac" in cia_limpia or "rímac" in cia_limpia: ruta_logo = "logo_rimac.png"
+            elif "mapfre" in cia_limpia: ruta_logo = "logo_mapfre.png"
+            elif "sanitas" in cia_limpia: ruta_logo = "logo_sanitas.png"
+            elif "positiva" in cia_limpia: ruta_logo = "logo_positiva.png"
+            else: ruta_logo = ""
+
+            celda_plan = []
+            if rec: 
+                celda_plan.append(Paragraph("<font color='#2456A6'><b>► RECOMENDADO</b></font><br/>", st_td_b))
+                
+            if os.path.exists(ruta_logo):
+                celda_plan.append(ImageRL(ruta_logo, width=2.2*cm, height=0.7*cm, kind='proportional'))
+                celda_plan.append(Paragraph(f"<b>{row['Plan']}</b>", st_td))
+            else:
+                celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", st_td))
+            
+            # --- COLUMNA DE INVERSIÓN (Precios agrupados) ---
+            dsc_men, dsc_anu = row['Dsc_Num_Mensual'], row['Dsc_Num_Anual']
+            
+            # Bloque Anual
+            if dsc_anu > 0:
+                ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
+                txt_anual = (f"<b>ANUAL:</b><br/>"
+                             f"<font color='#666666'>S/ <strike>{row['Precio_Anual_Base']:,.0f}</strike></font> | "
+                             f"<font color='#28A745'>Ahorro: S/ {ahorro_anual:,.0f}</font><br/>"
+                             f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>")
+            else:
+                txt_anual = f"<b>ANUAL:</b><br/><font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
+            
+            # Bloque Mensual
+            if dsc_men > 0:
+                ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
+                txt_mensual = (f"<b>MENSUAL:</b><br/>"
+                               f"<font color='#666666'>S/ <strike>{row['Precio_Mensual_Base']:,.0f}</strike></font> | "
+                               f"<font color='#28A745'>Ahorro: S/ {ahorro_mensual:,.0f}</font><br/>"
+                               f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>")
+            else:
+                txt_mensual = f"<b>MENSUAL:</b><br/><font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
+            
+            celda_inversion = Paragraph(f"{txt_mensual}<br/><br/>{txt_anual}", st_td)
+
+            # --- COLUMNA DE ACCIÓN (Enlaces y WhatsApp) ---
+            celda_accion = []
             links = []
             cartilla = str(row.get('Link_Cartilla', '')).strip()
             if cartilla and cartilla != '-' and cartilla.lower() != 'nan':
@@ -554,53 +596,32 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
                 href_c = carencia if carencia.startswith('http') else 'https://' + carencia
                 links.append(f"<a href='{href_c}' color='#2456A6'><u>Carencia</u></a>")
             
-            if links: txt_p += "<br/>" + " | ".join(links)
+            if links: 
+                celda_accion.append(Paragraph(" | ".join(links), st_td))
 
-            # 3. Botón directo de WhatsApp por plan
             nombre_titular = perfil['Titular'].split('(')[0].strip()
             msg_plan = f"Hola, soy {nombre_titular}. Revisé mi cotización (Folio {folio}) y deseo contratar el plan {row['Aseguradora']} {row['Plan']}."
             enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
-            txt_p += f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='7.5'><b>► CONTRATAR</b></font></a>"
-
-            # 4. Formateo de Precios Simétricos
-            dsc_men = row['Dsc_Num_Mensual']
-            dsc_anu = row['Dsc_Num_Anual']
-            
-            if dsc_anu > 0:
-                ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
-                precio_anual_str = (
-                    f"<font color='#666666' size='7.5'>Antes: S/ <strike>{row['Precio_Anual_Base']:,.0f}</strike></font><br/>"
-                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/ {ahorro_anual:,.0f}</b></font><br/>"
-                    f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
-                )
-            else:
-                precio_anual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
-            
-            if dsc_men > 0:
-                ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
-                precio_mensual_str = (
-                    f"<font color='#666666' size='7.5'>Antes: S/ <strike>{row['Precio_Mensual_Base']:,.0f}</strike></font><br/>"
-                    f"<font color='#28A745' size='7.5'><b>Ahorro: S/ {ahorro_mensual:,.0f}</b></font><br/>"
-                    f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
-                )
-            else:
-                precio_mensual_str = f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
+            celda_accion.append(Paragraph(f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='8'><b>► CONTRATAR</b></font></a>", st_td))
                 
-            # 5. Cierre de fila
-            if es_int:
-                fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Int_Amb_Full'], st_td), Paragraph(row['Int_Hosp_Full'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
+            # --- ENSAMBLAJE DINÁMICO DE LA FILA ---
+            txt_amb = row['Int_Amb_Full'] if es_int else row['Txt_Cob_Amb']
+            txt_hosp = row['Int_Hosp_Full'] if es_int else row['Txt_Cob_Hosp']
+            
+            if hay_clinicas:
+                fila = [celda_plan, Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(txt_amb, st_td), Paragraph(txt_hosp, st_td), celda_inversion, celda_accion]
             else:
-                fila = [Paragraph(txt_p, st_td), Paragraph(row['Txt_Clin_Red'], st_td), Paragraph(row['Txt_Cob_Amb'], st_td), Paragraph(row['Txt_Cob_Hosp'], st_td), Paragraph(precio_mensual_str, st_td_b), Paragraph(precio_anual_str, st_td_b)]
+                fila = [celda_plan, Paragraph(txt_amb, st_td), Paragraph(txt_hosp, st_td), celda_inversion, celda_accion]
+            
             data.append(fila)
-            # 👇 ESTA ES LA LÍNEA QUE DEBES AGREGAR 👇
+
         t = Table(data, colWidths=anchos, repeatRows=1)
-        estilos_t = [('BACKGROUND', (0,0), (-1,0), AZUL_CORP), ('GRID', (0,0), (-1,-1), 0.5, BORDE_SUAVE), ('VALIGN', (0,0), (-1,-1), 'TOP'), ('PADDING', (0,0), (-1,-1), 4)]
+        estilos_t = [('BACKGROUND', (0,0), (-1,0), AZUL_CORP), ('GRID', (0,0), (-1,-1), 0.5, BORDE_SUAVE), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('PADDING', (0,0), (-1,-1), 4)]
         
         for i, row in enumerate(df.iterrows()):
             if row[1]['ID'] == id_sel:
-                # Estilo premium para el recomendado: Fondo celeste suave y bordes azules
-                estilos_t.append(('BACKGROUND', (0, i+1), (-1, i+1), AZUL_CLARO))
-                estilos_t.append(('BOX', (0, i+1), (-1, i+1), 1.5, AZUL_CORP))
+                estilos_t.extend([('BACKGROUND', (0, i+1), (-1, i+1), AZUL_CLARO), ('BOX', (0, i+1), (-1, i+1), 1.5, AZUL_CORP)])
+        
         t.setStyle(TableStyle(estilos_t))
         elements.append(t)
         elements.append(Spacer(1, 10))
@@ -957,7 +978,13 @@ else:
                 
                 st.write("✅ Aplicando tus descuentos exclusivos de YQ Corredores...")
                 st.session_state['resultados'] = buscar(df_full, df_redes, familia, clinicas, cont, cob, descuentos_mensual, descuentos_anual)
-                st.session_state['perfil'] = {'Titular': f"{nom} ({edad} años)", 'Dependientes': txt_dependientes, 'Continuidad': cont, 'Cobertura': ", ".join(cob)}
+                st.session_state['perfil'] = {
+                    'Titular': f"{nom} ({edad} años)", 
+                    'Dependientes': txt_dependientes, 
+                    'Continuidad': cont, 
+                    'Cobertura': ", ".join(cob),
+                    'Clinicas_Sel': clinicas  # <--- NUEVA LÍNEA
+                }
                 st.session_state['nombre_cliente'] = nom
                 st.session_state['clinicas_sel'] = clinicas
                 
