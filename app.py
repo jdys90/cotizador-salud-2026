@@ -939,8 +939,7 @@ else:
             st.error("⚠️ Has olvidado ingresar la EDAD del titular. Es indispensable para el cálculo.")
         elif not cob:
             st.error("⚠️ Por favor selecciona al menos un tipo de Cobertura.")
-        elif requiere_clinica and not clinicas:
-            st.error("⚠️️ Por favor selecciona al menos una Clínica de preferencia.")
+        
         elif es_cliente and (len(celular_limpio) != 9 or not celular_limpio.startswith('9')):
             st.error("📱 Por favor ingresa un número de celular válido de 9 dígitos (Ej: 999123456).")
         elif es_cliente and (not correo or not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", correo)):
