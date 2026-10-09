@@ -640,29 +640,35 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         elements.append(Spacer(1, 10))
 
         # --- SISTEMA UNIFICADO DE ALERTAS (Diseño Limpio) ---
-        def crear_caja_aviso(texto):
-            tabla = Table([[Paragraph(texto, st_norm)]], colWidths=[18*cm])
-            tabla.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), GRIS_FONDO), ('BOX', (0,0), (-1,-1), 0.5, BORDE_SUAVE), ('PADDING', (0,0), (-1,-1), 8)]))
-            return tabla
+        alertas_activas = []
 
         if perfil['Continuidad'] == "Nuevo":
-            elements.append(crear_caja_aviso("<b>🚨 IMPORTANTE:</b> Al ser un seguro nuevo, aplican periodos de carencia (30 días) y espera. Revisa el enlace de 'Carencia'."))
-            elements.append(Spacer(1, 5))
+            alertas_activas.append("<b>PERIODO DE CARENCIA:</b> Al ser un seguro nuevo, aplican periodos de carencia (30 días) y espera. Revisa el enlace de 'Carencia' detallado en tu plan.")
         elif perfil['Continuidad'] == "Vengo con continuidad":
-            elements.append(crear_caja_aviso("<b>✅ BENEFICIO DE CONTINUIDAD:</b> Para mantenerlo, debes haber estado asegurado en los últimos 90 días con una póliza EPS o Individual."))
-            elements.append(Spacer(1, 5))
+            alertas_activas.append("<b>BENEFICIO DE CONTINUIDAD:</b> Para mantenerlo, debes haber estado asegurado ininterrumpidamente en los últimos 90 días con una póliza EPS o Individual vigente.")
 
         tiene_rimac = any("RIMAC" in str(cia).upper() or "RÍMAC" in str(cia).upper() for cia in df['Aseguradora'].values)
         if es_vista_cliente and tiene_rimac:
-            elements.append(crear_caja_aviso("<b>🎁 DESCUENTO EN RÍMAC:</b> Esta aseguradora otorga descuentos exclusivos por perfil crediticio que no podemos mostrar aquí. Escríbenos al WhatsApp para revelar tu tarifa final."))
-            elements.append(Spacer(1, 5))
+            alertas_activas.append("<b>DESCUENTO RÍMAC:</b> Esta aseguradora otorga descuentos exclusivos adicionales según evaluación crediticia. Escríbenos para revelar tu tarifa final exacta.")
             
         tiene_salud_total = any("SALUD TOTAL" in str(p).upper() for p in df['Plan'].values)
         if tiene_salud_total:
-            elements.append(crear_caja_aviso("<b>🏥 PLAN SALUD TOTAL:</b> La atención y hospitalización en la clínica Ricardo Palma está sujeta a previa evaluación de Mapfre."))
-            elements.append(Spacer(1, 5))
+            alertas_activas.append("<b>PLAN SALUD TOTAL:</b> La atención y hospitalización en la clínica Ricardo Palma está sujeta a previa evaluación médica de Mapfre.")
+
+        # Si hay al menos una alerta, generamos un único bloque consolidado
+        if alertas_activas:
+            # Unimos las alertas con un salto de línea doble para separarlas limpiamente
+            texto_alertas = "<br/><br/>".join([f"• {alerta}" for alerta in alertas_activas])
             
-        elements.append(Spacer(1, 15))
+            t_alertas = Table([[Paragraph(texto_alertas, st_norm)]], colWidths=[18*cm])
+            t_alertas.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,-1), GRIS_FONDO), 
+                ('LINELEFT', (0,0), (-1,-1), 2, AZUL_CORP), # Fina línea azul a la izquierda para darle peso visual
+                ('BOX', (0,0), (-1,-1), 0.5, BORDE_SUAVE), 
+                ('PADDING', (0,0), (-1,-1), 10)
+            ]))
+            elements.append(t_alertas)
+            elements.append(Spacer(1, 15))
 
         # Análisis del Experto (Estilo "Cita" Minimalista)
         if razon:
