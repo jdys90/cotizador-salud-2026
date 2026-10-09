@@ -1026,9 +1026,32 @@ else:
                 
                 planes_seleccionados = mejores_planes.apply(lambda r: f"{r['Aseguradora']} {r['Plan']}", axis=1).tolist()
                 sel = planes_seleccionados[0]
-                clin_txt = ", ".join(st.session_state.get('clinicas_sel', [])) or "su red de afiliados"
-                razon = f"Este plan es el que tiene mejor precio considerando las clínicas que prefiere ({clin_txt}) y sus beneficios."
-                if cont == "Nuevo": razon += " Recuerde revisar los periodos de carencia."
+                
+                # --- NUEVA LÓGICA DE ANÁLISIS DEL EXPERTO (CRO) ---
+                plan_rec = mejores_planes.iloc[0]
+                pago_mensual = plan_rec['Precio_Mensual_Final']
+                pago_anual = plan_rec['Precio_Anual_Final']
+                
+                # Evaluamos la mejor forma de pago matemáticamente
+                costo_anualizado = pago_mensual * 12
+                forma_pago_ideal = "ANUAL" if pago_anual < costo_anualizado else "MENSUAL"
+                
+                clinicas_seleccionadas = st.session_state.get('clinicas_sel', [])
+                
+                if clinicas_seleccionadas:
+                    clin_txt = ", ".join(clinicas_seleccionadas)
+                    razon = f"Este plan ofrece la tarifa más competitiva del mercado garantizando atención en tus centros de preferencia ({clin_txt})."
+                else:
+                    # Texto Premium para clientes sin clínica de preferencia
+                    razon = (
+                        "Al no contar con una clínica de preferencia específica, nuestro algoritmo ha filtrado el mercado "
+                        "buscando la máxima eficiencia económica. Este plan representa la mejor relación costo-beneficio a nivel nacional. "
+                        f"Para maximizar tu ahorro, te sugerimos optar por la modalidad de pago <b>{forma_pago_ideal}</b>."
+                    )
+                
+                if cont == "Nuevo": 
+                    razon += "<br/><br/><i>*Nota: Recuerda revisar los periodos de carencia detallados en el documento.</i>"
+                # --------------------------------------------------
 
                 with col_btn_pdf:
                     pdf_res = generar_pdf(st.session_state['perfil'], mejores_planes, op[sel], razon, incrementar_folio(), es_vista_cliente=True)
