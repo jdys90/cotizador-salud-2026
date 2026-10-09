@@ -420,7 +420,13 @@ def buscar(df_precios, df_redes, familia, clinicas_user, continuidad, coberturas
                     if quitar_tildes(cli) in [quitar_tildes(c.strip()) for c in str(row['Clinicas_Busqueda']).split(',')]:
                         list_clin_red.append(f"• <b>{cli}</b>: {row['Nombre_Red']}")
                         list_cob_amb.append(f"• <b>{cli}</b>: {row['Cobertura_Amb']}")
-                        list_cob_hosp.append(f"• <b>{cli}</b>: {row['Cobertura_Hosp']}")
+                        
+                        # --- INTERCEPTOR INTELIGENTE PARA CENTROS MÉDICOS ---
+                        # Si el nombre empieza con C.M. o C. M., forzamos el texto de Hospitalización
+                        if str(cli).strip().upper().startswith("C.M.") or str(cli).strip().upper().startswith("C. M."):
+                            list_cob_hosp.append(f"• <b>{cli}</b>: No aplica (Solo Amb.)")
+                        else:
+                            list_cob_hosp.append(f"• <b>{cli}</b>: {row['Cobertura_Hosp']}")
                         break
 
         base = calcular_precio(df_precios, cia, plan, familia)
