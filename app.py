@@ -668,11 +668,13 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             if links: 
                 celda_accion.append(Paragraph(" | ".join(links), st_td_c))
 
+            # ... (código anterior de la columna de acción) ...
             nombre_titular = perfil['Titular'].split('(')[0].strip()
             msg_plan = f"Hola, soy {nombre_titular}. Revisé mi cotización (Folio {folio}) y deseo contratar el plan {row['Aseguradora']} {row['Plan']}."
             enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
             
-            celda_accion.append(Paragraph(f"<br/><br/><a href='{enlace_plan_wa}' color='#28A745'><font size='8'><b>► CONTRATAR</b></font></a>", st_td_c))# --- ENSAMBLAJE DINÁMICO DE LA FILA ---
+            # ¡NUEVO! Aplicamos el Verde Teal (#089685) exacto al botón de contratar
+            celda_accion.append(Paragraph(f"<br/><br/><a href='{enlace_plan_wa}' color='#089685'><font size='8'><b>► CONTRATAR</b></font></a>", st_td_c))--- ENSAMBLAJE DINÁMICO DE LA FILA ---
             if hay_clinicas:
                 es_plan_int = str(row['Plan']) in ['Salud Preferencial', 'Medicvida Internacional']
                 txt_amb = row['Int_Amb_Full'] if es_plan_int else row['Txt_Cob_Amb']
@@ -1147,7 +1149,7 @@ else:
                 
                 with col_btn_wa:
                     st.markdown(f"""
-                        <a href='{enlace_wa}' target='_blank' style='display: flex; align-items: center; justify-content: center; width: 100%; height: 42px; background-color: #25D366; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;'>
+                        <a href='{enlace_wa}' target='_blank' style='display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; background-color: #25D366; color: white; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; box-sizing: border-box;'>
                             📲 Contratar vía WhatsApp
                         </a>
                     """, unsafe_allow_html=True)
