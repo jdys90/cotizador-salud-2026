@@ -522,12 +522,13 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
         
         # AJUSTE UX/CRO: Redistribución Total (3 columnas vs 6 columnas)
         if hay_clinicas:
-            headers = ['Aseguradora / Plan', 'Clínicas', 'Amb', 'Hosp', 'Inversión', 'Acción']
-            # Antes: 3.5cm (Plan) y 2.5cm (Inversión). AHORA: 3.0cm para ambos (Perfecto equilibrio)
-            anchos = [3.0*cm, 3.2*cm, 3.0*cm, 3.0*cm, 3.0*cm, 2.8*cm]
+            # Reemplazamos 'Amb' y 'Hosp' por términos claros y centrados en el cliente
+            headers = ['Aseguradora / Plan', 'Clínicas', 'Consultas', 'Hospitalización', 'Inversión', 'Acción']
+            anchos = [3.0*cm, 3.2*cm, 3.0*cm, 3.0*cm, 3.0*cm, 2.8*cm] 
             
+            # Actualizamos la guía para que coincida con los nuevos títulos de las columnas
             texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
-            • <b>Coberturas:</b> Muestra tu deducible o copago al atenderte por consulta (Amb) o por hospitalización (Hosp).<br/>
+            • <b>Coberturas:</b> Muestra tu deducible al atenderte por <b>Consultas</b> médicas o por <b>Hospitalización</b>.<br/>
             • <b>Inversión:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#28A745'><b>verde</b></font> verás tu ahorro.<br/>
             • <b>Acción:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> para ver detalles, y en <font color='#28A745'><b>► CONTRATAR</b></font> para contactar a tu asesor."""
         else:
