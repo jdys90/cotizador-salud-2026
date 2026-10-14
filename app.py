@@ -674,7 +674,10 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             enlace_plan_wa = f"https://wa.me/51906462225?text={urllib.parse.quote(msg_plan)}"
             
             # ¡NUEVO! Aplicamos el Verde Teal (#089685) exacto al botón de contratar
-            celda_accion.append(Paragraph(f"<br/><br/><a href='{enlace_plan_wa}' color='#089685'><font size='8'><b>► CONTRATAR</b></font></a>", st_td_c))--- ENSAMBLAJE DINÁMICO DE LA FILA ---
+            celda_accion.append(Paragraph(f"<br/><br/><a href='{enlace_plan_wa}' color='#089685'><font size='8'><b>► CONTRATAR</b></font></a>", st_td_c))
+            
+            #--- ENSAMBLAJE DINÁMICO DE LA FILA ---
+   
             if hay_clinicas:
                 es_plan_int = str(row['Plan']) in ['Salud Preferencial', 'Medicvida Internacional']
                 txt_amb = row['Int_Amb_Full'] if es_plan_int else row['Txt_Cob_Amb']
