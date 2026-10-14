@@ -51,21 +51,27 @@ st.markdown("""
             padding: 0px !important;
             margin: 0px !important;
         }
-    /* 1. Botón Principal: Cotizar */
+    /* 1. Botón Principal: Generar Propuesta */
     div.stButton > button {
         background-color: #2456A6 !important;
         color: white !important;
         border: 2px solid #2456A6 !important;
         border-radius: 8px !important;
-        font-weight: 600 !important;
-        font-size: 16px !important;
-        height: 48px !important;
+        height: 48px !important; /* Altura premium */
     }
     div.stButton > button:hover, div.stButton > button:active, div.stButton > button:focus {
         background-color: #1a428a !important;
         border-color: #1a428a !important;
         color: white !important;
         box-shadow: none !important;
+    }
+    /* Cazador del texto interno de Streamlit para igualar tipografía */
+    div.stButton > button p, div.stButton > button span {
+        font-weight: 700 !important; /* Fuerza la negrita (Bold) */
+        font-size: 16px !important;  /* Iguala el tamaño al botón verde */
+        font-family: sans-serif !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     /* 2. Botón Salvavidas HTML: WhatsApp */
