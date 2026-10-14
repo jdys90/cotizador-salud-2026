@@ -597,9 +597,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             else:
                 # Si no hay logo, centramos el texto puro de todos modos
                 celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", st_center))                
-                else:
-                    celda_plan.append(Paragraph(f"<b>{row['Aseguradora']}</b><br/>{row['Plan']}", ParagraphStyle('P_Center', parent=st_td, alignment=1)))
-                    
+                                    
             # --- COLUMNA DE INVERSIÓN ---
             dsc_men, dsc_anu = row['Dsc_Num_Mensual'], row['Dsc_Num_Anual']
             
