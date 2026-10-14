@@ -813,11 +813,7 @@ else:
     es_asesor = (codigo_actual in CODIGOS_ASESORES)
     es_cliente = (not es_admin and not es_asesor)
 
-    # --- 2. HERO SECTION & LANDING PAGE (MODO CAMALEÓN) ---
-    nombre_url = st.query_params.get("nombre", "")
-    origen_url = st.query_params.get("origen", "")
-
-    # Si NO viene de WordPress, mostramos logo y diseño completo
+    # Si NO viene de WordPress, mostramos logo y diseño completo estilo Banca Privada
     if origen_url != "web":
         
         # 2.1 Mostramos el Logo
@@ -826,66 +822,60 @@ else:
             with col2:
                 st.image("logo_web.png", use_container_width=True)
                 
-        # 2.2 Textos y Gatillos de Confianza
+        # 2.2 Textos y Gatillos de Confianza (Sin emojis infantiles y con paleta YQ)
         if nombre_url:
             st.markdown(f"""
                 <div style="text-align: center; padding: 15px 0px;">
-                    <h1 style="color: #2456A6; font-size: 2.2rem; font-weight: 800; margin-bottom: 5px;">
-                        ¡Hola {nombre_url}! 👋 Ya tenemos tus datos.
+                    <h1 style="color: #03318e; font-size: 2.2rem; font-weight: 800; margin-bottom: 5px;">
+                        Hola {nombre_url}, ya tenemos tus datos registrados.
                     </h1>
-                    <p style="color: #555555; font-size: 1.1rem;">
-                        Estás a un paso de encontrar tu plan ideal. Completa tus clínicas favoritas y obtén tu cotización al instante.
+                    <p style="color: #3c3c3c; font-size: 1.1rem;">
+                        Estás a un paso de encontrar tu plan ideal. Selecciona tus clínicas de preferencia y obtén tu propuesta al instante.
                     </p>
                 </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown("""
                 <div style="text-align: center; padding: 20px 0px 10px 0px;">
-                    <h1 style="color: #2456A6; font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; line-height: 1.2;">
-                        Cotiza y compara el mejor seguro de salud en 3 minutos ⏱️
+                    <h1 style="color: #03318e; font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; line-height: 1.2;">
+                        El mismo seguro de salud. Mejor tarifa.<br>Asesoría privada gratuita.
                     </h1>
-                    <p style="color: #666666; font-size: 1.2rem; font-weight: 400; margin-bottom: 25px;">
-                        Analizamos planes de <b>Pacífico, Mapfre, Rímac y La Positiva</b> para mostrarte las tarifas más bajas del mercado, garantizado.
+                    <p style="color: #3c3c3c; font-size: 1.15rem; font-weight: 400; margin-bottom: 25px;">
+                        Analizamos planes de <b>Pacífico, Mapfre, Rímac, Sanitas y La Positiva</b> aplicando descuentos exclusivos de agencia.
                     </p>
                 </div>
             """, unsafe_allow_html=True)
             
-            # Prueba Social y Gatillos de Confianza (Trust Badges)
+            # Prueba Social y Gatillos de Confianza (Con tus colores #03318e y #089685)
             col_t1, col_t2, col_t3 = st.columns(3)
             with col_t1:
                 st.markdown("""
-                <div style="background-color: #F8F9FA; padding: 15px; border-radius: 8px; border-left: 4px solid #28A745; text-align: center; height: 100px;">
-                    <h4 style="margin:0; color: #2456A6; font-size: 1.1rem;">🔒 Respaldo SBS</h4>
-                    <p style="margin:5px 0 0 0; color: #666; font-size: 0.85rem;">Corredores oficiales y regulados</p>
+                <div style="background-color: #F8F9FA; padding: 15px; border-radius: 8px; border-left: 4px solid #089685; text-align: center; height: 100px;">
+                    <h4 style="margin:0; color: #03318e; font-size: 1.05rem; font-weight: 700;">Respaldo SBS</h4>
+                    <p style="margin:5px 0 0 0; color: #555; font-size: 0.85rem;">Corredores oficiales y regulados</p>
                 </div>
                 """, unsafe_allow_html=True)
                 
             with col_t2:
                 st.markdown("""
-                <div style="background-color: #F8F9FA; padding: 15px; border-radius: 8px; border-left: 4px solid #28A745; text-align: center; height: 100px;">
-                    <h4 style="margin:0; color: #2456A6; font-size: 1.1rem;">💰 Tarifas VIP</h4>
-                    <p style="margin:5px 0 0 0; color: #666; font-size: 0.85rem;">Descuentos exclusivos de agencia</p>
+                <div style="background-color: #F8F9FA; padding: 15px; border-radius: 8px; border-left: 4px solid #089685; text-align: center; height: 100px;">
+                    <h4 style="margin:0; color: #03318e; font-size: 1.05rem; font-weight: 700;">Tarifas Preferenciales</h4>
+                    <p style="margin:5px 0 0 0; color: #555; font-size: 0.85rem;">Descuentos adicionales de agencia</p>
                 </div>
                 """, unsafe_allow_html=True)
                 
             with col_t3:
                 st.markdown("""
-                <div style="background-color: #F8F9FA; padding: 15px; border-radius: 8px; border-left: 4px solid #28A745; text-align: center; height: 100px;">
-                    <h4 style="margin:0; color: #2456A6; font-size: 1.1rem;">⚡ 100% Online</h4>
-                    <p style="margin:5px 0 0 0; color: #666; font-size: 0.85rem;">Cotización inmediata y sin compromiso</p>
+                <div style="background-color: #F8F9FA; padding: 15px; border-radius: 8px; border-left: 4px solid #089685; text-align: center; height: 100px;">
+                    <h4 style="margin:0; color: #03318e; font-size: 1.05rem; font-weight: 700;">Defensa al Asegurado</h4>
+                    <p style="margin:5px 0 0 0; color: #555; font-size: 0.85rem;">Gestión VIP de reembolsos y emergencias</p>
                 </div>
                 """, unsafe_allow_html=True)
 
         st.divider()
-    else:
-        # MODO CAMALEÓN (Para WordPress): Minimalista y directo al grano
-        # Título principal
-        if nombre_url:
-            st.write(f"### 👤 1. Perfil del Titular")
-        else:
-            st.write("### 👤 1. Perfil del Titular")
 
-
+    # Mostramos el título del Paso 1 SIEMPRE (con o sin WordPress) y sin emojis
+    st.markdown("<h3 style='color: #03318e; font-weight: 700; margin-bottom: 10px;'>1. Perfil del Titular</h3>", unsafe_allow_html=True)
     # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
     nombre_url = st.query_params.get("nombre", "")
     edad_url = st.query_params.get("edad", "")
@@ -920,8 +910,8 @@ else:
     else:
         salud = "Sano"
         
-    st.write("### 👥 2. Grupo Familiar")
-    st.caption("💡 *Agrega a tus dependientes para calcular automáticamente las tarifas con descuento.*")
+    st.markdown("<h3 style='color: #03318e; font-weight: 700; margin-top: 15px; margin-bottom: 5px;'>2. Grupo Familiar</h3>", unsafe_allow_html=True)
+    st.caption("*Agrega a tus dependientes para calcular automáticamente las tarifas con descuento familiar.*")
     
     # 2. Reducimos el tamaño del input de número de dependientes
     col_dep_num, _ = st.columns([2, 4])
@@ -947,7 +937,7 @@ else:
     txt_dependientes = ", ".join(txt_fam) if txt_fam else "Ninguno"
     # Solo mostramos el título si el cliente tiene algo que llenar aquí
     if es_admin or clinicas_unicas:
-        st.write("### 🏥 3. Preferencias de Atención")
+        st.markdown("<h3 style='color: #03318e; font-weight: 700; margin-top: 15px; margin-bottom: 10px;'>3. Preferencias de Atención</h3>", unsafe_allow_html=True)
     
     if es_admin:
         index_continuidad = 1 if "continuidad" in cont_url.lower() else 0
