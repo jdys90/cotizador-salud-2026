@@ -569,12 +569,14 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             else: ruta_logo = ""
 
             celda_plan = []
-            # Creamos los estilos centrados para que todo quede en perfecta simetría
+            # Creamos los estilos centrados
             st_center = ParagraphStyle('P_Center', parent=st_td, alignment=1)
-            st_rec_center = ParagraphStyle('Rec_Center', parent=st_td_b, alignment=1)
+            # INYECTAMOS EL DORADO VIP DIRECTAMENTE AL ESTILO RECOMENDADO
+            DORADO_VIP = colors.HexColor("#bf8d1b")
+            st_rec_center = ParagraphStyle('Rec_Center', parent=st_td_b, alignment=1, textColor=DORADO_VIP)
             
             if rec: 
-                celda_plan.append(Paragraph(f"<font color='{DORADO_VIP}'><b>► RECOMENDADO</b></font><br/>", st_rec_center))
+                celda_plan.append(Paragraph("<b>► RECOMENDADO</b><br/>", st_rec_center))
                 
             if os.path.exists(ruta_logo):
                 if hay_clinicas:
