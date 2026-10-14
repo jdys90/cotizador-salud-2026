@@ -53,17 +53,18 @@ st.markdown("""
         }
     /* 1. Botón Principal: Generar Propuesta */
     div.stButton > button {
-        background-color: #2456A6 !important;
+        background-color: #03318e !important;  /* Tu nuevo azul profundo */
         color: white !important;
-        border: 2px solid #2456A6 !important;
+        border: 2px solid #03318e !important;
         border-radius: 8px !important;
-        height: 48px !important; /* Altura premium */
+        height: 48px !important;
     }
     div.stButton > button:hover, div.stButton > button:active, div.stButton > button:focus {
-        background-color: #1a428a !important;
-        border-color: #1a428a !important;
+        background-color: #022266 !important; /* Un azul un poco más oscuro para el hover */
+        border-color: #022266 !important;
         color: white !important;
         box-shadow: none !important;
+    }
     }
     /* Cazador del texto interno de Streamlit para igualar tipografía */
     div.stButton > button p, div.stButton > button span {
