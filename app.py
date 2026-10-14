@@ -91,20 +91,28 @@ st.markdown("""
         color: white !important;
     }
     
-    /* 3. Botón de Descarga PDF */
+    /* 3. Botón de Descarga PDF (Igualado a Premium) */
     button[kind="secondary"] {
-        background-color: #2456A6 !important;
+        background-color: #03318e !important;
         color: white !important;
-        border: 2px solid #2456A6 !important;
+        border: 2px solid #03318e !important;
         border-radius: 8px !important;
-        font-weight: 600 !important;
-        font-size: 15px !important;
         width: 100% !important;
-        height: 42px !important;
+        height: 48px !important; /* Subimos de 42px a 48px */
     }
-    button[kind="secondary"]:hover {
-        background-color: #1a428a !important;
-        border-color: #1a428a !important;
+    button[kind="secondary"]:hover, button[kind="secondary"]:active, button[kind="secondary"]:focus {
+        background-color: #022266 !important;
+        border-color: #022266 !important;
+        color: white !important;
+        box-shadow: none !important;
+    }
+    
+    /* Cazador del texto interno para el botón de descarga */
+    button[kind="secondary"], 
+    button[kind="secondary"] * {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        font-family: sans-serif !important;
         color: white !important;
     }
 
@@ -1020,15 +1028,17 @@ else:
     if not es_admin:
         st.info("⚠️ **Importante:** Las tarifas mostradas aplican para nuevas afiliaciones. Si actualmente cuentas con una EPS o seguro privado, solicita una cotización personalizada con nuestros asesores para garantizar la **portabilidad y continuidad de tus preexistencias**.")
         
-    if st.button("Generar Propuesta", type="primary", use_container_width=True): # Cambiamos 'Cotizar' por 'Generar Propuesta'
+    if st.button("Generar Propuesta", type="primary", use_container_width=True):
         # 1. LIMPIEZA Y VALIDACIÓN MATEMÁTICA DE LEADS
         celular_limpio = "".join(filter(str.isdigit, str(celular))) if celular else ""
+        nombre_limpio = str(nom).strip() if nom else ""
 
-        if edad is None:
+        if es_cliente and not nombre_limpio:
+            st.error("👤 Por favor ingresa tu Nombre Completo para personalizar tu cotización.")
+        elif edad is None:
             st.error("⚠️ Has olvidado ingresar la EDAD del titular. Es indispensable para el cálculo.")
         elif not cob:
             st.error("⚠️ Por favor selecciona al menos un tipo de Cobertura.")
-        
         elif es_cliente and (len(celular_limpio) != 9 or not celular_limpio.startswith('9')):
             st.error("📱 Por favor ingresa un número de celular válido de 9 dígitos (Ej: 999123456).")
         elif es_cliente and (not correo or not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", correo)):
