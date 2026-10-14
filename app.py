@@ -65,7 +65,6 @@ st.markdown("""
         color: white !important;
         box-shadow: none !important;
     }
-    }
     /* Cazador del texto interno de Streamlit para igualar tipografía */
     div.stButton > button p, div.stButton > button span {
         font-weight: 700 !important; /* Fuerza la negrita (Bold) */
@@ -538,16 +537,16 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             # Actualizamos la guía para que coincida con los nuevos títulos de las columnas
             texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
             • <b>Coberturas:</b> Muestra tu deducible al atenderte por <b>Consultas</b> médicas o por <b>Hospitalización</b>.<br/>
-            • <b>Inversión:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='{VERDE_EXITO}'><b>verde</b></font> verás tu ahorro.<br/>
-            • <b>Acción:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> para ver detalles, y en <font color='{VERDE_EXITO}'><b>► CONTRATAR</b></font> para contactar a tu asesor."""
+            • <b>Inversión:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#089685'><b>verde</b></font> verás tu ahorro.<br/>
+            • <b>Acción:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> para ver detalles, y en <font color='#089685'><b>► CONTRATAR</b></font> para contactar a tu asesor."""
         else:
             # Diseño Ultra-Minimalista: Solo 3 columnas gigantes y limpias
             headers = ['Aseguradora / Plan', 'Inversión', 'Acción']
             anchos = [7.0*cm, 5.5*cm, 5.5*cm] # Total 18cm
             
             texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
-            • <b>Inversión:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='{VERDE_EXITO}'><b>verde</b></font> verás tu ahorro.<br/>
-            • <b>Acción:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> o <font color='#2456A6'><u>Carencia</u></font> para ver los beneficios del plan al detalle, y en <font color='{VERDE_EXITO}'><b>► CONTRATAR</b></font> para contactarnos."""
+            • <b>Inversión:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#089685'><b>verde</b></font> verás tu ahorro.<br/>
+            • <b>Acción:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> o <font color='#2456A6'><u>Carencia</u></font> para ver los beneficios del plan al detalle, y en <font color='#089685'><b>► CONTRATAR</b></font> para contactarnos."""
             
         t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
         t_guia.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F4F8")), ('BOX', (0,0), (-1,-1), 0.5, AZUL_CORP), ('PADDING', (0,0), (-1,-1), 8)]))
@@ -616,7 +615,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
                 ahorro_anual = row['Precio_Anual_Base'] - row['Precio_Anual_Final']
                 txt_anual = (f"<b>ANUAL:</b><br/>"
                              f"<font color='#666666'>Antes: S/ <strike>{row['Precio_Anual_Base']:,.0f}</strike></font><br/>"
-                             f"<font color='{VERDE_EXITO}'>Ahorro: S/ {ahorro_anual:,.0f}</font><br/>"
+                             f"<font color='#089685'>Ahorro: S/ {ahorro_anual:,.0f}</font><br/>"
                              f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>")
             else:
                 txt_anual = f"<b>ANUAL:</b><br/><font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
@@ -625,7 +624,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
                 ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
                 txt_mensual = (f"<b>MENSUAL:</b><br/>"
                                f"<font color='#666666'>Antes: S/ <strike>{row['Precio_Mensual_Base']:,.0f}</strike></font><br/>"
-                               f"<font color='{VERDE_EXITO}'>Ahorro: S/ {ahorro_mensual:,.0f}</font><br/>"
+                               f"<font color='#089685'>Ahorro: S/ {ahorro_mensual:,.0f}</font><br/>"
                                f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>")
             else:
                 txt_mensual = f"<b>MENSUAL:</b><br/><font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
