@@ -59,6 +59,7 @@ st.markdown("""
         border-radius: 8px !important;
         font-weight: 600 !important;
         font-size: 16px !important;
+        height: 48px !important;
     }
     div.stButton > button:hover, div.stButton > button:active, div.stButton > button:focus {
         background-color: #1a428a !important;
