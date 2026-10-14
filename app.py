@@ -546,7 +546,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
             • <b>Coberturas:</b> Muestra tu deducible al atenderte por <b>Consultas</b> médicas o por <b>Hospitalización</b>.<br/>
             • <b>Inversión:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#089685'><b>verde</b></font> verás tu ahorro.<br/>
-            • <b>Acción:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> para ver detalles, y en <font color='#089685'><b>► CONTRATAR</b></font> para contactar a tu asesor."""
+            • <b>Acción:</b> Haz clic en <font color='#03318e'><u>Cartilla</u></font> para ver detalles, y en <font color='#089685'><b>► CONTRATAR</b></font> para contactar a tu asesor."""
         else:
             # Diseño Ultra-Minimalista: Solo 3 columnas gigantes y limpias
             headers = ['Aseguradora / Plan', 'Inversión', 'Acción']
@@ -554,7 +554,7 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             
             texto_guia_pdf = """<b>¿CÓMO LEER ESTE DOCUMENTO?</b><br/>
             • <b>Inversión:</b> El precio <strike color='#999999'>Antes</strike> es la tarifa pública regular. Tu costo exclusivo es el <b>Final</b>, y en <font color='#089685'><b>verde</b></font> verás tu ahorro.<br/>
-            • <b>Acción:</b> Haz clic en <font color='#2456A6'><u>Cartilla</u></font> o <font color='#2456A6'><u>Carencia</u></font> para ver los beneficios del plan al detalle, y en <font color='#089685'><b>► CONTRATAR</b></font> para contactarnos."""
+            • <b>Acción:</b> Haz clic en <font color='#03318e'><u>Cartilla</u></font> o <font color='#03318e'><u>Carencia</u></font> para ver los beneficios del plan al detalle, y en <font color='#089685'><b>► CONTRATAR</b></font> para contactarnos."""
             
         t_guia = Table([[Paragraph(texto_guia_pdf, st_norm)]], colWidths=[18*cm])
         t_guia.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F4F8")), ('BOX', (0,0), (-1,-1), 0.5, AZUL_CORP), ('PADDING', (0,0), (-1,-1), 8)]))
@@ -626,18 +626,18 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
                 txt_anual = (f"<b>ANUAL:</b><br/>"
                              f"<font color='#666666'>Antes: S/ <strike>{row['Precio_Anual_Base']:,.0f}</strike></font><br/>"
                              f"<font color='#089685'>Ahorro: S/ {ahorro_anual:,.0f}</font><br/>"
-                             f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>")
+                             f"<font color='#03318e' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>")
             else:
-                txt_anual = f"<b>ANUAL:</b><br/><font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
+                txt_anual = f"<b>ANUAL:</b><br/><font color='#03318e' size='8.5'><b>Final: S/ {row['Precio_Anual_Final']:,.0f}</b></font>"
             
             if dsc_men > 0:
                 ahorro_mensual = row['Precio_Mensual_Base'] - row['Precio_Mensual_Final']
                 txt_mensual = (f"<b>MENSUAL:</b><br/>"
                                f"<font color='#666666'>Antes: S/ <strike>{row['Precio_Mensual_Base']:,.0f}</strike></font><br/>"
                                f"<font color='#089685'>Ahorro: S/ {ahorro_mensual:,.0f}</font><br/>"
-                               f"<font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>")
+                               f"<font color='#03318e' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>")
             else:
-                txt_mensual = f"<b>MENSUAL:</b><br/><font color='#2456A6' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
+                txt_mensual = f"<b>MENSUAL:</b><br/><font color='#03318e' size='8.5'><b>Final: S/ {row['Precio_Mensual_Final']:,.0f}</b></font>"
             
             # Decisión de Diseño: Apilado (Clínicas) vs Lado a Lado (Sin Clínicas)
             if hay_clinicas:
@@ -658,12 +658,12 @@ def generar_pdf(perfil, df, id_sel, razon, folio, es_vista_cliente=False):
             cartilla = str(row.get('Link_Cartilla', '')).strip()
             if cartilla and cartilla != '-' and cartilla.lower() != 'nan':
                 href = cartilla if cartilla.startswith('http') else 'https://' + cartilla
-                links.append(f"<a href='{href}' color='#2456A6'><u>Cartilla</u></a>")
+                links.append(f"<a href='{href}' color='#03318e'><u>Cartilla</u></a>")
                 
             carencia = str(row.get('Link_Carencia', '')).strip()
             if carencia and carencia != '-' and carencia.lower() != 'nan':
                 href_c = carencia if carencia.startswith('http') else 'https://' + carencia
-                links.append(f"<a href='{href_c}' color='#2456A6'><u>Carencia</u></a>")
+                links.append(f"<a href='{href_c}' color='#03318e'><u>Carencia</u></a>")
             
             if links: 
                 celda_accion.append(Paragraph(" | ".join(links), st_td_c))
@@ -813,6 +813,10 @@ else:
     es_asesor = (codigo_actual in CODIGOS_ASESORES)
     es_cliente = (not es_admin and not es_asesor)
 
+    # --- DEFINICIÓN DE VARIABLES DE URL (ESTO SOLUCIONA EL NAMEERROR) ---
+    nombre_url = st.query_params.get("nombre", "")
+    origen_url = st.query_params.get("origen", "")
+
     # Si NO viene de WordPress, mostramos logo y diseño completo estilo Banca Privada
     if origen_url != "web":
         
@@ -876,6 +880,7 @@ else:
 
     # Mostramos el título del Paso 1 SIEMPRE (con o sin WordPress) y sin emojis
     st.markdown("<h3 style='color: #03318e; font-weight: 700; margin-bottom: 10px;'>1. Perfil del Titular</h3>", unsafe_allow_html=True)
+    
     # --- CAPTURA INTELIGENTE DE VARIABLES DESDE ZOHO ---
     nombre_url = st.query_params.get("nombre", "")
     edad_url = st.query_params.get("edad", "")
@@ -1124,7 +1129,7 @@ else:
                     if isinstance(pdf_res, str): 
                         st.error(pdf_res)
                     else:
-                        nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
+                        nom_clean = (st.session_state.get('nombre_cliente', 'Cliente').strip() or 'Cliente').split()[0]
                         fecha_str = obtener_hora_peru().strftime("%d%m%y")
                         
                         datos_para_sheet = [obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, "Cliente"]
@@ -1187,7 +1192,7 @@ else:
                             datos_para_sheet = [obtener_hora_peru().strftime('%Y-%m-%d %H:%M'), nom, correo, celular, edad, str(cob), cont, str(clinicas), len(familia)-1, "Admin/Asesor"]
                             guardar_en_sheets(datos_para_sheet)
                             
-                            nom_clean = st.session_state.get('nombre_cliente', 'Cliente').strip().split()[0]
+                            nom_clean = (st.session_state.get('nombre_cliente', 'Cliente').strip() or 'Cliente').split()[0]
                             st.download_button("📥 Descargar PDF", pdf_res, f"COTISALUD_{nom_clean}.pdf", "application/pdf")
 
     # --- CIERRE PREMIUM (Salvavidas UX Dinámico) ---
