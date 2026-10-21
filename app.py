@@ -222,6 +222,7 @@ def enviar_notificacion(cliente, correo, celular, plan_interes_list, n_familia, 
                     "Email": correo,
                     "Mobile": str(celular),
                     "Lead_Source": "Cotizador Salud Web",
+                    "Seguro_de_Inter_s": "Salud",
                     "Description": descripcion_crm
                 }
             ]
