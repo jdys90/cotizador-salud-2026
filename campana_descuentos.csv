@@ -47,11 +47,11 @@ La Positiva Seguros,Medisalud Senior +,TODOS,TODOS,TODOS,1,Mensual,TODOS,TODOS,C
 La Positiva Seguros,Medisalud Senior +,TODOS,TODOS,TODOS,1,Contado,TODOS,TODOS,Crónico,TODOS,5
 La Positiva Seguros,Medisalud Senior +,TODOS,TODOS,TODOS,2,Mensual,TODOS,TODOS,Crónico,TODOS,8
 La Positiva Seguros,Medisalud Senior +,TODOS,TODOS,TODOS,2,Contado,TODOS,TODOS,Crónico,TODOS,12
-Mapfre Seguros,Trébol Salud,Nuevo,1,40,1,TODOS,TODOS,TODOS,TODOS,septiembre,35
-Mapfre Seguros,Trébol Salud,Nuevo,41,55,1,TODOS,TODOS,TODOS,TODOS,septiembre,30
-Mapfre Seguros,Viva Salud,Nuevo,1,55,1,TODOS,TODOS,TODOS,TODOS,septiembre,30
-Mapfre Seguros,Salud Total,Nuevo,0,55,1,TODOS,TODOS,TODOS,TODOS,septiembre,35
-Mapfre Seguros,Salud Total,Nuevo,56,64,1,TODOS,TODOS,TODOS,TODOS,septiembre,25
+Mapfre Seguros,Trébol Salud,Nuevo,1,40,1,TODOS,TODOS,TODOS,TODOS,octubre,35
+Mapfre Seguros,Trébol Salud,Nuevo,41,55,1,TODOS,TODOS,TODOS,TODOS,octubre,30
+Mapfre Seguros,Viva Salud,Nuevo,1,55,1,TODOS,TODOS,TODOS,TODOS,octubre,30
+Mapfre Seguros,Salud Total,Nuevo,0,55,1,TODOS,TODOS,TODOS,TODOS,octubre,35
+Mapfre Seguros,Salud Total,Nuevo,56,64,1,TODOS,TODOS,TODOS,TODOS,octubre,25
 Pacífico Seguros,Esencial,Nuevo,TODOS,TODOS,1,TODOS,TODOS,TODOS,TODOS,octubre,30
 Pacífico Seguros,Esencial,Continuidad,TODOS,TODOS,1,TODOS,TODOS,TODOS,TODOS,octubre,15
 Pacífico Seguros,Esencial Plus,Nuevo,TODOS,TODOS,1,TODOS,TODOS,TODOS,TODOS,octubre,30
@@ -78,199 +78,199 @@ Pacífico Seguros,Medicvida Internacional,Nuevo,41,64,1,TODOS,TODOS,TODOS,TODOS,
 Pacífico Seguros,Medicvida Internacional,Continuidad,0,19,1,TODOS,TODOS,TODOS,TODOS,octubre,30
 Pacífico Seguros,Medicvida Internacional,Continuidad,20,40,1,TODOS,TODOS,TODOS,TODOS,octubre,30
 Pacífico Seguros,Medicvida Internacional,Continuidad,41,64,1,TODOS,TODOS,TODOS,TODOS,octubre,15
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Bueno,No,TODOS,septiembre,26
-Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Bueno,No,TODOS,septiembre,27
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Bueno,No,TODOS,septiembre,28
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Bueno,Si,TODOS,septiembre,28
-Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Bueno,Si,TODOS,septiembre,28
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Bueno,Si,TODOS,septiembre,30
-Rímac Seguros,Red Preferente,Continuidad,0,64,1,TODOS,Bueno,TODOS,TODOS,septiembre,10
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Ambar,No,TODOS,septiembre,23
-Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Ambar,No,TODOS,septiembre,24
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Ambar,No,TODOS,septiembre,25
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Ambar,Si,TODOS,septiembre,25
-Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Ambar,Si,TODOS,septiembre,26
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Ambar,Si,TODOS,septiembre,27
-Rímac Seguros,Red Preferente,Continuidad,0,64,1,TODOS,Ambar,TODOS,TODOS,septiembre,5
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Rojo,No,TODOS,septiembre,5
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Rojo,Si,TODOS,septiembre,5
-Rímac Seguros,Red Preferente,Continuidad,0,64,1,TODOS,Rojo,TODOS,TODOS,septiembre,0
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Gris,No,TODOS,septiembre,18
-Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Gris,No,TODOS,septiembre,20
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Gris,No,TODOS,septiembre,21
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Gris,Si,TODOS,septiembre,20
-Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Gris,Si,TODOS,septiembre,21
-Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Gris,Si,TODOS,septiembre,22
-Rímac Seguros,Red Preferente,Continuidad,0,64,1,TODOS,Gris,TODOS,TODOS,septiembre,5
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Bueno,No,TODOS,septiembre,26
-Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Bueno,No,TODOS,septiembre,27
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Bueno,No,TODOS,septiembre,28
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Bueno,Si,TODOS,septiembre,28
-Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Bueno,Si,TODOS,septiembre,28
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Bueno,Si,TODOS,septiembre,30
-Rímac Seguros,Red Médica,Continuidad,0,64,1,TODOS,Bueno,TODOS,TODOS,septiembre,10
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Ambar,No,TODOS,septiembre,23
-Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Ambar,No,TODOS,septiembre,24
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Ambar,No,TODOS,septiembre,25
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Ambar,Si,TODOS,septiembre,25
-Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Ambar,Si,TODOS,septiembre,26
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Ambar,Si,TODOS,septiembre,27
-Rímac Seguros,Red Médica,Continuidad,0,64,1,TODOS,Ambar,TODOS,TODOS,septiembre,5
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Rojo,No,TODOS,septiembre,5
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Rojo,Si,TODOS,septiembre,5
-Rímac Seguros,Red Médica,Continuidad,0,64,1,TODOS,Rojo,TODOS,TODOS,septiembre,0
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Gris,No,TODOS,septiembre,18
-Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Gris,No,TODOS,septiembre,20
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Gris,No,TODOS,septiembre,21
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Gris,Si,TODOS,septiembre,20
-Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Gris,Si,TODOS,septiembre,21
-Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Gris,Si,TODOS,septiembre,22
-Rímac Seguros,Red Médica,Continuidad,0,64,1,TODOS,Gris,TODOS,TODOS,septiembre,5
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Bueno,No,TODOS,septiembre,26
-Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Bueno,No,TODOS,septiembre,28
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Bueno,No,TODOS,septiembre,30
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Bueno,Si,TODOS,septiembre,28
-Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Bueno,Si,TODOS,septiembre,30
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Bueno,Si,TODOS,septiembre,33
-Rímac Seguros,Full Salud,Continuidad,0,64,1,TODOS,Bueno,TODOS,TODOS,septiembre,10
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Ambar,No,TODOS,septiembre,24
-Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Ambar,No,TODOS,septiembre,26
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Ambar,No,TODOS,septiembre,28
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Ambar,Si,TODOS,septiembre,27
-Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Ambar,Si,TODOS,septiembre,29
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Ambar,Si,TODOS,septiembre,30
-Rímac Seguros,Full Salud,Continuidad,0,64,1,TODOS,Ambar,TODOS,TODOS,septiembre,5
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Rojo,No,TODOS,septiembre,5
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Rojo,Si,TODOS,septiembre,5
-Rímac Seguros,Full Salud,Continuidad,0,64,1,TODOS,Rojo,TODOS,TODOS,septiembre,0
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Gris,No,TODOS,septiembre,22
-Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Gris,No,TODOS,septiembre,24
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Gris,No,TODOS,septiembre,26
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Gris,Si,TODOS,septiembre,24
-Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Gris,Si,TODOS,septiembre,26
-Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Gris,Si,TODOS,septiembre,28
-Rímac Seguros,Full Salud,Continuidad,0,64,1,TODOS,Gris,TODOS,TODOS,septiembre,5
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Bueno,No,TODOS,septiembre,24
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Bueno,No,TODOS,septiembre,26
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Bueno,No,TODOS,septiembre,28
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Bueno,Si,TODOS,septiembre,26
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Bueno,Si,TODOS,septiembre,28
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Bueno,Si,TODOS,septiembre,31
-Rímac Seguros,Salud Preferencial,Continuidad,0,64,1,TODOS,Bueno,TODOS,TODOS,septiembre,10
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Ambar,No,TODOS,septiembre,21
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Ambar,No,TODOS,septiembre,23
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Ambar,No,TODOS,septiembre,25
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Ambar,Si,TODOS,septiembre,23
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Ambar,Si,TODOS,septiembre,25
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Ambar,Si,TODOS,septiembre,28
-Rímac Seguros,Salud Preferencial,Continuidad,0,64,1,TODOS,Ambar,TODOS,TODOS,septiembre,5
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Rojo,No,TODOS,septiembre,5
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Rojo,Si,TODOS,septiembre,5
-Rímac Seguros,Salud Preferencial,Continuidad,0,64,1,TODOS,Rojo,TODOS,TODOS,septiembre,0
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Gris,No,TODOS,septiembre,19
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Gris,No,TODOS,septiembre,21
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Gris,No,TODOS,septiembre,22
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Gris,Si,TODOS,septiembre,21
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Gris,Si,TODOS,septiembre,23
-Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Gris,Si,TODOS,septiembre,25
-Rímac Seguros,Salud Preferencial,Continuidad,0,64,1,TODOS,Gris,TODOS,TODOS,septiembre,5
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Bueno,No,TODOS,septiembre,19
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Bueno,No,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Bueno,No,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Bueno,Si,TODOS,septiembre,19
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Bueno,Si,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Bueno,Si,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan preferente,Continuidad,60,90,1,TODOS,Bueno,TODOS,TODOS,septiembre,10
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Ambar,No,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Ambar,No,TODOS,septiembre,20
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Ambar,No,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Ambar,Si,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Ambar,Si,TODOS,septiembre,20
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Ambar,Si,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan preferente,Continuidad,60,90,1,TODOS,Ambar,TODOS,TODOS,septiembre,5
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan preferente,Continuidad,60,90,1,TODOS,Rojo,TODOS,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Gris,No,TODOS,septiembre,16
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Gris,No,TODOS,septiembre,17
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Gris,No,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Gris,Si,TODOS,septiembre,16
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Gris,Si,TODOS,septiembre,17
-Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Gris,Si,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan preferente,Continuidad,60,90,1,TODOS,Gris,TODOS,TODOS,septiembre,5
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Bueno,No,TODOS,septiembre,19
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Bueno,No,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Bueno,No,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Bueno,Si,TODOS,septiembre,19
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Bueno,Si,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Bueno,Si,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Red,Continuidad,60,90,1,TODOS,Bueno,TODOS,TODOS,septiembre,10
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Ambar,No,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Ambar,No,TODOS,septiembre,20
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Ambar,No,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Ambar,Si,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Ambar,Si,TODOS,septiembre,20
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Ambar,Si,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Red,Continuidad,60,90,1,TODOS,Ambar,TODOS,TODOS,septiembre,5
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Red,Continuidad,60,90,1,TODOS,Rojo,TODOS,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Gris,No,TODOS,septiembre,16
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Gris,No,TODOS,septiembre,17
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Gris,No,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Gris,Si,TODOS,septiembre,16
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Gris,Si,TODOS,septiembre,17
-Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Gris,Si,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan Red,Continuidad,60,90,1,TODOS,Gris,TODOS,TODOS,septiembre,5
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Bueno,No,TODOS,septiembre,19
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Bueno,No,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Bueno,No,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Bueno,Si,TODOS,septiembre,19
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Bueno,Si,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Bueno,Si,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Completo,Continuidad,60,90,1,TODOS,Bueno,TODOS,TODOS,septiembre,10
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Ambar,No,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Ambar,No,TODOS,septiembre,20
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Ambar,No,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Ambar,Si,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Ambar,Si,TODOS,septiembre,20
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Ambar,Si,TODOS,septiembre,21
-Rímac Seguros,Oro - Plan Completo,Continuidad,60,90,1,TODOS,Ambar,TODOS,TODOS,septiembre,5
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Rojo,No,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Rojo,Si,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Completo,Continuidad,60,90,1,TODOS,Rojo,TODOS,TODOS,septiembre,0
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Gris,No,TODOS,septiembre,16
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Gris,No,TODOS,septiembre,17
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Gris,No,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Gris,Si,TODOS,septiembre,16
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Gris,Si,TODOS,septiembre,17
-Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Gris,Si,TODOS,septiembre,18
-Rímac Seguros,Oro - Plan Completo,Continuidad,60,90,1,TODOS,Gris,TODOS,TODOS,septiembre,5
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Bueno,No,TODOS,octubre,26
+Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Bueno,No,TODOS,octubre,27
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Bueno,No,TODOS,octubre,28
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Bueno,Si,TODOS,octubre,28
+Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Bueno,Si,TODOS,octubre,28
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Bueno,Si,TODOS,octubre,30
+Rímac Seguros,Red Preferente,Continuidad,0,64,1,TODOS,Bueno,TODOS,TODOS,octubre,10
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Ambar,No,TODOS,octubre,23
+Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Ambar,No,TODOS,octubre,24
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Ambar,No,TODOS,octubre,25
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Ambar,Si,TODOS,octubre,25
+Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Ambar,Si,TODOS,octubre,26
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Ambar,Si,TODOS,octubre,27
+Rímac Seguros,Red Preferente,Continuidad,0,64,1,TODOS,Ambar,TODOS,TODOS,octubre,5
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Rojo,No,TODOS,octubre,5
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Rojo,Si,TODOS,octubre,5
+Rímac Seguros,Red Preferente,Continuidad,0,64,1,TODOS,Rojo,TODOS,TODOS,octubre,0
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Gris,No,TODOS,octubre,18
+Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Gris,No,TODOS,octubre,20
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Gris,No,TODOS,octubre,21
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Mensual,Gris,Si,TODOS,octubre,20
+Rímac Seguros,Red Preferente,Nuevo,0,64,2,Mensual,Gris,Si,TODOS,octubre,21
+Rímac Seguros,Red Preferente,Nuevo,0,64,1,Contado,Gris,Si,TODOS,octubre,22
+Rímac Seguros,Red Preferente,Continuidad,0,64,1,TODOS,Gris,TODOS,TODOS,octubre,5
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Bueno,No,TODOS,octubre,26
+Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Bueno,No,TODOS,octubre,27
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Bueno,No,TODOS,octubre,28
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Bueno,Si,TODOS,octubre,28
+Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Bueno,Si,TODOS,octubre,28
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Bueno,Si,TODOS,octubre,30
+Rímac Seguros,Red Médica,Continuidad,0,64,1,TODOS,Bueno,TODOS,TODOS,octubre,10
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Ambar,No,TODOS,octubre,23
+Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Ambar,No,TODOS,octubre,24
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Ambar,No,TODOS,octubre,25
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Ambar,Si,TODOS,octubre,25
+Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Ambar,Si,TODOS,octubre,26
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Ambar,Si,TODOS,octubre,27
+Rímac Seguros,Red Médica,Continuidad,0,64,1,TODOS,Ambar,TODOS,TODOS,octubre,5
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Rojo,No,TODOS,octubre,5
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Rojo,Si,TODOS,octubre,5
+Rímac Seguros,Red Médica,Continuidad,0,64,1,TODOS,Rojo,TODOS,TODOS,octubre,0
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Gris,No,TODOS,octubre,18
+Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Gris,No,TODOS,octubre,20
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Gris,No,TODOS,octubre,21
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Mensual,Gris,Si,TODOS,octubre,20
+Rímac Seguros,Red Médica,Nuevo,0,64,2,Mensual,Gris,Si,TODOS,octubre,21
+Rímac Seguros,Red Médica,Nuevo,0,64,1,Contado,Gris,Si,TODOS,octubre,22
+Rímac Seguros,Red Médica,Continuidad,0,64,1,TODOS,Gris,TODOS,TODOS,octubre,5
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Bueno,No,TODOS,octubre,26
+Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Bueno,No,TODOS,octubre,28
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Bueno,No,TODOS,octubre,30
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Bueno,Si,TODOS,octubre,28
+Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Bueno,Si,TODOS,octubre,30
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Bueno,Si,TODOS,octubre,33
+Rímac Seguros,Full Salud,Continuidad,0,64,1,TODOS,Bueno,TODOS,TODOS,octubre,10
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Ambar,No,TODOS,octubre,24
+Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Ambar,No,TODOS,octubre,26
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Ambar,No,TODOS,octubre,28
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Ambar,Si,TODOS,octubre,27
+Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Ambar,Si,TODOS,octubre,29
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Ambar,Si,TODOS,octubre,30
+Rímac Seguros,Full Salud,Continuidad,0,64,1,TODOS,Ambar,TODOS,TODOS,octubre,5
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Rojo,No,TODOS,octubre,5
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Rojo,Si,TODOS,octubre,5
+Rímac Seguros,Full Salud,Continuidad,0,64,1,TODOS,Rojo,TODOS,TODOS,octubre,0
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Gris,No,TODOS,octubre,22
+Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Gris,No,TODOS,octubre,24
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Gris,No,TODOS,octubre,26
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Mensual,Gris,Si,TODOS,octubre,24
+Rímac Seguros,Full Salud,Nuevo,0,64,2,Mensual,Gris,Si,TODOS,octubre,26
+Rímac Seguros,Full Salud,Nuevo,0,64,1,Contado,Gris,Si,TODOS,octubre,28
+Rímac Seguros,Full Salud,Continuidad,0,64,1,TODOS,Gris,TODOS,TODOS,octubre,5
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Bueno,No,TODOS,octubre,24
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Bueno,No,TODOS,octubre,26
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Bueno,No,TODOS,octubre,28
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Bueno,Si,TODOS,octubre,26
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Bueno,Si,TODOS,octubre,28
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Bueno,Si,TODOS,octubre,31
+Rímac Seguros,Salud Preferencial,Continuidad,0,64,1,TODOS,Bueno,TODOS,TODOS,octubre,10
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Ambar,No,TODOS,octubre,21
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Ambar,No,TODOS,octubre,23
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Ambar,No,TODOS,octubre,25
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Ambar,Si,TODOS,octubre,23
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Ambar,Si,TODOS,octubre,25
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Ambar,Si,TODOS,octubre,28
+Rímac Seguros,Salud Preferencial,Continuidad,0,64,1,TODOS,Ambar,TODOS,TODOS,octubre,5
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Rojo,No,TODOS,octubre,5
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Rojo,Si,TODOS,octubre,5
+Rímac Seguros,Salud Preferencial,Continuidad,0,64,1,TODOS,Rojo,TODOS,TODOS,octubre,0
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Gris,No,TODOS,octubre,19
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Gris,No,TODOS,octubre,21
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Gris,No,TODOS,octubre,22
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Mensual,Gris,Si,TODOS,octubre,21
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,2,Mensual,Gris,Si,TODOS,octubre,23
+Rímac Seguros,Salud Preferencial,Nuevo,0,64,1,Contado,Gris,Si,TODOS,octubre,25
+Rímac Seguros,Salud Preferencial,Continuidad,0,64,1,TODOS,Gris,TODOS,TODOS,octubre,5
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Bueno,No,TODOS,octubre,19
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Bueno,No,TODOS,octubre,21
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Bueno,No,TODOS,octubre,21
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Bueno,Si,TODOS,octubre,19
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Bueno,Si,TODOS,octubre,21
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Bueno,Si,TODOS,octubre,21
+Rímac Seguros,Oro - Plan preferente,Continuidad,60,90,1,TODOS,Bueno,TODOS,TODOS,octubre,10
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Ambar,No,TODOS,octubre,18
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Ambar,No,TODOS,octubre,20
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Ambar,No,TODOS,octubre,21
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Ambar,Si,TODOS,octubre,18
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Ambar,Si,TODOS,octubre,20
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Ambar,Si,TODOS,octubre,21
+Rímac Seguros,Oro - Plan preferente,Continuidad,60,90,1,TODOS,Ambar,TODOS,TODOS,octubre,5
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Oro - Plan preferente,Continuidad,60,90,1,TODOS,Rojo,TODOS,TODOS,octubre,0
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Gris,No,TODOS,octubre,16
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Gris,No,TODOS,octubre,17
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Gris,No,TODOS,octubre,18
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Mensual,Gris,Si,TODOS,octubre,16
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,2,Mensual,Gris,Si,TODOS,octubre,17
+Rímac Seguros,Oro - Plan preferente,Nuevo,60,90,1,Contado,Gris,Si,TODOS,octubre,18
+Rímac Seguros,Oro - Plan preferente,Continuidad,60,90,1,TODOS,Gris,TODOS,TODOS,octubre,5
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Bueno,No,TODOS,octubre,19
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Bueno,No,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Bueno,No,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Bueno,Si,TODOS,octubre,19
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Bueno,Si,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Bueno,Si,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Red,Continuidad,60,90,1,TODOS,Bueno,TODOS,TODOS,octubre,10
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Ambar,No,TODOS,octubre,18
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Ambar,No,TODOS,octubre,20
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Ambar,No,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Ambar,Si,TODOS,octubre,18
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Ambar,Si,TODOS,octubre,20
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Ambar,Si,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Red,Continuidad,60,90,1,TODOS,Ambar,TODOS,TODOS,octubre,5
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Red,Continuidad,60,90,1,TODOS,Rojo,TODOS,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Gris,No,TODOS,octubre,16
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Gris,No,TODOS,octubre,17
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Gris,No,TODOS,octubre,18
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Mensual,Gris,Si,TODOS,octubre,16
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,2,Mensual,Gris,Si,TODOS,octubre,17
+Rímac Seguros,Oro - Plan Red,Nuevo,60,90,1,Contado,Gris,Si,TODOS,octubre,18
+Rímac Seguros,Oro - Plan Red,Continuidad,60,90,1,TODOS,Gris,TODOS,TODOS,octubre,5
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Bueno,No,TODOS,octubre,19
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Bueno,No,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Bueno,No,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Bueno,Si,TODOS,octubre,19
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Bueno,Si,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Bueno,Si,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Completo,Continuidad,60,90,1,TODOS,Bueno,TODOS,TODOS,octubre,10
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Ambar,No,TODOS,octubre,18
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Ambar,No,TODOS,octubre,20
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Ambar,No,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Ambar,Si,TODOS,octubre,18
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Ambar,Si,TODOS,octubre,20
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Ambar,Si,TODOS,octubre,21
+Rímac Seguros,Oro - Plan Completo,Continuidad,60,90,1,TODOS,Ambar,TODOS,TODOS,octubre,5
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Rojo,No,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Rojo,Si,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Completo,Continuidad,60,90,1,TODOS,Rojo,TODOS,TODOS,octubre,0
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Gris,No,TODOS,octubre,16
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Gris,No,TODOS,octubre,17
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Gris,No,TODOS,octubre,18
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Mensual,Gris,Si,TODOS,octubre,16
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,2,Mensual,Gris,Si,TODOS,octubre,17
+Rímac Seguros,Oro - Plan Completo,Nuevo,60,90,1,Contado,Gris,Si,TODOS,octubre,18
+Rímac Seguros,Oro - Plan Completo,Continuidad,60,90,1,TODOS,Gris,TODOS,TODOS,octubre,5
